@@ -1,6 +1,6 @@
 import type { RngState } from "../core/rng";
 import type { Dir, Lang, Text } from "../core/types";
-import type { Bottle, WorldData } from "../world/level0";
+import type { Bottle, WorldData, Zone } from "../world/level0";
 
 export const SAVE_VERSION = 1;
 
@@ -15,6 +15,19 @@ export interface Stats {
 export interface InvItem { key: string; id: string; bottle?: Bottle }
 export interface LogLine { t: Text; kind?: "event" | "warn" | "caption" }
 
+export type MapKey = `${number},${number}`;
+// Only what you can recognise. Door materials and real/fake flickers are never saved here.
+export type MapEdge = "open" | "wall" | "arch" | "door" | "door-open" | "flicker";
+export interface MapCell {
+  walls: [MapEdge, MapEdge, MapEdge, MapEdge]; // N E S W, copied at the time of drawing
+  zone: Zone;
+  t: number;
+  ver: number;
+  messy: boolean;
+  visited: boolean;
+}
+export type MapMark = { kind: "water" | "danger" | "exit" } | { kind: "custom"; text: string };
+
 export interface RunState {
   v: number;
   seed: number;
@@ -26,6 +39,9 @@ export interface RunState {
   inv: InvItem[];
   carried: string[];                // item ids bought before the run (left on the body if you die)
   pos: { i: number; j: number; d: Dir };
+  map: Record<MapKey, MapCell>;
+  mapMarks: Record<MapKey, MapMark>;
+  lastNotebookRead: number | null;
   rng: RngState;
   world: WorldData;
   moves: number;

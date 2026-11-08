@@ -35,7 +35,11 @@ export function migrateMeta(m: Partial<Meta> | undefined): Meta {
   return { ...base, ...m, settings: { ...base.settings, ...(m.settings ?? {}) }, v: SAVE_VERSION };
 }
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
-export async function loadRun(): Promise<RunState | null> { const r = (await store.get("run")) as RunState | undefined; return r && r.v === SAVE_VERSION && !r.ended ? r : null; }
+function runDefaults(r: RunState): RunState {
+  r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
+  return r;
+}
+export async function loadRun(): Promise<RunState | null> { const r = (await store.get("run")) as RunState | undefined; return r && r.v === SAVE_VERSION && !r.ended ? runDefaults(r) : null; }
 let chain = Promise.resolve();
 export function persist(meta: Meta, run: RunState | null) {   // serialised so saves never interleave
   const m = clone(meta), r = run ? clone(run) : null;
@@ -46,6 +50,6 @@ export function exportSave(meta: Meta, run: RunState | null): string { return bt
 export function importSave(text: string): { meta: Meta; run: RunState | null } {
   const o = JSON.parse(decodeURIComponent(escape(atob(text.trim()))));
   if (o.app !== "backrooms-echo") throw new Error("not a save");
-  return { meta: migrateMeta(o.meta), run: o.run && o.run.v === SAVE_VERSION ? o.run : null };
+  return { meta: migrateMeta(o.meta), run: o.run && o.run.v === SAVE_VERSION ? runDefaults(o.run) : null };
 }
 export async function wipe() { await store.del("meta"); await store.del("run"); }

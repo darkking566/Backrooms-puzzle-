@@ -8,9 +8,10 @@ import { feelings, hasStatus, H } from "../systems/survival";
 import { edgeCells, passable } from "../world/level0";
 import { ctx, L, U, lang, save } from "./ctx";
 import type { InvItem } from "../state/types";
+import { NotebookMap } from "./notebook-map";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
-  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" };
+  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 /* How long something took. With a watch you know exactly; without one you only have a feeling for it. */
 function took(m: number, watch: boolean): Text {
@@ -27,6 +28,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const stage = useRef<HTMLDivElement>(null), canvas = useRef<HTMLCanvasElement>(null), labels = useRef<HTMLDivElement>(null);
   const [, setTick] = useState(0); const rerender = () => setTick(x => x + 1);
   const [sheet, setSheet] = useState<Sheet>(null);
+  const sheetRef = useRef(sheet); sheetRef.current = sheet;
   const [caption, setCaption] = useState<Text | null>(null);
   const [hints, setHints] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -47,7 +49,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (s.sound && !ctx.audio.on) addEventListener("pointerdown", () => { ctx.audio.enable(true); ctx.audio.ambience(g); }, { once: true });   // browsers need a gesture before sound
     v.attach(g); ctx.audio.ambience(g); v.kick(); rerender();
     const key = (e: KeyboardEvent) => {
-      if (sheet || (e.target as HTMLElement).closest?.("input, textarea, select")) return;
+      if (sheetRef.current || (e.target as HTMLElement).closest?.("input, textarea, select")) return;
       if (e.key === "ArrowLeft") act({ type: "turn", dir: -1 }); else if (e.key === "ArrowRight") act({ type: "turn", dir: 1 }); else if (e.key === "ArrowDown") act({ type: "turn", dir: 2 });
     };
     addEventListener("keydown", key);
@@ -159,8 +161,8 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     <div class="bar">
       <button onClick={() => setSheet({ kind: "bag" })}>{U("bag")}<small>{g.weight().toFixed(1)}/{CARRY}</small></button>
       <button onClick={() => setSheet({ kind: "notes" })}>{U("notes")}<small>{ctx.meta.clues.length}</small></button>
+      <button onClick={() => setSheet({ kind: "map" })}>{U("map")}<small>{g.has("notebook") ? "✎" : "—"}</small></button>
       <button onClick={() => setSheet({ kind: "body" })}>{U("body")}<small>{feel.length ? "!" : "—"}</small></button>
-      <button onClick={() => setSheet({ kind: "log" })}>{U("log")}<small>{r.moves}</small></button>
     </div>);
 
   return (
@@ -185,7 +187,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         </div>
       </div>
       <div class="controls">{actionBar}{menuBar}</div>
-      <div class="side"><div class="log">{logLines(14)}</div>{actionBar}{menuBar}</div>
+      <div class="side"><div class="log">{logLines(14)}</div><button class="log-more" onClick={() => setSheet({ kind: "log" })}>{U("log")}</button>{actionBar}{menuBar}</div>
       {ev && <div class="sheet"><div class="card" role="dialog">
         <p class="story">{L(ev.text)}</p>
         {g.availableChoices(ev.id).map(({ ch, ok }, k) => <button class="opt" disabled={!ok} onClick={() => act({ type: "choose", index: k })}>{L(ch.text)}{!ok && ch.requires ? <small>{U("needs", { x: L(g.item(ch.requires.item).name) })}</small> : ch.effects?.time ? <small>{U("minutes", { m: ch.effects.time })}</small> : null}</button>)}
@@ -244,6 +246,7 @@ function Panel({ sheet, close, act, setSheet }: { sheet: NonNullable<Sheet>; clo
       </>);
     }
     case "notes": return card(U("notes"), <Notes />);
+    case "map": return card(U("map"), <NotebookMap run={r} act={cmd => act(cmd, true)} />);
     case "log": return card(U("log"), <div class="story" style="display:flex;flex-direction:column;gap:6px">{r.log.slice(-40).map((l, k) => <p key={k} style="margin:0" class={l.kind === "warn" ? "warn" : ""}>{L(l.t)}</p>)}</div>);
     case "manila": return card(U("notesObj"), <Manila act={act} />);
     case "cabinet": return card(U("cabinet"), <Cabinet act={act} />);
@@ -262,6 +265,7 @@ function Bag({ act, setSheet }: { act: (c: Command, keep?: boolean) => void; set
     if (it.tags.includes("food")) b.push([U("eat"), () => act({ type: "eat", key: x.key }, true)]);
     if (x.id === "firesalt" && r.inv.some(y => y.bottle && y.bottle.liquid !== "empty")) b.push([U("boil"), () => setSheet({ kind: "boil", salt: x.key })]);
     if (x.id === "bandage") b.push([U("bandageUp"), () => act({ type: "bandage", key: x.key }, true)]);
+    if (x.id === "notebook") b.push([U("map"), () => setSheet({ kind: "map" })]);
     if (inManila) b.push([U("putCabinet"), () => act({ type: "cabinetPut", key: x.key }, true)]);
     b.push([U("drop"), () => act({ type: "drop", key: x.key }, true)]);
     return b;

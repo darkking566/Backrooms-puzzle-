@@ -5,8 +5,9 @@ import type { ContentData } from "../../tools/content-schema";
 import { draw, pick, type RngState } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
 import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone } from "../world/level0";
-import { SAVE_VERSION, type Meta, type RunState } from "../state/types";
+import { SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
+import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
 
 export const CARRY = 8;                 // weight you can carry
 export const PREP_CARRY = 5;            // weight you can bring into a run
@@ -21,7 +22,8 @@ export type Command =
   | { type: "examine"; what: "tally" | "peel" | "notes" }
   | { type: "choose"; index: number }
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
-  | { type: "corpse" };
+  | { type: "corpse" }
+  | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
 export interface Outcome { say: Text[]; caption?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; sfx: string[]; minutes: number }
@@ -50,11 +52,13 @@ export class Game {
       stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
       inv: bought.map((id, k) => ({ key: "start" + k, id })), carried: [...bought],
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },
+      map: {}, mapMarks: {}, lastNotebookRead: null,
       moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
     };
     // volunteers keep the Manila Room cabinet stocked a little (Wiki: The Manila Room)
     if (meta.cabinet.filter(x => x.id === "almond_water").length < 2) meta.cabinet.push({ key: "vol" + meta.runs, id: "almond_water" });
     const g = new Game(c, meta, run);
+    recordNotebook(run, g.world, true);
     run.log.push({ t: T(`你在嗡嗡聲裡醒來。這是你記得的第 ${meta.runs} 次。`, `You wake up in the hum. This is the ${ordinal(meta.runs)} time you remember.`) });
     return g;
   }
@@ -108,6 +112,7 @@ export class Game {
     const r = this.run;
     if (r.ended) return this.out;
     if (r.pendingEvent && cmd.type !== "choose") return this.out;
+    const from = { ...r.pos }, hadNotebook = this.has("notebook");
     switch (cmd.type) {
       case "move": this.move(cmd.d); break;
       case "turn": this.turn(cmd.dir); break;
@@ -133,6 +138,13 @@ export class Game {
       case "cabinetPut": this.cabinetPut(cmd.key); break;
       case "writeNote": this.writeNote(cmd.text); break;
       case "corpse": this.searchCorpse(); break;
+      case "mapMark": setMapMark(r, cmd.key, cmd.mark); break;
+      case "rereadNotebook": this.rereadNotebook(); break;
+    }
+    if (!r.ended && cmd.type !== "mapMark" && cmd.type !== "rereadNotebook") {
+      const entered = from.i !== r.pos.i || from.j !== r.pos.j || !hadNotebook;
+      if (recordNotebook(r, this.world, entered)) this.say(T("這裡跟你畫的不一樣。", "This isn't what you drew."));
+      if (cmd.type === "door" && this.out.anim.kind === "door") recordNotebookDoor(r, this.world, cmd.edge);
     }
     return this.out;
   }
@@ -267,7 +279,7 @@ export class Game {
     if (c.searched) return this.say(T("這一帶你已經翻過了。", "You have already been over this area."));
     c.searched = true;
     if (this.rand("loot") < .08) {
-      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 6], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2]]);
+      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 6], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2], ["notebook", 5]]);
       this.drop_(c.items, id, c.i, c.j, "s" + r.time);
       this.say(T(`你在牆角的地毯縫裡找到了東西：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Wedged where the carpet meets the wall, you find something: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
       this.out.rebuild = true;
@@ -401,7 +413,7 @@ export class Game {
     c.searched = true;
     if (!bar && this.rand("loot") < .35) { addStatus(r, "bleeding", 4); this.say(T("你徒手把旁邊的板子扳開，邊緣把手掌割開了一道口子。", "You wrench the next panel loose by hand and its edge slices your palm."), "warn"); }
     if (this.rand("loot") < .3) {
-      const id = weighted(this.rand("loot"), [["bottle", 35], ["snack_bar", 25], ["flashlight", 12], ["crowbar", 10], ["bandage", 10], ["watch", 8]]);
+      const id = weighted(this.rand("loot"), [["bottle", 35], ["snack_bar", 25], ["flashlight", 12], ["crowbar", 10], ["bandage", 10], ["watch", 8], ["notebook", 5]]);
       this.drop_(c.items, id, c.i, c.j, "c" + r.time);
       this.say(T(`天花板夾層裡有東西掉了下來：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Something drops out of the ceiling void: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
       this.discover("ceiling_stash"); this.out.rebuild = true;
@@ -461,6 +473,25 @@ export class Game {
     this.meta.corpse = null; w.corpse = null; this.discover("own_corpse"); this.out.rebuild = true;
   }
 
+  private rereadNotebook() {
+    const r = this.run, block = notebookReadBlock(r);
+    if (block) {
+      const reason: Record<typeof block, Text> = {
+        missing: T("你身上沒有筆記本。", "You aren't carrying a notebook."),
+        blank: T("紙上還沒有畫下任何地方。", "No places drawn on the pages yet."),
+        calm: T("你認得自己的字。現在不用再讀一遍。", "You recognise your handwriting. No need to read it again just now."),
+        cooldown: T("那些線條還在腦裡。過幾個小時再讀吧。", "Those lines are still in your mind. Read again in a few hours.")
+      };
+      return this.say(reason[block]);
+    }
+    const gain = notebookReadGain(r);
+    this.pass(10); if (r.ended) return;
+    r.stats.sanity = Math.min(100, r.stats.sanity + gain); r.lastNotebookRead = r.time;
+    this.say(gain === 4 ? T("你沿著歪斜的線條讀下去。有些地方認不出來，但握筆的是你。", "You follow the crooked lines. Some places are unreadable, but it was your hand holding the pen.")
+      : T("你一頁一頁翻回去。走過的路，還留在紙上。呼吸慢了一點。", "You turn back through the pages. The places you walked are still on the paper. Your breathing slows."));
+    this.out.sfx.push("paper");
+  }
+
   /* ---------- developer panel (?dev) ---------- */
   devJump(where: "manila" | "red" | "flicker" | "outage" | "day") {
     const r = this.run, w = this.world;
@@ -476,7 +507,7 @@ export class Game {
       i = out[0] - DV[d][0]; j = out[1] - DV[d][1]; w.ensureAround(i, j);
       w.edges.set(edgeKey(i, j, d), "open");
     }
-    r.pos = { i, j, d }; w.ensureAround(i, j);
+    r.pos = { i, j, d }; w.ensureAround(i, j); recordNotebook(r, w, true);
   }
 
   /* ---------- ending ---------- */

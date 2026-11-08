@@ -47,6 +47,12 @@
   weight: 0
   tags: [tool]
   prep: { cost: 25 }
+- id: notebook
+  name: { zh: 筆記本和筆, en: Notebook and Pen }
+  desc: { zh: 薄薄一本，筆夾在封面上。走過的地方會留在紙上，但線條會淡，走廊也會變。心裡很亂時，可以翻回去重讀。, en: "A thin notebook, a pen clipped to its cover. The places you walk stay on the paper, but the lines fade and the corridors change. When your thoughts fray, turn back and read." }
+  weight: 0.3
+  tags: [tool, note]
+  prep: { cost: 30 }
 - id: firesalt
   name: { zh: 火鹽, en: Firesalt }
   desc: { zh: 從牆角刮下來的白色結晶。溶進水裡會發熱，可以把水煮沸。, en: White crystals scraped from a corner. Dissolved in water it heats up enough to boil it. }
