@@ -1,4 +1,46 @@
 - id: warehouse_latch
-  title: { zh: 箱子的側板, en: The Side Panel }
-  text: { zh: 上蓋釘死不代表箱子打不開。沿著側板下緣找滑閂。, en: A nailed lid does not mean the crate cannot be opened. Look for a sliding latch beneath the side panel. }
+  title:
+    zh: 箱子的側板
+    en: The Side Panel
+  text:
+    zh: 上蓋釘死不代表箱子打不開。沿著側板下緣找滑閂。
+    en: A nailed lid does not mean the crate cannot be opened. Look for a sliding
+      latch beneath the side panel.
+  source: level-1
+- id: elder_room
+  title:
+    zh: 問起木頭地板的房間
+    en: Ask about the room with a wooden floor
+  text:
+    zh: 「木頭地板。兩張椅子。櫃子有時是空的。」老人用指尖抹去桌上的水印。「我記得這些。」
+    en: '"A wooden floor. Two chairs. Sometimes the cabinet was empty." The elder
+      wipes a water mark from the table. "I remember those things."'
+  source: level-1
+- id: elder_last_water
+  title:
+    zh: 問起房間裡的水
+    en: Ask about the water in the room
+  text:
+    zh: 「有人把最後一瓶水放在桌上，說要出去找更多。」水壺輕輕碰了一下杯沿。老人沒有往下說。
+    en: '"Someone put the last bottle of water on the table and said they would go
+      out to find more." The kettle touches the rim of a cup. The elder says no
+      more.'
+  source: level-1
+- id: elder_waiting
+  title:
+    zh: 問起門關上以後的事
+    en: Ask what happened after the door closed
+  text:
+    zh: 「門關上了。留下來的人等了很久。」老人看著隔板上的光。「久到不知道該從哪一天算起。」
+    en: '"The door closed. The one who stayed waited a long time." The elder watches
+      the light on the partition. "Long enough to lose track of the first day."'
+  source: level-1
+- id: elder_promise
+  title:
+    zh: 問起離開時說過的話
+    en: Ask what was said before leaving
+  text:
+    zh: 「我去找更多，我會回來。」老人把杯子放好。「原話是這樣。」
+    en: '"I will go and find more. I will come back." The elder sets the cup down.
+      "Those were the words."'
   source: level-1

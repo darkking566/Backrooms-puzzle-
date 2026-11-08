@@ -1,0 +1,142 @@
+- id: alpha_elder
+  person: manila_stranger
+  era: late
+  reward:
+    clue: elder_last_water
+    points: 20
+  text:
+    name:
+      zh: 老人
+      en: The elder
+    arrival:
+      zh: 工作桌旁，一位老人把水壺移開，留出一個位置。
+      en: An elder moves a kettle aside at the worktable, making room for you.
+    first:
+      zh: 「先坐。這裡的燈有人顧。」
+      en: '"Sit down first. Someone looks after the lights here."'
+    again:
+      zh: 「又見面了。椅子還在。」
+      en: '"Here you are again. The chair is still here."'
+    familiar:
+      zh: 老人看了你一會兒，沒有問名字。
+      en: The elder looks at you for a while, without asking your name.
+    reward:
+      zh: 聽見一段往事
+      en: Heard a fragment of the past
+    board:
+      zh: 告示板
+      en: Noticeboard
+    supplies:
+      zh: 配給旁的告示寫著：「應急包每次只領一份。補給箱的側板有滑閂。帶夠回程的水。疲倦時回床位休息。」
+      en: 'The notice beside the supplies reads: "One emergency pack per arrival.
+        Supply crates have a sliding latch on the side. Keep water for the
+        return trip. Come back to the beds when tired."'
+    exhausted:
+      zh: 附近已沒有未收集的補給標記。基地不會再補發應急包。先清點身上的水與食物。
+      en: There are no uncollected supply markings nearby. The base has no more
+        emergency packs for you. Count the water and food you have left.
+    next:
+      zh: 「先看告示。出去找箱子，記得留回程。燈開始熄滅就收起光，別往貨架裡走。」
+      en: '"Read the notice first. Look for crates outside, and keep enough for the
+        way back. Put away your light when the lamps begin going out. Stay out
+        of the shelving."'
+  choices:
+    - id: room
+      minMeetings: 1
+      text:
+        zh: 問起木頭地板的房間
+        en: Ask about the room with a wooden floor
+      result:
+        zh: 「木頭地板。兩張椅子。櫃子有時是空的。」老人用指尖抹去桌上的水印。「我記得這些。」
+        en: '"A wooden floor. Two chairs. Sometimes the cabinet was empty." The elder
+          wipes a water mark from the table. "I remember those things."'
+      clue: elder_room
+    - id: water
+      minMeetings: 1
+      requiresClue: elder_room
+      text:
+        zh: 問起房間裡的水
+        en: Ask about the water in the room
+      result:
+        zh: 「有人把最後一瓶水放在桌上，說要出去找更多。」水壺輕輕碰了一下杯沿。老人沒有往下說。
+        en: '"Someone put the last bottle of water on the table and said they would go
+          out to find more." The kettle touches the rim of a cup. The elder says
+          no more.'
+      clue: elder_last_water
+    - id: waiting
+      minMeetings: 2
+      requiresClue: elder_last_water
+      text:
+        zh: 問起門關上以後的事
+        en: Ask what happened after the door closed
+      result:
+        zh: 「門關上了。留下來的人等了很久。」老人看著隔板上的光。「久到不知道該從哪一天算起。」
+        en: '"The door closed. The one who stayed waited a long time." The elder watches
+          the light on the partition. "Long enough to lose track of the first
+          day."'
+      clue: elder_waiting
+    - id: promise
+      minMeetings: 3
+      requiresClue: elder_waiting
+      text:
+        zh: 問起離開時說過的話
+        en: Ask what was said before leaving
+      result:
+        zh: 「我去找更多，我會回來。」老人把杯子放好。「原話是這樣。」
+        en: '"I will go and find more. I will come back." The elder sets the cup down.
+          "Those were the words."'
+      clue: elder_promise
+    - id: helped
+      minMeetings: 3
+      requiresClue: elder_promise
+      requiresFlag: helped
+      text:
+        zh: 提起你曾留下一瓶水
+        en: Mention leaving a bottle of water
+      result:
+        zh: 「一瓶水能讓人多等一會兒。」老人沒有問是哪一次。
+        en: '"One bottle lets someone wait a little longer." The elder does not ask
+          which time.'
+    - id: waited
+      minMeetings: 3
+      requiresClue: elder_promise
+      requiresFlag: waited
+      text:
+        zh: 提起你曾留在房間裡
+        en: Mention staying in the room
+      result:
+        zh: 「坐在那裡，會一直聽門外的聲音。」老人把另一張椅子拉近。
+        en: '"When you sit there, you keep listening for sounds outside the door." The
+          elder draws the other chair closer.'
+    - id: left
+      minMeetings: 3
+      requiresClue: elder_promise
+      requiresFlag: promisedAndLeft
+      text:
+        zh: 提起你曾答應回去
+        en: Mention a promise to return
+      result:
+        zh: 「說完以後，還有很長的路。」老人低頭看著杯子。
+        en: '"There is still a long way to go after saying it." The elder looks down at
+          the cup.'
+    - id: returned
+      minMeetings: 3
+      requiresClue: elder_promise
+      requiresFlag: returnedWater
+      text:
+        zh: 提起你曾帶水回去
+        en: Mention bringing water back
+      result:
+        zh: 「那就有人聽見門開了。」老人把水壺放回桌上。
+        en: '"Then someone heard the door open." The elder puts the kettle back on the
+          table.'
+    - id: paper
+      minMeetings: 3
+      requiresClue: room_person_paper
+      text:
+        zh: 提起那張紙
+        en: Mention the sheet of paper
+      result:
+        zh: 「紙比人留得久。潮了，要換個乾的地方放。」
+        en: '"Paper stays longer than people. If it gets damp, find somewhere dry for
+          it."'

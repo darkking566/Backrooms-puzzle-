@@ -71,6 +71,15 @@ export const Hazard = z.object({
     litCaption: Text, darkCaption: Text, approaching: Text, retreat: Text, hurt: Text, vanished: Text, wait: Text }).strict()
 }).strict();
 export type HazardData = z.infer<typeof Hazard>;
+export const Elder = z.object({
+  id: z.literal("alpha_elder"), person: z.literal("manila_stranger"), era: z.literal("late"),
+  reward: z.object({ clue: z.string(), points: z.number().int().nonnegative() }).strict(),
+  text: z.object({ name: Text, arrival: Text, first: Text, again: Text, familiar: Text, reward: Text, board: Text, supplies: Text, exhausted: Text, next: Text }).strict(),
+  choices: z.array(z.object({ id: z.string(), minMeetings: z.number().int().min(1).max(3),
+    requiresClue: z.string().optional(), requiresFlag: z.enum(["helped", "waited", "promisedAndLeft", "returnedWater"]).optional(),
+    text: Text, result: Text, clue: z.string().optional() }).strict()).min(1)
+}).strict();
+export type ElderData = z.infer<typeof Elder>;
 export const Puzzle = z.object({
   id: z.string(), kind: z.literal("symbol_lock"),
   spawn: z.object({ minRun: z.number().int().min(1), chance: Chance, minMoves: z.number().int().min(0), zone: z.literal("arch") }).strict(),
@@ -111,7 +120,7 @@ export type DialogueChoice = z.infer<typeof Dialogue>["choices"][number];
 export const Content = z.object({
   items: z.array(Item), liquids: z.array(Liquid), events: z.array(Event), endings: z.array(Ending),
   clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle), quests: z.array(Quest), dialogue: z.array(Dialogue),
-  levels: z.array(Level), rewards: z.array(Reward), hazards: z.array(Hazard)
+  levels: z.array(Level), rewards: z.array(Reward), hazards: z.array(Hazard), npcs: z.array(Elder)
 });
 export type ContentData = z.infer<typeof Content>;
 
@@ -137,6 +146,11 @@ export function checkRefs(c: ContentData): string[] {
   const src = (s: string | undefined, where: string) => { if (s && !sources.has(s)) errs.push(`${where}: unknown source ${s}`); };
   ids(c.levels, "level"); ids(c.rewards, "reward");
   ids(c.hazards, "hazard"); for (const h of c.hazards) src(h.source, h.id);
+  ids(c.npcs, "npc");
+  for (const n of c.npcs) {
+    ids(n.choices, `${n.id} choice`);
+    for (const id of [n.reward.clue, ...n.choices.flatMap(ch => [ch.clue, ch.requiresClue].filter((v): v is string => !!v))]) if (!clues.has(id)) errs.push(`${n.id}: unknown clue ${id}`);
+  }
   for (const l of c.levels) {
     src(l.source, l.id);
     for (const x of [...l.supplies.emergency, ...l.supplies.base]) if (!items.has(x.item)) errs.push(`${l.id}: unknown item ${x.item}`);

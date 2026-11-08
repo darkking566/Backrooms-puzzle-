@@ -9,7 +9,7 @@ export const shared = {
   uLM: { value: null as THREE.Texture | null }, uLM2: { value: null as THREE.Texture | null }, uFlick: { value: 1 }, uPower: { value: 1 },
   uLMo: { value: new THREE.Vector2() }, uLMs: { value: 1 },
   uCam: { value: new THREE.Vector3() }, uCamDir: { value: new THREE.Vector3() }, uTorch: { value: 0 }, uAmb: { value: .07 },
-  uWarehouse: { value: 0 }, uCeilingHeight: { value: H },
+  uBaseRect: { value: new THREE.Vector4() }, uWarehouse: { value: 0 }, uCeilingHeight: { value: H },
   uSeedOff: { value: new THREE.Vector2() }
 };
 const VERT = `
@@ -29,7 +29,7 @@ const FRAG = `
   uniform sampler2D map; uniform vec2 uRep; uniform vec3 uTint; uniform float uKind; uniform float uAlpha;
   uniform sampler2D uLM; uniform sampler2D uLM2; uniform float uFlick; uniform float uPower;
   uniform vec2 uLMo; uniform float uLMs; uniform vec3 uCam; uniform vec3 uCamDir; uniform float uTorch; uniform float uAmb; uniform vec2 uSeedOff;
-  uniform float uWarehouse; uniform float uCeilingHeight;
+  uniform float uWarehouse; uniform float uCeilingHeight; uniform vec4 uBaseRect;
   varying vec2 vUv; varying vec3 vW; varying vec3 vN;
   #include <fog_pars_fragment>
   float vh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -50,9 +50,11 @@ const FRAG = `
     vec2 sp = vW.xz + vN.xz * 0.3;
     vec2 luv = (sp - uLMo) / uLMs;
     vec4 lms = texture2D(uLM, luv);
-    vec3 lm = (lms.rgb + texture2D(uLM2, luv).rgb * uFlick) * 2.0 * uPower;
+    float baseArea = uWarehouse * step(uBaseRect.x, vW.x) * step(vW.x, uBaseRect.z) * step(uBaseRect.y, vW.z) * step(vW.z, uBaseRect.w);
+    float power = mix(uPower, 1.0, baseArea);
+    vec3 lm = (lms.rgb + texture2D(uLM2, luv).rgb * uFlick) * 2.0 * power;
     if (uKind < 2.5 || uKind > 4.5) base = mix(base, base * vec3(1.35, 0.46, 0.38), lms.a * 0.65);
-    float amb = uAmb * (0.45 + 0.55 * uPower);
+    float amb = uAmb * (0.45 + 0.55 * power);
     float h = clamp(vW.y / uCeilingHeight, 0.0, 1.0), k = 1.0;
     if (uKind > 0.5 && uKind < 1.5) k = mix(0.55, 1.05, h) * mix(0.62, 1.0, smoothstep(0.0, 0.4, vW.y)) * mix(1.0, 0.8, smoothstep(uCeilingHeight - .3, uCeilingHeight, vW.y));
     else if (uKind > 1.5 && uKind < 2.5) k = 0.4;
@@ -67,6 +69,7 @@ const FRAG = `
       base = rim * (1.0 - smoothstep(0.0, 1.0, pow(dep, 0.55)));
       L = lm * mix(1.0, 0.2, dep) + vec3(amb) * (1.0 - dep) + vec3(1.0, 0.95, 0.85) * torch * (1.0 - dep);
     }
+    L += baseArea * vec3(.38, .23, .10) * (1.0 - .55 * clamp(vW.y / 6.0, 0.0, 1.0));
     gl_FragColor = vec4(base * L, uAlpha > 0.5 ? tx.a : 1.0);
     #include <fog_fragment>
   }`;
@@ -83,6 +86,8 @@ export function makeMaterials(TEX: Textures) {
   return {
     concrete: litMat(TEX.concrete, [1, 1], 6), concreteWall: litMat(TEX.concrete, [1, 1], 1),
     metal: litMat(TEX.doorMetal, [1, 1], 6, [.7, .8, .85]),
+    blanket: litMat(TEX.carpet, [.4, .4], 6, [.38, .55, .64]),
+    alphaLamp: new THREE.MeshBasicMaterial({ color: 0xffd391 }),
     alphaSign: new THREE.MeshBasicMaterial({ map: TEX.alphaSign }),
     marking: new THREE.MeshBasicMaterial({ color: 0xd4d9ce }),
     walls: TEX.walls.map(t => litMat(t, [1, 1], 1)),

@@ -5,6 +5,7 @@ import { Level1 } from "../world/level1";
 import type { ActiveWorld } from "../world/world";
 import { advanceWarehouse } from "../systems/encounters";
 import { warehouseCommand } from "./level1";
+import { meetElder, hearElder, elderChoiceVisible } from "../systems/elder";
 import { queueReward, warehouseSurvival } from "../systems/rewards";
 import type { ContentData } from "../../tools/content-schema";
 import { draw, pick, type RngState, type Stream } from "./rng";
@@ -33,6 +34,7 @@ export type Command =
   | { type: "choose"; index: number }
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
   | { type: "readGuide" } | { type: "readSign" } | { type: "baseSupplies" }
+  | { type: "elderTalk" } | { type: "elderChoice"; id: string } | { type: "readNotice" }
   | { type: "crateExamine"; id: string } | { type: "crateOpen"; id: string } | { type: "crateTake"; id: string; key: string }
   | { type: "corpse" } | { type: "toggleFlashlight" } | { type: "avoidEntity" } | { type: "wait" }
   | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
@@ -212,7 +214,7 @@ export class Game {
     const from = { ...r.pos }, hadNotebook = this.has("notebook"), previousSanity = r.stats.sanity, redStage = r.redStage;
     const handled = this.world.level === "level-1" && warehouseCommand({ run: r, world: this.world, content: this.c, out: this.out,
       say: (t, kind) => this.say(t, kind), pass: (m, a) => this.pass(m, a), rand: () => this.rand(),
-      discover: id => this.discover(id), knows: id => this.meta.clues.includes(id), learn: id => this.learn(id), weight: () => this.weight() }, cmd);
+      discover: id => this.discover(id), knows: id => this.meta.clues.includes(id), learn: id => this.learn(id), weight: () => this.weight(), meetElder: () => this.meetAlphaElder() }, cmd);
     if (!handled) switch (cmd.type) {
       case "move": this.move(cmd.d); break;
       case "turn": this.turn(cmd.dir); break;
@@ -253,6 +255,12 @@ export class Game {
       case "roomPersonChoice": this.roomPersonChoice(cmd.id, cmd.waterKey); break;
       case "mapMark": setMapMark(r, cmd.key, cmd.mark); break;
       case "rereadNotebook": this.rereadNotebook(); break;
+      case "elderTalk":
+        if (this.zoneHere() === "alpha") { this.meetAlphaElder(); this.say(this.elder.text.next); this.out.important = true; } break;
+      case "elderChoice":
+        if (this.zoneHere() === "alpha") { for (const t of hearElder(r, this.meta, this.elder, cmd.id)) this.say(t); this.out.important = true; } break;
+      case "readNotice":
+        if (this.zoneHere() === "alpha") { this.say(this.elder.text.supplies); this.out.important = true; } break;
     }
     if (!r.ended && cmd.type !== "mapMark" && cmd.type !== "rereadNotebook") {
       const entered = from.i !== r.pos.i || from.j !== r.pos.j || !hadNotebook;
@@ -766,6 +774,10 @@ export class Game {
   }
 
   /* ---------- developer panel (?dev) ---------- */
+  get elder() { return this.c.npcs[0]; }
+  elderChoices() { return this.elder.choices.filter(ch => elderChoiceVisible(this.run, this.meta, ch)); }
+  private meetAlphaElder() { for (const t of meetElder(this.run, this.meta, this.elder)) this.say(t); }
+
   devJump(where: "manila" | "red" | "flicker" | "outage" | "day" | "level1" | "alpha") {
     if (where === "level1") {
       if (this.run.level === "level-0") { this.out = { say: [], anim: { kind: "none" }, sfx: [], minutes: 0 }; this.enterLevel1(); } return;

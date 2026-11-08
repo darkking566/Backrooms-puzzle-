@@ -6,7 +6,7 @@ import { reachableCrate } from "../src/core/level1";
 
 export function playWarehouse(g: Game, limit = 500) {
   const w = g.world; if (w.level !== "level-1") throw new Error("warehouse expected");
-  let reachedBase = false;
+  let reachedBase = false, talked = false;
   for (let n = 0; n < limit && !g.run.ended; n++) {
     if (g.run.l1?.encounter) { g.dispatch({ type: "avoidEntity" }); continue; }
     if (g.run.l1?.power.phase !== "normal" && g.zoneHere() !== "alpha") {
@@ -17,6 +17,10 @@ export function playWarehouse(g: Game, limit = 500) {
     if (drink && r.stats.water < 60) { g.dispatch({ type: "drink", key: drink.key }); continue; }
     const food = r.inv.find(i => i.id === "snack_bar");
     if (food && r.stats.food < 60) { g.dispatch({ type: "eat", key: food.key }); continue; }
+    if (zone === "alpha" && !talked) {
+      g.dispatch({ type: "elderTalk" }); for (const id of ["room", "water", "waiting", "promise"]) g.dispatch({ type: "elderChoice", id });
+      g.dispatch({ type: "readNotice" }); talked = true;
+    }
     if (zone === "alpha" && !r.l1!.baseClaimed) { g.dispatch({ type: "baseSupplies" }); continue; }
     const useful = (id: string) => id === "almond_water" || id === "snack_bar" || (id === "crowbar" && !g.has("crowbar"));
     const local = [...w.crates.values()].find(c => reachableCrate(r, w, c) && (!c.opened || c.items.some(i => useful(i.id) && g.weight() + g.item(i.id).weight <= 8)));

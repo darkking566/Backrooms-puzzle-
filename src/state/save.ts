@@ -41,6 +41,7 @@ export function migrateMeta(m: (Partial<Meta> & { corpse?: Corpse | null }) | un
     symbolLock: { ...base.symbolLock, ...m.symbolLock },
     roomPerson: { ...base.roomPerson, ...m.roomPerson, flags: { ...base.roomPerson.flags, ...m.roomPerson?.flags } },
     npcMeetings: { ...base.npcMeetings, ...m.npcMeetings },
+    elder: { ...base.elder, ...m.elder },
     settings: { ...base.settings, ...(m.settings ?? {}) }, v: SAVE_VERSION };
 }
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }

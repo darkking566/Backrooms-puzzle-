@@ -16,6 +16,7 @@ export interface WarehouseContext {
   knows(id: string): boolean;
   learn(id: string): void;
   weight(): number;
+  meetElder(): void;
 }
 export const reachableCrate = (r: RunState, w: Level1, c: SupplyCrate) => (c.i === r.pos.i && c.j === r.pos.j)
   || (w.zone(r.pos.i, r.pos.j) === "alpha" && w.zone(c.i, c.j) === "alpha");
@@ -39,7 +40,7 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
       w.ensureAround(r.pos.i, r.pos.j); out.anim = { kind: "move", from, d: cmd.d }; out.rebuild = true;
       x.pass(10 + Math.floor(x.rand() * 7) + (r.l1?.power.phase === "blackout" && w.zone(r.pos.i, r.pos.j) !== "alpha" && !(has("flashlight") && r.flashlightOn) ? 8 : 0), "walk"); if (r.ended) return true;
       const zone = w.zone(r.pos.i, r.pos.j);
-      if (zone !== previous) { x.say(rules.zones[zone]); if (zone === "alpha") { x.discover("base_alpha"); out.important = true; } }
+      if (zone !== previous) { x.say(rules.zones[zone]); if (zone === "alpha") { x.discover("base_alpha"); x.meetElder(); out.important = true; } }
       if (w.corpse?.[0] === r.pos.i && w.corpse[1] === r.pos.j) x.say(T("水泥柱旁躺著一具遺體。", "A body lies beside the concrete pillar."), "warn");
       return true;
     }

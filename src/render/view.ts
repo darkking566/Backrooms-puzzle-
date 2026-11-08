@@ -1,3 +1,4 @@
+import { buildBaseAlpha } from "./base-alpha";
 import type { ActiveWorld } from "../world/world";
 /* The 3D view: fixed stations, light grid, instanced building, picking, labels, smooth motion, old-photo post.
    It only reads the game; it never changes it. Taps become Pick values for the UI to turn into commands. */
@@ -11,7 +12,7 @@ import { H, litMat, makeGeometry, makeMaterials, shared, type Geometry, type Mat
 export type Pick =
   | { kind: "exit"; d: Dir } | { kind: "item"; key: string; i: number; j: number } | { kind: "door"; edge: string } | { kind: "flicker"; edge: string }
   | { kind: "wall"; edge: string } | { kind: "tally" } | { kind: "peel" } | { kind: "hole" } | { kind: "pit" } | { kind: "salt" } | { kind: "corpse" }
-  | { kind: "crate"; id: string } | { kind: "guide" } | { kind: "routeSign" } | { kind: "baseSupplies" }
+  | { kind: "elder" } | { kind: "noticeboard" } | { kind: "crate"; id: string } | { kind: "guide" } | { kind: "routeSign" } | { kind: "baseSupplies" }
   | { kind: "notes" } | { kind: "cabinet" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 export type Quality = "low" | "mid" | "high";
 const TIERS: Record<Quality, { scale: number; R: number; res: number; post: number }> = {
@@ -104,6 +105,10 @@ export class View {
     this.scene.background = color; (this.scene.fog as THREE.FogExp2).color.copy(color);
     shared.uWarehouse.value = warehouse ? 1 : 0; shared.uCeilingHeight.value = warehouse ? 6 : H;
     this.post.uniforms.uWarehouse.value = warehouse ? 1 : 0;
+    if (game.world.level === "level-1") {
+      const w = game.world, corners = [w.global(w.distance - .5, -.5), w.global(w.distance + 1.5, 1.5)];
+      shared.uBaseRect.value.set(Math.min(...corners.map(p => p[0])) * S, Math.min(...corners.map(p => p[1])) * S, Math.max(...corners.map(p => p[0])) * S, Math.max(...corners.map(p => p[1])) * S);
+    }
     this.tiles.clear(); this.pendingDirty.clear(); this.lights = null; this.figure = null;
     shared.uSeedOff.value.set(game.world.hash(1, 2, 3) * 100, game.world.hash(4, 5, 6) * 100);
     this.wasOut = game.powerOut(); this.power = this.wasOut ? 0 : 1; this.powerAnim = null;
@@ -131,7 +136,7 @@ export class View {
     const g = this.game!; const { i, j } = g.run.pos;
     this.torchTarget = g.isDark() && g.hasLight() ? 1 : 0;
     shared.uAmb.value = g.isDark() && !g.hasLight() ? .03 : .07;
-    const out = g.powerOut();
+    const out = g.run.level === "level-1" ? g.run.l1?.power.phase === "blackout" : g.powerOut();
     if (out !== this.wasOut) { this.wasOut = out; this.powerAnim = { from: this.power, to: out ? 0 : 1, t0: performance.now(), dur: this.reduceMotion ? 1 : out ? (this.flash ? 900 : 1600) : (this.flash ? 1100 : 2200) }; }
     this.post.uniforms.uRed.value = g.world.level === "level-0" ? (1 - sstep(.8, 3.2, g.world.redDist(i, j))) * .35 : 0;
     this.post.uniforms.uSan.value = 1 - sstep(15, 60, g.run.stats.sanity);
@@ -151,7 +156,8 @@ export class View {
   private buildLights() {
     this.lights = new Map();
     for (const c of this.game!.world.cells.values()) if (c.panel && c.panel !== "dead") {
-      const w = c.panel.warm, tint = c.panel.red ? [1.3, .3, .24] : w < .33 ? [1, .93, .76] : w < .66 ? [1, .97, .86] : [.9, 1, .95];
+      const base = this.game!.world.zone(c.i, c.j) === "alpha";
+      const w = c.panel.warm, tint = base ? [1.3, .91, .53] : c.panel.red ? [1.3, .3, .24] : w < .33 ? [1, .93, .76] : w < .66 ? [1, .97, .86] : [.9, 1, .95];
       this.lights.set(ck(c.i, c.j), { x: c.i * S, z: c.j * S, r: tint[0] * c.panel.int, g: tint[1] * c.panel.int, b: tint[2] * c.panel.int, flick: !!c.panel.flick });
     }
   }
@@ -338,17 +344,18 @@ export class View {
         const sign = new THREE.Mesh(G.box, M.alphaSign); sign.scale.set(.5, .6, .06); sign.position.set(x + 1, 1.3, z);
         this.add(sign, { pick: { kind: "routeSign" }, label: "routeSign", ly: .2 });
       }
-      if (zone === "alpha" && w.local(c.i, c.j)[1] === 1) {
-        const bed = new THREE.Mesh(G.box, M.body); bed.scale.set(.85, .35, 1.8); bed.position.set(x + .9, .2, z + .6); this.add(bed);
-        const partition = new THREE.Mesh(G.box, M.metal); partition.scale.set(.08, 2, 2.2); partition.position.set(x - 1.4, 1, z); this.add(partition);
-      }
+
     }
     for (const [k, edge] of w.edges) if (edge === "wall") {
       const [[i, j]] = edgeCells(k); if (Math.abs(i - ci) > R || Math.abs(j - cj) > R) continue;
       walls.push([k[0] === "v" ? (i + .5) * S : i * S, 0, k[0] === "v" ? j * S : (j + .5) * S, k[0] === "v" ? Math.PI / 2 : 0]); keys.push(k);
     }
     this.inst(G.floor, M.concrete, floor); this.inst(G.warehouseCeil, M.concrete, ceiling);
-    this.inst(G.water, M.water, water); this.inst(G.warehousePanel, M.panel, panels);
+    this.inst(G.water, M.water, water);
+    this.inst(G.warehousePanel, M.panel, panels.filter(([x,,z]) => w.zone(x / S, z / S) !== "alpha"));
+    this.inst(G.warehousePanel, M.alphaLamp, panels.filter(([x,,z]) => w.zone(x / S, z / S) === "alpha"));
+    if (Math.abs(ci - w.base[0]) <= R + 1 && Math.abs(cj - w.base[1]) <= R + 1)
+      buildBaseAlpha(w, G, M, (o, pick) => this.add(o, pick ? { pick, label: pick.kind, ly: .4 } : undefined));
     const p = this.inst(G.warehousePillar, M.concreteWall, pillars); if (p) this.blockers.push(p);
     const wall = this.inst(G.warehouseWall, M.concreteWall, walls, undefined, keys); if (wall) this.blockers.push(wall);
     for (const c of w.crates.values()) {

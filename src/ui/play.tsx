@@ -16,7 +16,7 @@ import { LockedPackPanel } from "./locked-pack";
 import { RoomPersonPanel } from "./room-person";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
-  | { kind: "crate"; id: string } | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" } | { kind: "roomPerson" };
+  | { kind: "elder" } | { kind: "crate"; id: string } | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
@@ -110,6 +110,8 @@ export function Play({ onEnd }: { onEnd: () => void }) {
       case "guide": return act({ type: "readGuide" });
       case "routeSign": return act({ type: "readSign" });
       case "baseSupplies": return act({ type: "baseSupplies" });
+      case "elder": return g.zoneHere() === "alpha" ? openElder() : say(U("tooFar"));
+      case "noticeboard": return g.zoneHere() === "alpha" ? act({ type: "readNotice" }) : say(U("tooFar"));
       case "roomPerson": return g.canTalkToPerson() ? openPerson() : say(U("tooFar"));
       case "lockedPack": {
         if (g.canReachPack()) return openPack();
@@ -135,6 +137,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const openManila = () => { act({ type: "examine", what: "notes" }); ctx.audio.sfx("paper"); setSheet({ kind: "manila" }); };
   const openPack = () => { act({ type: "packExamine" }); setSheet({ kind: "lockedPack" }); };
   const openPerson = () => { act({ type: "roomPersonTalk" }); setSheet({ kind: "roomPerson" }); };
+  const openElder = () => { act({ type: "elderTalk" }); setSheet({ kind: "elder" }); };
   const say = (s: string) => { g.run.log.push({ t: { zh: s, en: s } }); rerender(); };
 
   function labelText(p: Pick): string {
@@ -142,6 +145,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     switch (p.kind) {
       case "crate": return U("supplyCrate"); case "guide": return U("survivalGuide");
       case "routeSign": return U("routeSign"); case "baseSupplies": return U("baseSupplies");
+      case "elder": return L(g.elder.text.name); case "noticeboard": return L(g.elder.text.board);
       case "roomPerson": return L(g.personQuest.text.name);
       case "lockedPack": return L(g.packPuzzle.text.name);
       case "exit": { const t = g.world.edgeAt(g.run.pos.i, g.run.pos.j, p.d); return "→ " + U(p.d === d ? "ahead" : p.d === (d + 3) % 4 ? "toLeft" : "toRight") + (t === "arch" ? U("archS") : t?.endsWith("-open") ? U("doorS") : ""); }
@@ -172,6 +176,10 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (g.zoneHere() === "arrival" || g.zoneHere() === "alpha") near.push({ tag: U("inRoom"), label: U("survivalGuide"), verb: U("read"), run: () => act({ type: "readGuide" }) });
     if (g.world.routeMark(r.pos.i, r.pos.j) !== null) near.push({ tag: U("inRoom"), label: U("routeSign"), verb: U("read"), run: () => act({ type: "readSign" }) });
     if (g.zoneHere() === "alpha") near.push({ tag: U("inRoom"), label: U("baseSupplies"), verb: U("collectSupplies"), run: () => act({ type: "baseSupplies" }) });
+    if (g.zoneHere() === "alpha") {
+      near.push({ tag: U("inRoom"), label: L(g.elder.text.name), verb: U("look"), run: openElder });
+      near.push({ tag: U("inRoom"), label: L(g.elder.text.board), verb: U("read"), run: () => act({ type: "readNotice" }) });
+    }
   }
   if (inManila()) { near.push({ tag: U("inRoom"), label: U("notesObj"), verb: U("read"), run: openManila }); near.push({ tag: U("inRoom"), label: U("cabinet"), verb: U("open"), run: () => setSheet({ kind: "cabinet" }) }); }
   const ev = r.pendingEvent ? ctx.content.events.find(e => e.id === r.pendingEvent) : null;
@@ -236,6 +244,11 @@ function Panel({ sheet, close, act, setSheet }: { sheet: NonNullable<Sheet>; clo
     <div class="sheet" onClick={e => { if (e.target === e.currentTarget) close(); }}><div class="card" data-panel={sheet.kind} role="dialog" aria-label={title}><h3>{title}<button class="x" onClick={close}>{U("close")}</button></h3>{body}</div></div>);
   const opt = (label: string, note: string, run: () => void, disabled = false) => <button class="opt" disabled={disabled} onClick={run}>{label}<small>{note}</small></button>;
   switch (sheet.kind) {
+    case "elder": return card(L(g.elder.text.name), <>
+      <p class="story">{L(r.log.at(-1)?.t ?? g.elder.text.first)}</p>
+      {g.elderChoices().map(ch => <button class="opt" key={ch.id} onClick={() => act({ type: "elderChoice", id: ch.id }, true)}>{L(ch.text)}</button>)}
+      <button class="opt" onClick={close}>{U("close")}</button>
+    </>);
     case "crate": return card(U("supplyCrate"), <SupplyCratePanel id={sheet.id} act={cmd => act(cmd, true)} />);
     case "roomPerson": return card(L(g.personQuest.text.name), <RoomPersonPanel act={cmd => act(cmd, true)} close={close} />);
     case "lockedPack": return card(L(g.packPuzzle.text.name), <LockedPackPanel act={cmd => act(cmd, true)} />);

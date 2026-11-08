@@ -143,12 +143,13 @@ export interface Meta {
   symbolLock: { ruleNoteSeen: boolean; lastCode: string | null };
   roomPerson: RoomPersonMeta;
   npcMeetings: Record<string, number>;
+  elder: { meetings: number; rewardClaimed: boolean };
   history: { run: number; ending: string; days: number; points: number }[];
   settings: Settings;
 }
 export const newMeta = (): Meta => ({
   v: SAVE_VERSION, name: null, runs: 0, points: 0, discoveries: [], endings: [], clues: [], notes: [], cabinet: [], corpses: {}, history: [],
   symbolLock: { ruleNoteSeen: false, lastCode: null },
-  roomPerson: newRoomPersonMeta(), npcMeetings: {},
+  roomPerson: newRoomPersonMeta(), npcMeetings: {}, elder: { meetings: 0, rewardClaimed: false },
   settings: { lang: "zh", flash: false, sound: false, quality: "auto", reduceMotion: false }
 });
