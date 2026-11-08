@@ -7,6 +7,8 @@ export const S = 4;                                    // cell size in metres
 export const VIEW = 8;                                 // logic view distance in cells (renderer draws at most this far)
 
 export type Zone = "hall" | "arch" | "pillar" | "dark" | "pit" | "manila" | "red";
+export type Level1Zone = "arrival" | "warehouse" | "storage" | "alpha";
+export type AnyZone = Zone | Level1Zone;
 export type BottleColor = "grey" | "green" | "blue" | "reddish";
 export interface Panel { int: number; warm: number; flick?: boolean; red?: boolean }
 export interface Bottle { liquid: string; color: BottleColor; full: boolean; sealed: boolean; spoiled: boolean; boiled?: boolean }

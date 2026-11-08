@@ -12,7 +12,7 @@ function files(dir: string): string[] {
   return readdirSync(dir).flatMap(f => { const p = join(dir, f); return statSync(p).isDirectory() ? files(p) : p.endsWith(".yaml") ? [p] : []; });
 }
 export function loadContent(): ContentData {
-  const out: Record<string, unknown[]> = { items: [], liquids: [], events: [], endings: [], clues: [], sources: [], puzzles: [], quests: [], dialogue: [] };
+  const out: Record<string, unknown[]> = { items: [], liquids: [], events: [], endings: [], clues: [], sources: [], puzzles: [], quests: [], dialogue: [], levels: [], rewards: [] };
   for (const f of files(ROOT)) {
     const kind = relative(ROOT, f).split(/[\\/]/)[0];
     const data = parse(readFileSync(f, "utf8"));

@@ -1,0 +1,40 @@
+- id: level-1
+  name: { zh: Level 1, en: Level 1 }
+  arrival:
+    zh: 你撲進閃爍的牆。腳下不再是地毯。鞋底踩進一層冷水，聲音傳得很遠。水泥柱一直排進霧裡。身上的東西還在。渴也還在。這裡是 Level 1。
+    en: You throw yourself into the flickering wall. There is no carpet underfoot. Your shoes land in cold water. The sound carries far. Concrete pillars disappear into fog. Your belongings are still with you. So is the thirst. This is Level 1.
+  again: { zh: 水泥。積水。遠處的日光燈。你又到了這裡。, en: "Concrete. Standing water. Fluorescent lights in the distance. You are here again." }
+  guide:
+    zh: 「白框 A，沿雙白線走。燈開始接連熄滅時，先離開貨架。黑暗裡看見笑臉，就收起光，慢慢退開。」
+    en: '"A in a white frame. Follow the double white lines. When the lights begin going out in sequence, leave the shelving. If you see a smile in the dark, put away the light and back away slowly."'
+  sign: { zh: "白框裡寫著 A。兩道白線指向{direction}。", en: "An A inside a white frame. Two white lines point {direction}." }
+  zones:
+    arrival: { zh: 牆面是冷的。旁邊放著一只開著的箱子，箱蓋內側壓著一張紙。, en: "The wall is cold. An open crate stands beside it, a sheet of paper tucked inside the lid." }
+    warehouse: { zh: 水泥柱隔得很遠。燈管吊在高處，照不到柱子後面。, en: "The concrete pillars stand far apart. Tubes hang high overhead, leaving the spaces behind the pillars unlit." }
+    storage: { zh: 貨架擋住了遠處的燈。木板下面有拖動過的痕跡。, en: "Shelving blocks the distant lights. Something has been dragged beneath the boards." }
+    alpha: { zh: 金屬隔板後面亮著燈。有人挪動椅子。聲音沒有因為你走近而消失。, en: "Lights remain on behind metal partitions. Someone moves a chair. The sound does not disappear as you approach." }
+  layout: { chunkSize: 8, baseMin: 8, baseMax: 12 }
+  supplies:
+    emergency: [{ item: almond_water, count: 1 }, { item: bandage, count: 1 }]
+    base: [{ item: almond_water, count: 2 }, { item: snack_bar, count: 2 }, { item: bandage, count: 1 }]
+    waterChance: 0.65
+    foodChance: 0.8
+    toolChance: 0.25
+  crate:
+    name: { zh: 補給箱, en: Supply crate }
+    description: { zh: 上蓋釘死了。側板下緣有一條磨亮的縫。, en: "The lid is nailed shut. A worn seam runs beneath the side panel." }
+    latch: { zh: 側板旁邊的鐵閂可以滑動。不必拆掉上蓋。, en: "The metal latch beside the side panel can slide. There is no need to remove the lid." }
+    opened: { zh: 側板退出來了。裡面的包裝還是乾的。, en: "The side panel slides free. The packages inside are still dry." }
+    empty: { zh: 紙屑下面沒有別的東西。, en: Nothing beneath the scraps of paper. }
+    needLatch: { zh: 側板還卡著。先看看邊緣的鐵件。, en: The side panel is still held in place. Examine the metalwork along the edge. }
+    examineMinutes: 3
+    openMinutes: 15
+    crowbarMinutes: 3
+  base:
+    name: { zh: Alpha 基地, en: Base Alpha }
+    supplies: { zh: 「先拿著。床位在隔板後面。」, en: '"Take these first. The beds are behind the partition."' }
+    claimed: { zh: 「這次的應急包已經領了。告示上有附近的補給標記。」, en: '"You have already collected this emergency pack. The notice shows nearby supply markings."' }
+    rest: { zh: 你在隔板後面的床位躺下。外面有人值守。, en: You lie down behind the partition. Someone is keeping watch outside. }
+    outsideRest: { zh: 這裡沒有值守。燈變暗時，你可能得提早起來。, en: "No one is keeping watch here. If the lights dim, you may have to get up early." }
+  survival: { sanity: -0.3, darkSanity: -0.9, baseSanity: 3 }
+  source: level-1

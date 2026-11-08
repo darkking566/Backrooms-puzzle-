@@ -1,0 +1,6 @@
+# Provisional until the full Level 1 economy comparison (commit 7).
+- id: level1
+  arrival: 300
+  firstArrival: 250
+  survivalMultiplier: 0.2
+  survivalCap: 40

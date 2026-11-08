@@ -46,6 +46,21 @@ export const Clue = z.object({ id: z.string(), title: Text, text: Text, source: 
 export const Source = z.object({ id: z.string(), title: z.string(), authors: z.string(), url: z.string().url(), used: Text }).strict();
 
 const Chance = z.number().min(0).max(1);
+const Supplies = z.array(z.object({ item: z.string(), count: z.number().int().positive() }).strict());
+export const Level = z.object({
+  id: z.literal("level-1"), name: Text, arrival: Text, again: Text, guide: Text, sign: Text,
+  zones: z.object({ arrival: Text, warehouse: Text, storage: Text, alpha: Text }).strict(),
+  layout: z.object({ chunkSize: z.literal(8), baseMin: z.number().int().min(8), baseMax: z.number().int().max(12) }).strict(),
+  supplies: z.object({ emergency: Supplies, base: Supplies, waterChance: Chance, foodChance: Chance, toolChance: Chance }).strict(),
+  crate: z.object({ name: Text, description: Text, latch: Text, opened: Text, empty: Text, needLatch: Text,
+    examineMinutes: z.number().int().positive(), openMinutes: z.number().int().positive(), crowbarMinutes: z.number().int().positive() }).strict(),
+  base: z.object({ name: Text, supplies: Text, claimed: Text, rest: Text, outsideRest: Text }).strict(),
+  survival: z.object({ sanity: z.number(), darkSanity: z.number(), baseSanity: z.number().positive() }).strict(),
+  source: z.string()
+}).strict().refine(x => x.layout.baseMin <= x.layout.baseMax, "baseMin must not exceed baseMax");
+export type LevelData = z.infer<typeof Level>;
+export const Reward = z.object({ id: z.literal("level1"), arrival: z.number().int().nonnegative(),
+  firstArrival: z.number().int().nonnegative(), survivalMultiplier: z.number().min(0).max(1), survivalCap: z.number().int().nonnegative() }).strict();
 export const Puzzle = z.object({
   id: z.string(), kind: z.literal("symbol_lock"),
   spawn: z.object({ minRun: z.number().int().min(1), chance: Chance, minMoves: z.number().int().min(0), zone: z.literal("arch") }).strict(),
@@ -85,7 +100,8 @@ export type DialogueChoice = z.infer<typeof Dialogue>["choices"][number];
 
 export const Content = z.object({
   items: z.array(Item), liquids: z.array(Liquid), events: z.array(Event), endings: z.array(Ending),
-  clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle), quests: z.array(Quest), dialogue: z.array(Dialogue)
+  clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle), quests: z.array(Quest), dialogue: z.array(Dialogue),
+  levels: z.array(Level), rewards: z.array(Reward)
 });
 export type ContentData = z.infer<typeof Content>;
 
@@ -109,6 +125,11 @@ export function checkRefs(c: ContentData): string[] {
     for (const x of p.contents) if (!items.has(x.item)) errs.push(`${p.id}: unknown item ${x.item}`);
   }
   const src = (s: string | undefined, where: string) => { if (s && !sources.has(s)) errs.push(`${where}: unknown source ${s}`); };
+  ids(c.levels, "level"); ids(c.rewards, "reward");
+  for (const l of c.levels) {
+    src(l.source, l.id);
+    for (const x of [...l.supplies.emergency, ...l.supplies.base]) if (!items.has(x.item)) errs.push(`${l.id}: unknown item ${x.item}`);
+  }
   for (const x of [...c.items, ...c.liquids, ...c.events, ...c.clues]) src(x.source, x.id);
   for (const l of c.liquids) if (l.deadly && !endings.has(l.deadly)) errs.push(`${l.id}: unknown ending ${l.deadly}`);
   for (const e of c.events) for (const ch of e.choices) if (ch.requires && !items.has(ch.requires.item)) errs.push(`${e.id}: unknown item ${ch.requires.item}`);
