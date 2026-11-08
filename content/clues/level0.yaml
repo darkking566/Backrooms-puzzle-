@@ -1,0 +1,26 @@
+- id: tally_marks
+  title: { zh: 牆上的記號, en: Marks on the Wall }
+  text: { zh: 牆上刻著一組一組的記號，像在數日子。刻痕很深，像是用指甲刻的。那個筆跡……很眼熟。, en: "Sets of marks carved into the wall, as if counting days. Deep, as if scratched with fingernails. The hand is... familiar." }
+- id: manila_guide
+  title: { zh: 曼尼拉房間的筆記, en: The Manila Room Notes }
+  text: { zh: 「如果你是剛掉進來的：這個房間是安全的，至少現在是。出去以後，找一面會閃的牆——不是燈在閃，是牆本身在閃。不要猶豫，整個人撲進去。猶豫的人都還在外面。」, en: "\"If you just fell in: this room is safe, for now at least. When you leave, find a wall that flickers. Not the lights. The wall itself. Don't hesitate; throw your whole body in. The ones who hesitated are still out there.\"" }
+  source: manila-room
+- id: manila_hand
+  title: { zh: 眼熟的字跡, en: A Familiar Hand }
+  text: { zh: 「櫃子裡的水是乾淨的。拿一瓶就好，剩下的留給下一個人。」字跡很眼熟。像是你自己的。, en: "\"The water in the cabinet is clean. Take one; leave the rest for the next one.\" The handwriting is familiar. Like your own." }
+- id: unfilled_rule
+  title: { zh: 沒裝滿的瓶子, en: Unfilled Bottles }
+  text: { zh: 沒裝滿的瓶子不要喝。可能被人動過，也可能長了東西。, en: "Never drink from a bottle that isn't full. Someone may have tampered with it, or something may be growing in it." }
+  source: object-1
+- id: reddish_rule
+  title: { zh: 兩種紅, en: Two Kinds of Red }
+  text: { zh: 紅色杏仁水很苦、顏色很深、瓶底有沉澱。另一種紅色的液體顏色淡得像稀釋的果汁——那不是杏仁水。, en: "Red almond water is very bitter, deep in colour, with sediment. The other red liquid is thin like watered-down juice. That is not almond water." }
+  source: object-48
+- id: red_room_signs
+  title: { zh: 紅房間的徵兆, en: Signs of a Red Room }
+  text: { zh: 地毯變黏、燈光偏紅、壁紙剝落露出深紅色、嗡嗡聲變低。看到這些就掉頭。, en: "The carpet turns sticky, the light goes red, peeling wallpaper shows deep red underneath, the hum drops lower. Turn back when you notice them." }
+  source: level-0
+- id: flicker_wall
+  title: { zh: 閃爍的牆, en: The Flickering Wall }
+  text: { zh: 在這裡撐得夠久，總有一天會在走廊盡頭看到一面閃爍的牆。真的那面會發出細細的電流聲。理智撐不住的時候，眼睛也會騙你。, en: "Last long enough and one day a wall at the end of a corridor will flicker. The real one hums with a thin electric buzz. When your mind is fraying, your eyes lie too." }
+  source: level-0

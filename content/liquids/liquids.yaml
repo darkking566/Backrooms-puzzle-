@@ -1,0 +1,52 @@
+# What a flask can hold. Rules are fixed (Wiki); which flask holds what is random each run.
+- id: aw_grey
+  name: { zh: 灰色杏仁水, en: Grey Almond Water }
+  look: { zh: 灰白色，有點混濁, en: "Greyish white, a little cloudy" }
+  inspect: { zh: 搖一搖，液體很均勻，聞起來淡淡的杏仁味。, en: "Shaken, it stays even. A faint smell of almonds." }
+  taste: { zh: 微甜，杏仁的味道。, en: Slightly sweet. Almonds. }
+  effects: { water: 30, food: 30, sanity: 4 }
+  source: object-1
+- id: aw_green
+  name: { zh: 綠色杏仁水, en: Green Almond Water }
+  look: { zh: 淡淡的綠色, en: A pale green }
+  inspect: { zh: 一打開就有很甜的味道，像能量飲料。, en: "Very sweet the moment it opens, like an energy drink." }
+  taste: { zh: 甜得發膩，喝完心跳快了一點。, en: "Cloyingly sweet. Your heart picks up a little." }
+  effects: { water: 25, food: 25, rest: 240 }
+  source: object-1
+- id: aw_blue
+  name: { zh: 藍色杏仁水, en: Blue Almond Water }
+  look: { zh: 很淡的藍色，幾乎透明, en: "A very faint blue, nearly clear" }
+  inspect: { zh: 幾乎沒有味道，像清水。, en: "Almost no smell. Like plain water." }
+  taste: { zh: 像清水，喝完頭腦安靜了一些。, en: "Like water. Your head goes a little quieter." }
+  effects: { water: 30, food: 15, sanity: 18, rest: -60 }
+  source: object-1
+- id: aw_red
+  name: { zh: 紅色杏仁水, en: Red Almond Water }
+  look: { zh: 泛紅, en: Reddish }
+  inspect: { zh: 紅得很深，瓶底有一點細細的沉澱。聞起來很苦。, en: "A deep red with a fine sediment at the bottom. It smells bitter." }
+  taste: { zh: 極苦，苦到舌根發麻。, en: "Extremely bitter, enough to numb your tongue." }
+  effects: { water: 25, food: 15, rest: -300, clearStatus: [infection] }
+  source: object-1
+- id: liquid_pain
+  name: { zh: Liquid Pain, en: Liquid Pain }
+  look: { zh: 泛紅, en: Reddish }
+  inspect: { zh: 紅色很淡，像稀釋過的果汁，沒有沉澱。搖起來好像比水黏一點。, en: "A thin red, like watered-down juice, with no sediment. It seems slightly thicker than water." }
+  taste: { zh: 比想像中苦，而且苦味一直留在喉嚨裡，越來越燙。, en: "More bitter than expected, and the bitterness stays in your throat, getting hotter." }
+  effects: { health: -200 }
+  sip: { health: -35, sanity: -10 }
+  deadly: death_liquid_pain
+  source: object-48
+- id: carpet_water
+  name: { zh: 地毯擠出來的水, en: Water Wrung from the Carpet }
+  look: { zh: 混濁的黃褐色, en: Murky yellow-brown }
+  inspect: { zh: 有一股潮濕地毯的霉味，表面浮著細細的纖維。, en: "It smells of damp carpet, with fine fibres floating on top." }
+  taste: { zh: 鹹鹹的，帶著霉味。, en: "Salty and mouldy." }
+  effects: { water: 12, health: -4, status: [infection] }
+  source: level-0
+- id: carpet_water_boiled
+  name: { zh: 煮沸過的地毯水, en: Boiled Carpet Water }
+  look: { zh: 黃褐色，比較清了, en: "Yellow-brown, a little clearer" }
+  inspect: { zh: 霉味淡了很多。煮沸能殺菌，去不掉別的東西。, en: "The mould smell is much fainter. Boiling kills germs; it removes nothing else." }
+  taste: { zh: 鹹，還有一點怪味。, en: "Salty, with an odd aftertaste." }
+  effects: { water: 14, health: -1 }
+  source: object-15

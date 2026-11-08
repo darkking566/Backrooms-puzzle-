@@ -1,0 +1,63 @@
+# Weight units: a full bottle is 1. Carrying limit is set in src/systems/inventory.ts.
+- id: bottle
+  name: { zh: 保溫瓶, en: Flask }
+  desc: { zh: 金屬保溫瓶。看得到顏色，看不到裡面。, en: "A metal flask. You can see its colour, not what is inside." }
+  weight: 1
+  tags: [drink, bottle]
+  use: { zh: 喝, en: Drink }
+  source: object-1
+- id: almond_water
+  name: { zh: 杏仁水, en: Almond Water }
+  desc: { zh: 一瓶封好的灰色杏仁水。帶著它醒來的感覺很奇怪，像是有人替你準備的。, en: "A sealed bottle of grey almond water. Waking up with it feels strange, as if someone packed it for you." }
+  weight: 1
+  tags: [drink]
+  use: { zh: 喝, en: Drink }
+  effects: { water: 30, food: 30, sanity: 4 }
+  prep: { cost: 40 }
+  source: object-1
+- id: snack_bar
+  name: { zh: 壓扁的能量棒, en: Crushed Energy Bar }
+  desc: { zh: 包裝上的字褪色到看不清。是跟著某個人一起掉進來的。, en: The wrapper has faded past reading. It fell in with someone. }
+  weight: 0.3
+  tags: [food]
+  use: { zh: 吃, en: Eat }
+  effects: { food: 14, water: -2 }
+- id: crowbar
+  name: { zh: 撬棍, en: Crowbar }
+  desc: { zh: 很重，很可靠。能撬開天花板、上鎖的門。, en: "Heavy and dependable. Opens ceilings and locked doors." }
+  weight: 4
+  tags: [tool]
+  prep: { cost: 120 }
+  source: level-1
+- id: flashlight
+  name: { zh: 手電筒, en: Flashlight }
+  desc: { zh: 斷電的地方沒有它幾乎什麼都看不到。, en: Without it you see almost nothing where the power is out. }
+  weight: 1
+  tags: [light, tool]
+  prep: { cost: 60 }
+- id: earplugs
+  name: { zh: 耳塞, en: Earplugs }
+  desc: { zh: 嗡嗡聲突然變大的時候可以保護耳朵。, en: Protect your ears when the hum suddenly spikes. }
+  weight: 0
+  tags: [tool]
+  prep: { cost: 20 }
+- id: watch
+  name: { zh: 手錶, en: Wristwatch }
+  desc: { zh: 指針還在走。在這裡，知道時間本身就是一種奢侈。, en: "It still ticks. Down here, knowing the time is a luxury." }
+  weight: 0
+  tags: [tool]
+  prep: { cost: 25 }
+- id: firesalt
+  name: { zh: 火鹽, en: Firesalt }
+  desc: { zh: 從牆角刮下來的白色結晶。溶進水裡會發熱，可以把水煮沸。, en: White crystals scraped from a corner. Dissolved in water it heats up enough to boil it. }
+  weight: 0.2
+  tags: [fuel]
+  use: { zh: 煮沸一瓶, en: Boil a flask }
+  source: object-15
+- id: bandage
+  name: { zh: 繃帶, en: Bandage }
+  desc: { zh: 一捲還算乾淨的繃帶。, en: A roll of fairly clean bandage. }
+  weight: 0.2
+  tags: [medical]
+  use: { zh: 包紮, en: Bandage up }
+  effects: { health: 12, clearStatus: [bleeding] }

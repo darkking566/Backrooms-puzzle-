@@ -1,0 +1,46 @@
+# Backrooms Wiki pages this game builds on (CC BY-SA 3.0). Shown in the in-game sources page.
+- id: level-0
+  title: Level 0 - "Threshold"
+  authors: DivineAtlas, DrAkimoto, and RobertGoerman
+  url: https://backrooms-wiki.wikidot.com/level-0
+  used: { zh: Level 0 的全部設定：周邊偏移、孤立效應、各種區域、噪音、地毯液體、閃爍牆出口, en: "Everything about Level 0: peripheral shift, the isolation effect, its zones, the noise, carpet liquids, the flickering-wall exit" }
+- id: manila-room
+  title: The Manila Room
+  authors: Br Miller & Neptunium (original concept Tocharian17, rewrite Hickory)
+  url: https://backrooms-wiki.wikidot.com/manila-room
+  used: { zh: 曼尼拉房間：孤立效應失效、鋼琴聲、櫃子裡的補給、內部不變, en: "The Manila Room: the isolation effect lifts, piano music, supplies in the cabinet, an unchanging interior" }
+- id: level-1
+  title: Level 1 - "Habitable Zone"
+  authors: Praetor3005 and DivineAtlas
+  url: https://backrooms-wiki.wikidot.com/level-1
+  used: { zh: 閃爍的牆通往的層級；撬棍, en: Where the flickering wall leads; the crowbar }
+- id: object-1
+  title: Object 1 - "Almond Water"
+  authors: Natedagreat563
+  url: https://backrooms-wiki.wikidot.com/object-1
+  used: { zh: 杏仁水的顏色與效果、熱量、沒裝滿不要喝、煮沸, en: "Almond water colours and effects, calories, never drink an unfilled bottle, boiling" }
+- id: object-15
+  title: Object 15 - "Firesalt"
+  authors: Will Anomaler
+  url: https://backrooms-wiki.wikidot.com/object-15
+  used: { zh: 火鹽：長在牆角、溶於水會發熱，可以煮沸, en: "Firesalt: grows in corners, heats water when dissolved, can boil it" }
+- id: object-48
+  title: Object 48 - "Liquid Pain"
+  authors: ReyDay
+  url: https://backrooms-wiki.wikidot.com/object-48
+  used: { zh: Liquid Pain：外觀近似杏仁水、泛紅、偏苦、致命, en: "Liquid Pain: looks like almond water, reddish, more bitter, lethal" }
+- id: entity-15
+  title: Entity 15 - "Wretches"
+  authors: Stretchsterz and etoisle
+  url: https://backrooms-wiki.wikidot.com/entity-15
+  used: { zh: Wretched Cycle 的三個階段, en: The three stages of the Wretched Cycle }
+- id: level-72
+  title: Level 72 - "The Pit"
+  authors: r a t i f
+  url: https://backrooms-wiki.wikidot.com/level-72
+  used: { zh: 從坑洞掉下去會抵達的層級, en: Where a fall into the pits can end }
+- id: level-311
+  title: Level 311 - "The Yellowrooms"
+  authors: BlueSkiesAbove
+  url: https://backrooms-wiki.wikidot.com/level-311
+  used: { zh: 碰到稍微更黃的牆會被帶去的層級, en: Where touching a slightly yellower wall takes you }

@@ -1,0 +1,45 @@
+- id: exit_level1
+  kind: exit
+  title: { zh: 穿過閃爍的牆, en: Through the Flickering Wall }
+  text: { zh: 你整個人撲進閃爍的牆裡。有一瞬間什麼都沒有，然後是冷冷的水泥味，和遠處滴水的聲音。這裡是 Level 1。（第一版到這裡為止。Level 1 還在製作中。）, en: "You throw yourself into the flickering wall. For a moment there is nothing; then the cold smell of concrete, and dripping somewhere far off. This is Level 1. (The first version ends here. Level 1 is still being built.)" }
+  points: 300
+- id: exit_level72
+  kind: exit
+  title: { zh: 墜落, en: The Fall }
+  text: { zh: 你掉了很久，久到開始懷疑會不會永遠掉下去。然後腳底碰到了東西。四周一片漆黑，空氣是溫的。這裡是 Level 72。（Level 72 還在製作中。）, en: "You fall for a long time, long enough to wonder whether you ever stop. Then your feet touch something. Total darkness, warm air. This is Level 72. (Level 72 is still being built.)" }
+  points: 200
+- id: exit_level311
+  kind: exit
+  title: { zh: 更黃一點, en: A Little Yellower }
+  text: { zh: 你的手碰到那面牆的瞬間，四周的黃色變得更濃了一點。走廊看起來一模一樣，又不太一樣。這裡是 Level 311。（Level 311 還在製作中。）, en: "The moment your hand touches the wall, the yellow around you deepens a shade. The corridor looks exactly the same, and not quite. This is Level 311. (Level 311 is still being built.)" }
+  points: 150
+- id: closed_loop
+  kind: ending
+  title: { zh: 封閉迴圈, en: Closed Loop }
+  text: { zh: 你走進了紅色的房間。回頭的時候，進來的開口已經不在了。四面都是紅色的牆，燈一直亮著。你不記得自己在這裡待了多久。, en: "You step into the red room. When you turn around, the way in is gone. Red walls on every side, the lights always on. You do not remember how long you have been here." }
+  points: 100
+- id: no_one_returned
+  kind: death
+  title: { zh: 沒有人回來過, en: No One Came Back }
+  text: { zh: 你一直往下掉。沒有底。, en: "You keep falling. There is no bottom." }
+  points: 10
+- id: death_dehydration
+  kind: death
+  title: { zh: 乾涸, en: Dried Out }
+  text: { zh: 你的舌頭黏在上顎，眼前的黃色一片一片地剝落。你坐下來，想著休息一下就好。, en: "Your tongue sticks to the roof of your mouth and the yellow peels away in flakes. You sit down, telling yourself it is just for a moment." }
+  points: 10
+- id: death_wretch
+  kind: death
+  title: { zh: 變成 Wretch, en: Becoming a Wretch }
+  text: { zh: 你已經想不起自己的名字。你只記得渴，只記得餓。你的腳步聲在走廊裡拖得很長。, en: "You can no longer remember your name. Only thirst, only hunger. Your footsteps drag long down the corridor." }
+  points: 10
+- id: death_liquid_pain
+  kind: death
+  title: { zh: 不是杏仁水, en: Not Almond Water }
+  text: { zh: 苦味在喉嚨裡燒成一條火線，一路燒進胃裡。你終於明白那瓶顏色為什麼淡得像果汁。, en: "The bitterness becomes a line of fire down your throat and into your stomach. You finally understand why that one looked like watered-down juice." }
+  points: 10
+- id: death_injury
+  kind: death
+  title: { zh: 傷得太重, en: Too Badly Hurt }
+  text: { zh: 你靠著牆慢慢滑坐到地上。地毯是濕的。嗡嗡聲沒有停。, en: "You slide down the wall to the floor. The carpet is wet. The hum does not stop." }
+  points: 10

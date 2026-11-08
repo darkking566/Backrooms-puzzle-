@@ -1,0 +1,41 @@
+- id: noise_spike
+  text: { zh: 嗡嗡聲突然變得很刺耳，像有一根針直直刺進耳朵裡。, en: "The hum suddenly turns piercing, like a needle driven straight into your ears." }
+  caption: { zh: 〔嗡嗡聲突然變得很刺耳〕, en: "[The hum spikes, painfully loud]" }
+  trigger: { on: move, chance: 0.035, zones: [hall, pillar, pit, arch] }
+  choices:
+    - text: { zh: 摀住耳朵，蹲下來等它過去, en: "Cover your ears and wait it out" }
+      result: { zh: 你蹲在地上摀著耳朵，不知道過了多久，聲音才慢慢退回原本的嗡嗡聲。, en: "You crouch with your hands over your ears. After who knows how long, it sinks back to the usual hum." }
+      effects: { time: 20, sanity: -3 }
+    - text: { zh: 戴上耳塞, en: Put in the earplugs }
+      requires: { item: earplugs }
+      result: { zh: 你把耳塞塞進耳朵。世界一下子變得很遠，只剩自己的心跳。, en: "You push the earplugs in. The world goes far away; only your heartbeat is left." }
+      effects: { time: 2 }
+    - text: { zh: 不理它，繼續走, en: Ignore it and keep walking }
+      result: { zh: 你咬著牙繼續走。聲音退去之後，耳朵裡還一直在響，其他聲音都悶悶的。, en: "You grit your teeth and keep going. When it fades your ears keep ringing, and everything else sounds muffled." }
+      effects: { status: [hearing_damage], health: -3 }
+  source: level-0
+- id: whisper
+  text: { zh: 嗡嗡聲裡好像夾著一點別的聲音。像有人在很遠的地方，小聲地叫一個名字。, en: "There is something else in the hum. As if someone far away is quietly calling a name." }
+  caption: { zh: 〔嗡嗡聲裡有很小的人聲〕, en: "[A faint voice inside the hum]" }
+  trigger: { on: move, chance: 0.02, zones: [hall, pillar], minHours: 10 }
+  once: per_run
+  choices:
+    - text: { zh: 停下來仔細聽, en: Stop and listen }
+      result: { zh: 你屏住呼吸。聲音停了。你不確定剛才那是不是你的名字。, en: "You hold your breath. The voice stops. You are not sure it was your name." }
+      effects: { time: 5, sanity: -6 }
+    - text: { zh: 繼續走，不要理它, en: "Keep walking, don't listen" }
+      result: { zh: 你加快腳步。聲音跟了一段，然後就散在嗡嗡聲裡了。, en: "You walk faster. It follows for a while, then dissolves into the hum." }
+      effects: { sanity: -2 }
+  source: level-0
+- id: scratching
+  text: { zh: 牆的另一邊傳來抓撓的聲音，很慢，一下一下的。, en: "Scratching from the other side of the wall. Slow. One stroke at a time." }
+  caption: { zh: 〔牆後傳來抓撓聲〕, en: "[Scratching behind the wall]" }
+  trigger: { on: move, chance: 0.015, zones: [hall], minHours: 20 }
+  choices:
+    - text: { zh: 敲敲牆, en: Knock on the wall }
+      result: { zh: 你敲了兩下。抓撓聲停了。過了很久，牆的另一邊也敲了兩下。, en: "You knock twice. The scratching stops. A long while later, two knocks come back." }
+      effects: { time: 5, sanity: -8 }
+    - text: { zh: 安靜地走開, en: Walk away quietly }
+      result: { zh: 你一步一步退開，直到再也聽不到為止。, en: "You back away step by step until you can no longer hear it." }
+      effects: { time: 10, sanity: -3 }
+  source: level-0
