@@ -11,6 +11,7 @@ import type { InvItem } from "../state/types";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
   | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" };
+const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
 export function Play({ onEnd }: { onEnd: () => void }) {
@@ -146,6 +147,9 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         <div class="labels" ref={labels} />
         <div class="top">
           <span class="chip" title={U("time")} onClick={() => setSheet({ kind: "body" })}><b>{timeText}</b></span>
+          {DEV && <select class="chip" aria-label="dev" onChange={e => { const v = (e.target as HTMLSelectElement).value as "manila"; (e.target as HTMLSelectElement).value = ""; if (!v) return; g.devJump(v); ctx.view!.attach(g); ctx.audio.ambience(g); save(); rerender(); }}>
+            <option value="">dev ▾</option><option value="manila">曼尼拉房間 Manila</option><option value="red">紅房間 red room</option><option value="flicker">閃爍牆 flicker wall</option><option value="outage">停電 outage</option><option value="day">+24h</option>
+          </select>}
           {feel.map((f, k) => <span key={k} class={`chip feel l${f.level}`} title={f[lang()]} onClick={() => setSheet({ kind: "body" })}>{ICON[f.id]}</span>)}
         </div>
         <button class="turn l" disabled={lock} aria-label={U("left")} onClick={() => act({ type: "turn", dir: -1 })}>‹<small>{U("left")}</small></button>

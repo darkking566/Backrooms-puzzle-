@@ -461,6 +461,24 @@ export class Game {
     this.meta.corpse = null; w.corpse = null; this.discover("own_corpse"); this.out.rebuild = true;
   }
 
+  /* ---------- developer panel (?dev) ---------- */
+  devJump(where: "manila" | "red" | "flicker" | "outage" | "day") {
+    const r = this.run, w = this.world;
+    if (where === "day") { r.time += 24 * H; return; }
+    if (where === "outage") { r.outageLeft = 4; r.lastOutage = r.moves; return; }
+    if (where === "flicker") { const k = w.wallAhead(r.pos.i, r.pos.j, r.pos.d); if (k) { w.edges.set(k, "flicker"); w.flickerKey = k; } return; }
+    let i: number, j: number, d: Dir;
+    if (where === "manila") { [i, j] = w.manila; i -= 1; d = 1; w.ensureAround(i, j); }
+    else {
+      const core = w.redCoresNear(r.pos.i, r.pos.j)[0] ?? w.redCoresNear(16, 16)[0] ?? [8, 8];
+      const ent = edgeCells(w.redEntrance(core[0], core[1])), out = ent.find(([a, b]) => a !== core[0] || b !== core[1])!;
+      d = DV.findIndex(v => v[0] === core[0] - out[0] && v[1] === core[1] - out[1]) as Dir;
+      i = out[0] - DV[d][0]; j = out[1] - DV[d][1]; w.ensureAround(i, j);
+      w.edges.set(edgeKey(i, j, d), "open");
+    }
+    r.pos = { i, j, d }; w.ensureAround(i, j);
+  }
+
   /* ---------- ending ---------- */
   private end(id: string) {
     const r = this.run, m = this.meta; if (r.ended) return;
