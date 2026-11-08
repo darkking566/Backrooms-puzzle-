@@ -37,7 +37,11 @@ body { background: var(--ink); color: var(--paper); font-family: var(--f-ui); ov
 .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; font-size: 11px; color: var(--muted); letter-spacing: .03em; }
 .chip b { color: var(--tube); font-weight: 600; }
 .chip.title { color: var(--paper); }
-button.chip { pointer-events: auto; cursor: pointer; font: inherit; font-size: 11px; }
+button.chip, select.chip { pointer-events: auto; cursor: pointer; font: inherit; font-size: 11px; }
+select.chip { color: var(--paper); -webkit-appearance: none; appearance: none; padding-right: 9px; }
+select.chip option { background: #1a1810; color: var(--paper); }
+.cap { pointer-events: none; font-size: 12px; color: var(--muted); background: rgba(22, 20, 13, .72); border-radius: 4px; padding: 3px 9px; transition: opacity .4s; }
+.cap:empty { opacity: 0; }
 .bottom { position: absolute; left: 0; right: 0; bottom: 10px; padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 .near { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .near:empty { display: none; }
@@ -47,7 +51,7 @@ button.chip { pointer-events: auto; cursor: pointer; font: inherit; font-size: 1
 .say { pointer-events: none; max-width: min(38em, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; font-family: var(--f-story); font-size: 15px; line-height: 1.7; text-wrap: pretty; transition: opacity .4s; }
 .say:empty { opacity: 0; }
 .bar { flex: none; background: var(--ink); border-top: 1px solid var(--line); padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); display: flex; justify-content: center; }
-.ctrl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; max-width: 560px; width: 100%; }
+.ctrl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; max-width: 560px; width: 100%; }
 .ctrl button { background: var(--panel); border: 0; color: var(--paper); font: inherit; font-size: 13px; padding: 11px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .ctrl button small { font-size: 10px; color: var(--muted); }
 .ctrl button:hover { background: rgba(48, 44, 28, .95); }
@@ -60,6 +64,19 @@ button:focus-visible { outline: 2px solid var(--tube); outline-offset: -2px; }
 .end h2 { font-family: var(--f-story); font-weight: 400; font-size: 24px; margin: 0; }
 .end p { color: var(--muted); max-width: 30em; line-height: 1.7; margin: 0; font-size: 13px; }
 .end button { background: var(--panel); border: 1px solid var(--tube); color: var(--tube); border-radius: 5px; padding: 10px 16px; font: inherit; cursor: pointer; }
+.end.red.on { background: rgba(42, 7, 4, .95); }
+.end.red h2 { color: #e5826d; }
+.sheet { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; background: rgba(12, 11, 7, .72); padding: 16px; }
+.sheet[hidden] { display: none; }
+.paper { background: #e9dfc2; color: #2b2416; border-radius: 4px; max-width: 30em; width: 100%; max-height: 100%; overflow: auto; padding: 18px 20px; font-family: var(--f-story); font-size: 15px; line-height: 1.75; box-shadow: 0 10px 40px rgba(0, 0, 0, .5); box-sizing: border-box; }
+.paper h3 { margin: 0 0 10px; font-size: 17px; font-weight: 400; }
+.paper .note { margin: 0 0 12px; }
+.paper .note small { display: block; color: #6b5f44; font-family: var(--f-ui); font-size: 11px; }
+.paper label { display: block; font-family: var(--f-ui); font-size: 12px; color: #5b5038; margin-top: 12px; }
+.paper textarea { width: 100%; box-sizing: border-box; font: inherit; background: #f4ecd4; border: 1px solid #b9a77a; border-radius: 3px; padding: 8px; color: #2b2416; resize: vertical; user-select: text; -webkit-user-select: text; }
+.paper .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.paper button { font-family: var(--f-ui); font-size: 13px; border: 1px solid #8a7a52; background: #d9cca5; color: #2b2416; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+.paper .fine { font-family: var(--f-ui); font-size: 11px; color: #7a6d4e; margin-top: 8px; display: block; }
 .err { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); }
 </style>
 
@@ -73,20 +90,32 @@ button:focus-visible { outline: 2px solid var(--tube); outline-offset: -2px; }
       <span class="chip">偏移 <b id="sh">0</b></span>
       <button class="chip" id="bQ">畫質 <b id="q">中</b><span id="qa">（自動）</span></button>
       <span class="chip">種子 <b id="sd">—</b></span>
+      <select class="chip" id="jump" aria-label="傳送到展示點">
+        <option value="">傳送 ▾</option>
+        <option value="start">起點</option>
+        <option value="arch">拱門區</option>
+        <option value="manila">曼尼拉房間門口</option>
+        <option value="red">紅房間附近</option>
+        <option value="pit">坑洞區</option>
+        <option value="dark">斷電區</option>
+        <option value="outage">觸發停電</option>
+      </select>
     </div>
     <button class="turn" id="bL" aria-label="左轉">‹<small>左轉</small></button>
     <button class="turn" id="bR" aria-label="右轉">›<small>右轉</small></button>
-    <div class="bottom"><div class="near" id="near"></div><div class="say" id="say"></div></div>
+    <div class="bottom"><div class="near" id="near"></div><div class="cap" id="cap" aria-live="polite"></div><div class="say" id="say"></div></div>
+    <div class="sheet" id="sheet" hidden><div class="paper" role="dialog" aria-labelledby="shH"><h3 id="shH">桌上的筆記</h3><div id="shBody"></div><label for="shText">留一張紙條給下一局的自己</label><textarea id="shText" maxlength="200" rows="3"></textarea><div class="row"><button id="shSave">留下紙條</button><button id="shClose">關閉</button></div><span class="fine">紙條只存在這台裝置的瀏覽器裡，換一個種子或重新開始都還會在。</span></div></div>
   </div>
   <div class="bar">
     <div class="ctrl">
       <button id="bBack">回頭<small>鏡頭外會偏移</small></button>
       <button id="bHint" aria-pressed="false">互動點<small>顯示可點處</small></button>
       <button id="bFlash" aria-pressed="false">閃爍<small>預設關閉</small></button>
-      <button id="bSeed">換一個種子<small>重新生成</small></button>
+      <button id="bSound" aria-pressed="false">聲音<small>關閉</small></button>
+      <button id="bSeed">換種子<small>重新生成</small></button>
     </div>
   </div>
-  <div class="end" id="end"><h2>你撲進了閃爍的牆。</h2><p>技術展示到此結束。正式版會在這裡進入 Level 1。</p><button id="bAgain">重新開始</button></div>
+  <div class="end" id="end"><h2 id="endH"></h2><p id="endP"></p><button id="bAgain">重新開始</button></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -107,9 +136,28 @@ let SEED = (Math.random() * 1e9) | 0;
 function hash(...n) { let h = 2166136261 ^ SEED; for (const v of n) { h = Math.imul(h ^ (v | 0), 16777619); h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15; } return (h >>> 0) / 4294967296; }
 function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const ck = (i, j) => i + "," + j;
+const sstep = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 /* zones: fixed per seed, never shift. Near the start a few are placed on purpose so the demo shows each one. */
-function zone(i, j) {
+const M = { i: 5, j: -4 };     // the Manila Room: 2×2 cells (8×8 m) next to the arch zone. Fixed here so the demo can show it.
+const inManila = (i, j) => i >= M.i && i <= M.i + 1 && j >= M.j && j <= M.j + 1;
+const MANILA_DOORS = new Set(["v:4,-4", "v:6,-3", "h:6,-5", "h:5,-3"]);   // one wooden door in each wall
+/* red rooms: at most one per 8×8 block, single cells; one is placed on purpose a few cells south of the start */
+const coreCache = new Map();
+function blockCore(bi, bj) {
+  const k = bi + "," + bj; if (coreCache.has(k)) return coreCache.get(k);
+  let c = null;
+  if (bi === 0 && bj === 0) c = [0, 4];
+  else if (hash(bi, bj, 88) < .3) { const ci = bi * 8 + 1 + Math.floor(hash(bi, bj, 89) * 6), cj = bj * 8 + 1 + Math.floor(hash(bi, bj, 90) * 6); if (baseZone(ci, cj) === "hall" && !inManila(ci, cj) && Math.hypot(ci, cj) > 5) c = [ci, cj]; }
+  coreCache.set(k, c); return c;
+}
+const isRedCore = (i, j) => { const c = blockCore(Math.floor(i / 8), Math.floor(j / 8)); return !!c && c[0] === i && c[1] === j; };
+function redEntrance(ci, cj) { return ci === 0 && cj === 4 ? edgeKey(0, 4, 0) : edgeKey(ci, cj, Math.floor(hash(ci, cj, 91) * 4)); }   // a red room has exactly one way in
+function redCoresNear(i, j) { const out = [], bi = Math.floor(i / 8), bj = Math.floor(j / 8); for (let a = bi - 1; a <= bi + 1; a++) for (let b = bj - 1; b <= bj + 1; b++) { const c = blockCore(a, b); if (c) out.push(c); } return out; }
+function redDist(i, j) { let best = 99; for (const [a, b] of redCoresNear(i, j)) best = Math.min(best, Math.hypot(a - i, b - j)); return best; }   // in cells
+const redTint = (i, j) => (1 - sstep(.8, 3.2, redDist(i, j))) * .35;
+function zone(i, j) { return inManila(i, j) ? "manila" : isRedCore(i, j) ? "red" : baseZone(i, j); }
+function baseZone(i, j) {
   if (i >= 2 && i <= 4 && j >= -5 && j <= -2) return "arch";
   if (i <= -2 && i >= -7 && j >= -6 && j <= 1) return "pillar";
   if (i >= -1 && i <= 1 && j >= -10 && j <= -7) return "dark";
@@ -118,7 +166,7 @@ function zone(i, j) {
   const n = hash(Math.floor(i / 5), Math.floor(j / 5), 77);
   return n < .1 ? "arch" : n < .24 ? "pillar" : n < .32 ? "dark" : n < .38 ? "pit" : "hall";
 }
-const stable = (i, j) => zone(i, j) === "arch";
+const stable = (i, j) => { const z = zone(i, j); return z === "arch" || z === "manila" || z === "red"; };   // never regenerated by peripheral shift
 
 /* ================= renderer & scene ================= */
 const canvas = $("gl");
@@ -151,6 +199,31 @@ function wallpaper(base, stripe, seed, stains) {
       x.fillStyle = sg; x.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
     }
     noise(x, w, h, 22, r);
+  });
+}
+function doorTex(kind) {
+  return canvasTex(128, 256, (x, w, h) => {
+    const r = mulberry(kind === "metal" ? 81 : kind === "manila" ? 83 : 82);
+    if (kind === "metal") {
+      x.fillStyle = "#6c7366"; x.fillRect(0, 0, w, h);
+      for (let k = 0; k < 7; k++) { const cx = r() * w, cy = h * (.25 + r() * .75), rad = 10 + r() * 40, g = x.createRadialGradient(cx, cy, 0, cx, cy, rad); g.addColorStop(0, "rgba(112,62,26,.45)"); g.addColorStop(1, "rgba(112,62,26,0)"); x.fillStyle = g; x.fillRect(cx - rad, cy - rad, rad * 2, rad * 2); }
+      x.strokeStyle = "rgba(30,32,28,.55)"; x.lineWidth = 3; x.strokeRect(9, 9, w - 18, h - 18);
+      x.fillStyle = "rgba(38,40,34,.85)"; for (const [px, py] of [[15, 15], [w - 15, 15], [15, h - 15], [w - 15, h - 15]]) { x.beginPath(); x.arc(px, py, 2.6, 0, 7); x.fill(); }
+      x.fillStyle = "#bdb79c"; x.fillRect(24, 58, w - 48, 22); x.fillStyle = "rgba(50,46,34,.75)"; for (let k = 0; k < 5; k++) x.fillRect(30 + k * 14, 66, 9, 6);
+      x.fillStyle = "rgba(40,40,34,.6)"; x.fillRect(0, h - 34, w, 34);
+    } else {
+      const base = kind === "manila" ? [104, 68, 38] : [138, 108, 66];
+      x.fillStyle = `rgb(${base})`; x.fillRect(0, 0, w, h);
+      for (let k = 0; k < 40; k++) { x.strokeStyle = `rgba(50,30,12,${.06 + r() * .12})`; x.lineWidth = 1; const gx = r() * w; x.beginPath(); x.moveTo(gx, 0); x.bezierCurveTo(gx + (r() - .5) * 8, h * .3, gx + (r() - .5) * 8, h * .7, gx + (r() - .5) * 4, h); x.stroke(); }
+      x.strokeStyle = "rgba(40,24,10,.55)"; x.lineWidth = 3;
+      if (kind === "wood") {                                  // the old wooden door with a small window
+        x.fillStyle = "#14130d"; x.fillRect(28, 26, 72, 74);
+        const g = x.createLinearGradient(28, 26, 100, 100); g.addColorStop(0, "rgba(200,190,140,.22)"); g.addColorStop(1, "rgba(200,190,140,.04)"); x.fillStyle = g; x.fillRect(28, 26, 72, 74);
+        x.fillStyle = `rgb(${base})`; x.fillRect(62, 26, 4, 74); x.fillRect(28, 61, 72, 4);
+        x.strokeRect(28, 26, 72, 74); x.strokeRect(24, 130, 80, 104);
+      } else { x.strokeRect(20, 20, 88, 96); x.strokeRect(20, 134, 88, 102); }
+    }
+    noise(x, w, h, 16, r);
   });
 }
 const TEX = {
@@ -191,6 +264,38 @@ const TEX = {
       gx += 58 + (r() - .5) * 6; if (gx > w - 50) { gx = 14 + r() * 8; gy += 62; }
     }
   }),
+  red: wallpaper("#6a1712", "rgba(132,30,24,.4)", 61, 6),
+  manila: wallpaper("#b3925f", "rgba(198,170,120,.35)", 51, 2),
+  wood: canvasTex(256, 256, (x, w, h) => {        // floor planks, 0.5 m wide; seamless on all four edges
+    const r = mulberry(71);
+    for (let p = 0; p < 8; p++) {
+      const y = p * 32, tone = 92 + r() * 30;
+      x.fillStyle = `rgb(${tone + 42},${tone + 8},${tone - 32})`; x.fillRect(0, y, w, 32);
+      for (let g = 0; g < 12; g++) { x.strokeStyle = `rgba(60,34,14,${.07 + r() * .13})`; x.lineWidth = 1; const gy = y + 2 + r() * 28; x.beginPath(); x.moveTo(0, gy); x.bezierCurveTo(w * .3, gy + (r() - .5) * 6, w * .7, gy + (r() - .5) * 6, w, gy); x.stroke(); }
+      x.fillStyle = "rgba(30,18,8,.6)"; x.fillRect(0, y, w, 1.5); x.fillRect(r() * w, y, 1.5, 32);
+    }
+    noise(x, w, h, 18, r);
+  }),
+  doorWood: doorTex("wood"), doorMetal: doorTex("metal"), doorManila: doorTex("manila"),
+  paper: canvasTex(256, 180, (x, w, h) => {
+    const r = mulberry(91); x.fillStyle = "#e6dcc0"; x.fillRect(0, 0, w, h);
+    x.strokeStyle = "rgba(120,140,170,.35)"; x.lineWidth = 1; for (let y = 24; y < h; y += 14) { x.beginPath(); x.moveTo(8, y); x.lineTo(w - 8, y); x.stroke(); }
+    x.strokeStyle = "rgba(40,35,60,.75)"; x.lineWidth = 1.4;
+    for (let y = 22; y < h - 10; y += 14) { let px = 14; const end = w - 20 - r() * 60; x.beginPath(); x.moveTo(px, y); while (px < end) { px += 3 + r() * 4; x.lineTo(px, y - 2 - r() * 5); px += 2; x.lineTo(px, y); } x.stroke(); }
+    noise(x, w, h, 10, r);
+  }),
+  peel: canvasTex(256, 256, (x, w, h) => {       // a torn flap of wallpaper with deep red showing underneath
+    const r = mulberry(97); x.clearRect(0, 0, w, h);
+    const pts = []; for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2, rad = 62 + r() * 46; pts.push([w / 2 + Math.cos(a) * rad, h / 2 + Math.sin(a) * rad * 1.1]); }
+    const path = () => { x.beginPath(); pts.forEach(([px, py], k) => k ? x.lineTo(px, py) : x.moveTo(px, py)); x.closePath(); };
+    x.save(); x.translate(4, 7); x.filter = "blur(4px)"; path(); x.fillStyle = "rgba(30,20,5,.45)"; x.fill(); x.restore(); x.filter = "none";
+    path(); x.fillStyle = "#dccb7e"; x.fill();
+    x.save(); x.translate(w / 2, h / 2); x.scale(.84, .84); x.translate(-w / 2, -h / 2); path();
+    const g = x.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, 120); g.addColorStop(0, "#4e0b08"); g.addColorStop(1, "#8a1c14"); x.fillStyle = g; x.fill(); x.clip();
+    for (let k = 0; k < 14; k++) { x.strokeStyle = "rgba(36,3,2,.5)"; x.lineWidth = 1 + r() * 2.5; const sx = r() * w, sy = r() * h * .6; x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx + (r() - .5) * 6, sy + 40 + r() * 70); x.stroke(); }
+    x.restore();
+    noise(x, w, h, 18, r);
+  }),
   figure: canvasTex(128, 320, (x, w, h) => {     // soft human silhouette for the peripheral shadow
     x.clearRect(0, 0, w, h); x.filter = "blur(6px)"; x.fillStyle = "rgba(6,5,2,1)";
     x.beginPath(); x.ellipse(w / 2, 52, 20, 25, 0, 0, 7); x.fill();
@@ -199,9 +304,9 @@ const TEX = {
 };
 
 /* ================= light-grid shader ================= */
-const LM = { tex: null, origin: new THREE.Vector2(), size: 1, data: null, n: 1 };
+const LM = { tex: null, tex2: null, origin: new THREE.Vector2(), size: 1, data: null, data2: null, n: 1 };   // tex: steady lights (alpha = red-room tint), tex2: flickering tubes
 const shared = {
-  uLM: { value: null }, uLMo: { value: LM.origin }, uLMs: { value: 1 },
+  uLM: { value: null }, uLM2: { value: null }, uFlick: { value: 1 }, uPower: { value: 1 }, uLMo: { value: LM.origin }, uLMs: { value: 1 },
   uCam: { value: new THREE.Vector3() }, uCamDir: { value: new THREE.Vector3() }, uTorch: { value: 0 }, uAmb: { value: .07 },
   uSeedOff: { value: new THREE.Vector2() }
 };
@@ -219,7 +324,8 @@ const VERT = `
   }`;
 const FRAG = `
   uniform sampler2D map; uniform vec2 uRep; uniform vec3 uTint; uniform float uKind; uniform float uAlpha;
-  uniform sampler2D uLM; uniform vec2 uLMo; uniform float uLMs; uniform vec3 uCam; uniform vec3 uCamDir; uniform float uTorch; uniform float uAmb; uniform vec2 uSeedOff;
+  uniform sampler2D uLM; uniform sampler2D uLM2; uniform float uFlick; uniform float uPower;
+  uniform vec2 uLMo; uniform float uLMs; uniform vec3 uCam; uniform vec3 uCamDir; uniform float uTorch; uniform float uAmb; uniform vec2 uSeedOff;
   varying vec2 vUv; varying vec3 vW; varying vec3 vN;
   #include <fog_pars_fragment>
   float vh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -236,22 +342,26 @@ const FRAG = `
       float damp = smoothstep(.5, .8, fbm(w * .21 + uSeedOff));
       base *= mix(vec3(1.0), vec3(.64, .57, .47), damp);
       base *= .86 + .28 * fbm(w * .045 + uSeedOff * 1.7);
-    }
+    } else if (uKind > 4.5 && uKind < 5.5) base = texture2D(map, vW.xz * 0.25).rgb * uTint;   // wooden floor, world space
     vec2 sp = vW.xz + vN.xz * 0.3;                         // walls read the light just in front of them
-    vec3 lm = texture2D(uLM, (sp - uLMo) / uLMs).rgb * 2.0;
+    vec2 luv = (sp - uLMo) / uLMs;
+    vec4 lms = texture2D(uLM, luv);
+    vec3 lm = (lms.rgb + texture2D(uLM2, luv).rgb * uFlick) * 2.0 * uPower;
+    if (uKind < 2.5 || uKind > 4.5) base = mix(base, base * vec3(1.35, 0.46, 0.38), lms.a * 0.65);   // near a red room everything drifts red
+    float amb = uAmb * (0.45 + 0.55 * uPower);
     float h = clamp(vW.y / 2.75, 0.0, 1.0), k = 1.0;
     if (uKind > 0.5 && uKind < 1.5) k = mix(0.55, 1.05, h) * mix(0.62, 1.0, smoothstep(0.0, 0.4, vW.y)) * mix(1.0, 0.8, smoothstep(2.45, 2.75, vW.y));
     else if (uKind > 1.5 && uKind < 2.5) k = 0.4;
-    vec3 L = lm * k + vec3(uAmb);
+    vec3 L = lm * k + vec3(amb);
     vec3 tv = vW - uCam; float td = max(length(tv), 0.001);
     float torch = uTorch * smoothstep(0.72, 0.93, dot(tv / td, uCamDir)) * 4.0 / (1.0 + td * td * 0.22);
     L += vec3(1.0, 0.95, 0.85) * torch;
-    if (uKind > 2.5 && uKind < 3.5) { base = vec3(0.13, 0.11, 0.06); L = lm * 0.55 + vec3(uAmb) + vec3(1.0,0.95,0.85) * torch * 2.4; }   // standing water
-    if (uKind > 3.5) {                                   // pit walls: cut carpet at the rim, then dim earth fading to black with depth
+    if (uKind > 2.5 && uKind < 3.5) { base = vec3(0.13, 0.11, 0.06); L = lm * 0.55 + vec3(amb) + vec3(1.0,0.95,0.85) * torch * 2.4; }   // standing water
+    if (uKind > 3.5 && uKind < 4.5) {                    // pit walls: cut carpet at the rim, then dim earth fading to black with depth
       float dep = clamp(-vW.y / 1.4, 0.0, 1.0);
       vec3 rim = vW.y > -0.035 ? texture2D(map, vW.xz * 0.85).rgb * 0.75 : vec3(0.34, 0.28, 0.18);
       base = rim * (1.0 - smoothstep(0.0, 1.0, pow(dep, 0.55)));
-      L = lm * mix(1.0, 0.2, dep) + vec3(uAmb) * (1.0 - dep) + vec3(1.0, 0.95, 0.85) * torch * (1.0 - dep);
+      L = lm * mix(1.0, 0.2, dep) + vec3(amb) * (1.0 - dep) + vec3(1.0, 0.95, 0.85) * torch * (1.0 - dep);
     }
     gl_FragColor = vec4(base * L, uAlpha > 0.5 ? tx.a : 1.0);
     #include <fog_fragment>
@@ -275,6 +385,18 @@ const MAT = {
   pit: (() => { const m = litMat(TEX.carpet, [1, 1], 4); m.side = THREE.BackSide; return m; })(),
   tally: litMat(TEX.tally, [1, 1], 1, [1, 1, 1], true),
   panel: new THREE.MeshBasicMaterial({ map: TEX.panel }),
+  fpanel: new THREE.MeshBasicMaterial({ map: TEX.panel }),
+  red: litMat(TEX.red, [1, 1], 1),
+  mwall: litMat(TEX.manila, [1, 1], 1),
+  frame: litMat(TEX.walls[0], [1 / S, 1 / H], 1),
+  mframe: litMat(TEX.manila, [1 / S, 1 / H], 1),
+  wood: litMat(TEX.wood, [1, 1], 5),
+  furn: litMat(TEX.wood, [1, 1], 6, [.85, .76, .66]),
+  furnDark: litMat(TEX.doorManila, [1, 1], 6),
+  door_wood: litMat(TEX.doorWood, [1, 1], 6), door_metal: litMat(TEX.doorMetal, [1, 1], 6), door_manila: litMat(TEX.doorManila, [1, 1], 6),
+  knob: new THREE.MeshBasicMaterial({ color: 0x2c2719 }),
+  paper: litMat(TEX.paper, [1, 1], 6),
+  peel: litMat(TEX.peel, [1, 1], 1, [1, 1, 1], true),
   dead: new THREE.MeshBasicMaterial({ color: 0x3b382b }),
   hole: new THREE.MeshBasicMaterial({ color: 0x050402, side: THREE.BackSide }),
   black: new THREE.MeshBasicMaterial({ color: 0x050402 }),
@@ -287,7 +409,7 @@ const GEO = {
   floor: new THREE.PlaneGeometry(S, S).rotateX(-Math.PI / 2),
   tile: new THREE.PlaneGeometry(.5, .5).rotateX(-Math.PI / 2),
   ceil: new THREE.PlaneGeometry(S, S).rotateX(Math.PI / 2).translate(0, H, 0),
-  wall: new THREE.BoxGeometry(S + .14, H + .02, .14).translate(0, H / 2 - .01, 0),
+  wall: new THREE.BoxGeometry(S + .13, H + .02, .14).translate(0, H / 2 - .01, 0),   // ends stop 5 mm inside the crossing wall: a flush end face z-fights at T-junctions
   panel: new THREE.PlaneGeometry(.62, 1.24).rotateX(Math.PI / 2).translate(0, H - .01, 0),
   pillar: new THREE.BoxGeometry(.7, H + .02, .7).translate(0, H / 2 - .01, 0),
   pit: new THREE.BoxGeometry(1, 3.2, 1).translate(0, -1.6, 0),
@@ -298,25 +420,44 @@ const GEO = {
   figure: new THREE.PlaneGeometry(.62, 1.75).translate(0, .875, 0),
   arch: (() => {
     // the bottom edges sit 2 cm below the floor so no face of the arch is coplanar with the carpet (that caused z-fighting)
-    const y0 = -.02, s = new THREE.Shape(); s.moveTo(-S / 2 - .07, y0); s.lineTo(S / 2 + .07, y0); s.lineTo(S / 2 + .07, H); s.lineTo(-S / 2 - .07, H); s.closePath();
+    const y0 = -.02, s = new THREE.Shape(); s.moveTo(-S / 2 - .065, y0); s.lineTo(S / 2 + .065, y0); s.lineTo(S / 2 + .065, H); s.lineTo(-S / 2 - .065, H); s.closePath();
     const w = 1.1, top = 1.75; const p = new THREE.Path(); p.moveTo(-w, y0); p.lineTo(-w, top); p.absarc(0, top, w, Math.PI, 0, true); p.lineTo(w, y0); p.closePath(); s.holes.push(p);
     return new THREE.ExtrudeGeometry(s, { depth: .3, bevelEnabled: false }).translate(0, 0, -.15);
   })(),
   bottle: new THREE.CylinderGeometry(.075, .075, .3, 16).translate(0, .15, 0),
   cap: new THREE.CylinderGeometry(.06, .06, .05, 12).translate(0, .325, 0),
   proxy: new THREE.SphereGeometry(.42, 8, 6).translate(0, .2, 0),
-  box: new THREE.BoxGeometry(1, 1, 1)
+  box: new THREE.BoxGeometry(1, 1, 1),
+  doorframe: (() => {      // a wall with a door-sized hole; like the arch, its bottom edges sit 2 cm under the floor
+    const y0 = -.02, s = new THREE.Shape(); s.moveTo(-S / 2 - .065, y0); s.lineTo(S / 2 + .065, y0); s.lineTo(S / 2 + .065, H + .01); s.lineTo(-S / 2 - .065, H + .01); s.closePath();
+    const p = new THREE.Path(); p.moveTo(-.475, y0); p.lineTo(-.475, 2.1); p.lineTo(.475, 2.1); p.lineTo(.475, y0); p.closePath(); s.holes.push(p);
+    return new THREE.ExtrudeGeometry(s, { depth: .14, bevelEnabled: false }).translate(0, 0, -.07);
+  })(),
+  leaf: new THREE.BoxGeometry(.93, 2.08, .045).translate(.465, 1.04, 0),     // hinge at the local origin
+  knob: new THREE.BoxGeometry(.05, .05, .15),
+  peel: new THREE.PlaneGeometry(.9, .9),
+  tableTop: new THREE.CylinderGeometry(.78, .78, .05, 8).translate(0, .76, 0),
+  cabinet: new THREE.CylinderGeometry(.52, .58, .72, 8).translate(0, .36, 0),
+  seat: new THREE.BoxGeometry(.44, .05, .44).translate(0, .46, 0),
+  chairBack: new THREE.BoxGeometry(.44, .5, .05).translate(0, .74, -.2),
+  leg: new THREE.BoxGeometry(.04, .46, .04).translate(0, .23, 0),
+  paper: new THREE.PlaneGeometry(.3, .21).rotateX(-Math.PI / 2).translate(0, .79, 0)
 };
 
 /* ================= world model (data only) ================= */
 const cells = new Map();     // key -> { i, j, ver, panel: null|{tint,int}|"dead", hole: bool, pits: [[sx,sz]...], items: [] }
-const edges = new Map();     // "v:i,j" | "h:i,j" -> type: open | wall | arch | flicker
+const edges = new Map();     // "v:i,j" | "h:i,j" -> type: open | wall | arch | flicker | mwall (Manila Room) | door-wood | door-metal | door-manila (+ "-open")
 const picked = new Set();
 const FIXED = new Set();      // hand-placed edges near the start that dead-end fixing and shifts must leave alone
-let cur = { i: 0, j: 0, d: 0 }, moves = 0, shifted = 0, flickerKey = null, busy = false, hints = false, flash = false, figure = null;
+const doorAng = new Map();    // edge key -> swing angle of an opened door
+let cur = { i: 0, j: 0, d: 0 }, moves = 0, shifted = 0, flickerKey = null, busy = false, hints = false, flash = false, figure = null, modal = false;
+let power = 1, powerAnim = null, outageLeft = 0, lastOutage = 0, redStage = 0, cabinetTaken = false;
 function edgeKey(i, j, d) { return d === 1 ? `v:${i},${j}` : d === 3 ? `v:${i - 1},${j}` : d === 2 ? `h:${i},${j}` : `h:${i},${j - 1}`; }
 function edgeCells(k) { const [t, rest] = k.split(":"); const [i, j] = rest.split(",").map(Number); return t === "v" ? [[i, j], [i + 1, j]] : [[i, j], [i, j + 1]]; }
-const passable = t => t === "open" || t === "arch";
+const isOpenDoor = t => !!t && t.endsWith("-open");
+const passable = t => t === "open" || t === "arch" || isOpenDoor(t);
+const traversable = t => passable(t) || t === "door-wood" || t === "door-manila";   // closed but openable counts for dead-end fixing
+const solid = t => !!t && !passable(t);
 const edgeAt = (i, j, d) => edges.get(edgeKey(i, j, d));
 
 function rollEdge(k) {
@@ -324,17 +465,22 @@ function rollEdge(k) {
   const za = zone(a, b), zb = zone(c, d);
   const ver = (cells.get(ck(a, b))?.ver || 0) * 31 + (cells.get(ck(c, d))?.ver || 0);
   const r = hash(...k.slice(2).split(",").map(Number), k[0] === "v" ? 1 : 2, ver);
+  if (za === "manila" || zb === "manila") return za === zb ? "open" : MANILA_DOORS.has(k) ? "door-manila" : "mwall";
+  if (za === "red" || zb === "red") { const [ci, cj] = za === "red" ? [a, b] : [c, d]; return k === redEntrance(ci, cj) ? "open" : "wall"; }
   if (za === "pillar" && zb === "pillar") return "open";
   if (za === "arch" || zb === "arch") return r < .62 ? "arch" : "wall";
   if (za === "pillar" || zb === "pillar" || za === "pit" || zb === "pit") return r < .7 ? "open" : "wall";
-  return r < .56 ? "open" : "wall";
+  return r < .56 ? "open" : r < .6 ? "door-wood" : r < .615 ? "door-metal" : "wall";
 }
 function rollCell(i, j) {
   const old = cells.get(ck(i, j)), ver = old?.ver || 0, z = zone(i, j);
   const r = hash(i, j, ver, 9);
   const c = { i, j, ver, panel: null, hole: false, pits: [], items: [] };
+  if (z === "manila") { c.panel = { int: .78, warm: 0 }; cells.set(ck(i, j), c); return; }
+  if (z === "red") { c.panel = { int: 1.35, warm: 0, red: true }; cells.set(ck(i, j), c); return; }
   if (z !== "dark" && r < .84) c.panel = r < .76 ? { int: .85 + hash(i, j, ver, 11) * .3, warm: hash(i, j, ver, 12) } : "dead";
   if (z === "dark" && r < .4) c.panel = "dead";
+  if (c.panel && c.panel !== "dead" && (z === "hall" || z === "pillar") && hash(i, j, ver, 15) < .05) c.panel.flick = true;   // a tube with a dying ballast
   if (z === "hall" && !(i === 0 && j === 0) && hash(i, j, ver, 13) < .1) c.hole = true;
   if (z === "pit") for (const px of [-1, 1]) for (const pz of [-1, 1]) if (hash(i, j, px, pz, 14) < .85) c.pits.push([px, pz]);   // 1 m holes on a 2 m grid, 0.5 m clear of every wall
   if (!(i === 0 && j === 0) && z !== "pit" && hash(i, j, ver, 21) < .1 && !picked.has(ck(i, j) + ":" + ver)) {
@@ -345,12 +491,13 @@ function rollCell(i, j) {
   cells.set(ck(i, j), c);
 }
 function fixDeadEnd(i, j, protect) {
+  if (zone(i, j) === "red") return;
   const ks = [0, 1, 2, 3].map(d => edgeKey(i, j, d));
-  let open = ks.filter(k => passable(edges.get(k))).length, n = 0;
+  let open = ks.filter(k => traversable(edges.get(k))).length, n = 0;
   while (open < 2 && n++ < 6) {
     const k = ks[Math.floor(hash(i, j, n, 31) * 4)];
-    if ((protect && protect(k)) || FIXED.has(k)) continue;
-    if (!passable(edges.get(k)) && edges.get(k) !== "flicker") { edges.set(k, zone(i, j) === "arch" ? "arch" : "open"); open++; }
+    if ((protect && protect(k)) || FIXED.has(k) || edgeCells(k).some(([a, b]) => { const z = zone(a, b); return z === "manila" || z === "red"; })) continue;
+    if (!traversable(edges.get(k)) && edges.get(k) !== "flicker") { edges.set(k, zone(i, j) === "arch" ? "arch" : "open"); open++; }
   }
 }
 function ensureAround(ci, cj) {
@@ -387,7 +534,7 @@ function shiftUnseen() {
 }
 
 /* ================= light grid ================= */
-function blockFactor(t) { return t === "open" ? 1 : t === "arch" ? .55 : 0; }
+function blockFactor(t) { return t === "open" ? 1 : t === "arch" ? .55 : isOpenDoor(t) ? .6 : 0; }
 function lineOfSight(x0, z0, x1, z1) {
   let ci = Math.round(x0 / S), cj = Math.round(z0 / S), f = 1;
   const len = Math.hypot(x1 - x0, z1 - z0), steps = Math.max(1, Math.ceil(len / .45));
@@ -407,37 +554,42 @@ function lineOfSight(x0, z0, x1, z1) {
 function bakeLight(ci, cj) {
   const res = TIERS[tier].res, span = (2 * R + 1) * S, n = Math.round(span / res);
   const ox = (ci - R) * S - S / 2, oz = (cj - R) * S - S / 2;
-  if (!LM.tex || LM.n !== n) { LM.data = new Uint8Array(n * n * 4); LM.tex = new THREE.DataTexture(LM.data, n, n, THREE.RGBAFormat); LM.tex.magFilter = LM.tex.minFilter = THREE.LinearFilter; LM.n = n; }
-  LM.origin.set(ox, oz); LM.size = span; shared.uLM.value = LM.tex; shared.uLMs.value = span;
+  const mk = d => { const t = new THREE.DataTexture(d, n, n, THREE.RGBAFormat); t.magFilter = t.minFilter = THREE.LinearFilter; return t; };
+  if (!LM.tex || LM.n !== n) { LM.data = new Uint8Array(n * n * 4); LM.data2 = new Uint8Array(n * n * 4); LM.tex = mk(LM.data); LM.tex2 = mk(LM.data2); LM.n = n; }
+  LM.origin.set(ox, oz); LM.size = span; shared.uLM.value = LM.tex; shared.uLM2.value = LM.tex2; shared.uLMs.value = span;
   const lights = new Map();
   for (const c of cells.values()) if (c.panel && c.panel !== "dead") {
-    const w = c.panel.warm, tint = w < .33 ? [1, .93, .76] : w < .66 ? [1, .97, .86] : [.9, 1, .95];
-    lights.set(ck(c.i, c.j), { x: c.i * S, z: c.j * S, r: tint[0] * c.panel.int, g: tint[1] * c.panel.int, b: tint[2] * c.panel.int });
+    const w = c.panel.warm, tint = c.panel.red ? [1.3, .3, .24] : w < .33 ? [1, .93, .76] : w < .66 ? [1, .97, .86] : [.9, 1, .95];
+    lights.set(ck(c.i, c.j), { x: c.i * S, z: c.j * S, r: tint[0] * c.panel.int, g: tint[1] * c.panel.int, b: tint[2] * c.panel.int, flick: !!c.panel.flick });
   }
-  const D = LM.data;
+  const cores = redCoresNear(ci, cj).map(([a, b]) => [a * S, b * S]);
+  const D = LM.data, D2 = LM.data2;
   for (let tz = 0; tz < n; tz++) for (let tx = 0; tx < n; tx++) {
     const x = ox + (tx + .5) * res, z = oz + (tz + .5) * res, ti = Math.round(x / S), tj = Math.round(z / S);
-    let r = 0, g = 0, b = 0;
+    let r = 0, g = 0, b = 0, fr = 0, fg = 0, fb = 0;
     for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++) {
       const L = lights.get(ck(ti + di, tj + dj)); if (!L) continue;
       const d2 = (L.x - x) ** 2 + (L.z - z) ** 2; if (d2 > 81) continue;
       const vis = (di || dj) ? lineOfSight(x, z, L.x, L.z) : 1; if (!vis) continue;
       const a = vis * 1.2 / (1 + d2 * .22);
-      r += L.r * a; g += L.g * a; b += L.b * a;
+      if (L.flick) { fr += L.r * a; fg += L.g * a; fb += L.b * a; } else { r += L.r * a; g += L.g * a; b += L.b * a; }
     }
+    let rd = 99; for (const [cx, cz] of cores) rd = Math.min(rd, Math.hypot(cx - x, cz - z));
+    const red = Math.pow(Math.max(0, Math.min(1, 1 - (rd - 2) / 9)), 1.6);   // red-room tint: full inside, gone ~11 m away
     const c = cells.get(ck(ti, tj)); let ao = 1;
     if (c) {                                                      // darken near walls and pillars (cheap ambient occlusion)
       const lx = x - ti * S, lz = z - tj * S; let dmin = 9;
-      const wall = d => { const t = edges.get(edgeKey(ti, tj, d)); return t === "wall" || t === "flicker"; };
+      const wall = d => solid(edges.get(edgeKey(ti, tj, d)));
       if (wall(0)) dmin = Math.min(dmin, lz + S / 2); if (wall(2)) dmin = Math.min(dmin, S / 2 - lz);
       if (wall(3)) dmin = Math.min(dmin, lx + S / 2); if (wall(1)) dmin = Math.min(dmin, S / 2 - lx);
       if (zone(ti, tj) === "pillar") dmin = Math.min(dmin, Math.hypot(lx + S / 2, lz + S / 2) - .35);
       ao = .58 + .42 * Math.min(1, Math.max(0, (dmin - .02) / .85));
     }
     const o = (tz * n + tx) * 4;
-    D[o] = Math.min(255, r * ao * 127.5); D[o + 1] = Math.min(255, g * ao * 127.5); D[o + 2] = Math.min(255, b * ao * 127.5); D[o + 3] = 255;
+    D[o] = Math.min(255, r * ao * 127.5); D[o + 1] = Math.min(255, g * ao * 127.5); D[o + 2] = Math.min(255, b * ao * 127.5); D[o + 3] = red * 255;
+    D2[o] = Math.min(255, fr * ao * 127.5); D2[o + 1] = Math.min(255, fg * ao * 127.5); D2[o + 2] = Math.min(255, fb * ao * 127.5); D2[o + 3] = 255;
   }
-  LM.tex.needsUpdate = true;
+  LM.tex.needsUpdate = true; LM.tex2.needsUpdate = true;
 }
 
 /* ================= build instanced meshes from the world model ================= */
@@ -455,7 +607,7 @@ function inst(geo, mat, list, colorFn) {
 function rebuild() {
   for (const m of built) { scene.remove(m); if (m.isInstancedMesh) m.dispose(); }
   built = []; blockers = [];
-  const L = { floor: [], tile: [], ceil: [], water: [], pit: [], hole: [], panel: [], dead: [], pillar: [], walls: [[], [], []], yel: [[], [], []], pale: [], arch: [] };
+  const L = { floor: [], tile: [], ceil: [], water: [], pit: [], hole: [], panel: [], fpanel: [], dead: [], pillar: [], walls: [[], [], []], yel: [[], [], []], pale: [], arch: [], wood: [], red: [], mwall: [] };
   for (const c of cells.values()) {
     if (Math.abs(c.i - cur.i) > R || Math.abs(c.j - cur.j) > R) continue;
     const x = c.i * S, z = c.j * S, zn = zone(c.i, c.j);
@@ -465,11 +617,11 @@ function rebuild() {
         if (!c.pits.some(([px, pz]) => Math.abs(lx - px) < .5 && Math.abs(lz - pz) < .5)) L.tile.push([x + lx, 0, z + lz]);
       }
       for (const [px, pz] of c.pits) L.pit.push([x + px, 0, z + pz]);
-    } else L.floor.push([x, 0, z]);
+    } else (zn === "manila" ? L.wood : L.floor).push([x, 0, z]);
     L.ceil.push([x, 0, z]);
     if (zn === "dark") L.water.push([x, 0, z]);
     if (c.hole) L.hole.push([x + 1, H - .004, z + 1]);
-    if (c.panel) (c.panel === "dead" ? L.dead : L.panel).push([x, 0, z, hash(c.i, c.j, c.ver, 10) < .5 ? Math.PI / 2 : 0, c.panel]);
+    if (c.panel) (c.panel === "dead" ? L.dead : c.panel.flick ? L.fpanel : L.panel).push([x, 0, z, hash(c.i, c.j, c.ver, 10) < .5 ? Math.PI / 2 : 0, c.panel]);
     if (zn === "pillar") L.pillar.push([x - S / 2, 0, z - S / 2]);
   }
   for (const [k, t] of edges) {
@@ -477,33 +629,44 @@ function rebuild() {
     if (Math.abs(a - cur.i) > R || Math.abs(b - cur.j) > R) continue;
     const vert = k[0] === "v", x = vert ? (a + .5) * S : a * S, z = vert ? b * S : (b + .5) * S, rot = vert ? Math.PI / 2 : 0;
     if (t === "wall") {
-      if (stable(a, b) || stable(c2, d2)) L.pale.push([x, 0, z, rot]);
+      if (zone(a, b) === "red" || zone(c2, d2) === "red") L.red.push([x, 0, z, rot]);
+      else if (stable(a, b) || stable(c2, d2)) L.pale.push([x, 0, z, rot]);
       else { const v = Math.floor(hash(a, b, vert ? 3 : 4) * 3); (hash(a, b, vert ? 5 : 6, 311) < .06 ? L.yel : L.walls)[v].push([x, 0, z, rot]); }
     } else if (t === "arch") L.arch.push([x, 0, z, rot]);
+    else if (t === "mwall") L.mwall.push([x, 0, z, rot]);
+    else if (t.startsWith("door")) buildDoor(k, t, x, z, rot);
     else if (t === "flicker") { const m = new THREE.Mesh(GEO.wall, MAT.flicker); m.position.set(x, 0, z); m.rotation.y = rot; m.userData.flick = true; scene.add(m); built.push(m); }
   }
-  inst(GEO.floor, MAT.floor, L.floor); inst(GEO.tile, MAT.tile, L.tile); inst(GEO.ceil, MAT.ceil, L.ceil); inst(GEO.water, MAT.water, L.water);
+  inst(GEO.floor, MAT.wood, L.wood); inst(GEO.floor, MAT.floor, L.floor); inst(GEO.tile, MAT.tile, L.tile); inst(GEO.ceil, MAT.ceil, L.ceil); inst(GEO.water, MAT.water, L.water);
   inst(GEO.pit, MAT.pit, L.pit); inst(GEO.hole, MAT.black, L.hole);
-  const pm = inst(GEO.panel, MAT.panel, L.panel, t => { const w = t[4].warm, s = .82 + t[4].int * .18; return w < .33 ? new THREE.Color(s, s * .95, s * .8) : w < .66 ? new THREE.Color(s, s * .98, s * .9) : new THREE.Color(s * .92, s, s * .96); });
+  const panelColor = t => { const w = t[4].warm, s = .82 + t[4].int * .18; return t[4].red ? new THREE.Color(1, .3, .24) : w < .33 ? new THREE.Color(s, s * .95, s * .8) : w < .66 ? new THREE.Color(s, s * .98, s * .9) : new THREE.Color(s * .92, s, s * .96); };
+  inst(GEO.panel, MAT.panel, L.panel, panelColor); inst(GEO.panel, MAT.fpanel, L.fpanel, panelColor);
   inst(GEO.panel, MAT.dead, L.dead); const pillarMesh = inst(GEO.pillar, MAT.pillar, L.pillar); if (pillarMesh) blockers.push(pillarMesh);
   L.walls.forEach((l, v) => { const m = inst(GEO.wall, MAT.walls[v], l); if (m) blockers.push(m); });
   L.yel.forEach((l, v) => { const m = inst(GEO.wall, MAT.yellower[v], l); if (m) blockers.push(m); });
-  for (const [l, mat, g] of [[L.pale, MAT.pale, GEO.wall], [L.arch, MAT.arch, GEO.arch]]) { const m = inst(g, mat, l); if (m) blockers.push(m); }   // arch holes let rays through
-  // decals: tally marks on a few walls (one guaranteed near the start)
+  for (const [l, mat, g] of [[L.pale, MAT.pale, GEO.wall], [L.arch, MAT.arch, GEO.arch], [L.red, MAT.red, GEO.wall], [L.mwall, MAT.mwall, GEO.wall]]) { const m = inst(g, mat, l); if (m) blockers.push(m); }   // arch holes let rays through
+  // decals: tally marks on a few walls (one guaranteed near the start), peeling wallpaper near red rooms
+  const decal = (geo, mat, x, z, vert, side, y, hot) => {
+    const m = new THREE.Mesh(geo, mat);
+    if (vert) { m.position.set(x + side * .076, y, z); m.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2; }
+    else { m.position.set(x, y, z + side * .076); m.rotation.y = side > 0 ? 0 : Math.PI; }
+    m.userData.hot = hot; scene.add(m); built.push(m);
+  };
   for (const [k, t] of edges) {
     if (t !== "wall") continue;
     const [[a, b], [c2, d2]] = edgeCells(k);
     if (Math.abs(a - cur.i) > R || Math.abs(b - cur.j) > R || stable(a, b) || stable(c2, d2)) continue;
+    const vert = k[0] === "v", x = vert ? (a + .5) * S : a * S, z = vert ? b * S : (b + .5) * S;
+    const ra = redDist(a, b), rb = redDist(c2, d2);
+    if (Math.min(ra, rb) <= 2.3 && hash(a, b, vert ? 41 : 42, 7) < .55) {
+      decal(GEO.peel, MAT.peel, x, z, vert, hash(a, b, vert ? 43 : 44) < .5 ? 1 : -1, .9 + hash(a, b, 45) * .7, { kind: "peel", label: "剝落的壁紙", text: "壁紙剝落了一角，翻起來的邊緣摸起來是濕的。底下不是牆，是一層深紅色的東西。" });
+      continue;
+    }
     const forced = k === "v:-1,-1";
-    if (!forced && hash(a, b, k[0] === "v" ? 7 : 8, 99) > .035) continue;
-    const vert = k[0] === "v", side = forced ? 1 : (hash(a, b, 100) < .5 ? 1 : -1);
-    const m = new THREE.Mesh(GEO.tally, MAT.tally);
-    const x = vert ? (a + .5) * S : a * S, z = vert ? b * S : (b + .5) * S;
-    if (vert) { m.position.set(x + side * .076, 1.32, z); m.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2; }
-    else { m.position.set(x, 1.32, z + side * .076); m.rotation.y = side > 0 ? 0 : Math.PI; }
-    m.userData.hot = { kind: "tally", label: "牆上的記號", text: "牆上刻著一組一組的記號，像在數日子。刻痕很深，像是用指甲刻的。這個筆跡……很眼熟。" };
-    scene.add(m); built.push(m);
+    if (!forced && hash(a, b, vert ? 7 : 8, 99) > .035) continue;
+    decal(GEO.tally, MAT.tally, x, z, vert, forced ? 1 : (hash(a, b, 100) < .5 ? 1 : -1), 1.32, { kind: "tally", label: "牆上的記號", text: "牆上刻著一組一組的記號，像在數日子。刻痕很深，像是用指甲刻的。這個筆跡……很眼熟。" });
   }
+  if (Math.abs(M.i + .5 - cur.i) <= R + .5 && Math.abs(M.j + .5 - cur.j) <= R + .5) buildManila();
   // items, holes, pits as clickable objects
   for (const c of cells.values()) {
     if (Math.abs(c.i - cur.i) > R || Math.abs(c.j - cur.j) > R) continue;
@@ -524,6 +687,40 @@ function rebuild() {
   rebuildExits();
 }
 
+function swingAway(x, z, rot) {        // the swing angle that opens a door away from the player's cell
+  const px = cur.i * S - x, pz = cur.j * S - z;
+  for (const a of [1.65, -1.65]) if (Math.cos(rot + a) * px - Math.sin(rot + a) * pz < 0) return a;
+  return 1.65;
+}
+function buildDoor(k, t, x, z, rot) {
+  const kind = t.split("-")[1], open = isOpenDoor(t);
+  const frame = new THREE.Mesh(GEO.doorframe, kind === "manila" ? MAT.mframe : MAT.frame); frame.position.set(x, 0, z); frame.rotation.y = rot;
+  scene.add(frame); built.push(frame); blockers.push(frame);
+  const g = new THREE.Group(); g.position.set(x - Math.cos(rot) * .475, 0, z + Math.sin(rot) * .475); g.rotation.y = rot;
+  const leaf = new THREE.Mesh(GEO.leaf, MAT["door_" + kind]), kn = new THREE.Mesh(GEO.knob, MAT.knob); kn.position.set(.82, 1, 0); g.add(leaf, kn);
+  if (open) g.rotation.y = rot + (doorAng.get(k) ?? swingAway(x, z, rot));
+  else {
+    const hot = { kind: "door", key: k, type: t, door: kind, group: g, rot, label: kind === "metal" ? "金屬門" : "木門", lp: new THREE.Vector3(x, 1.25, z) };
+    leaf.userData.hot = hot; leaf.userData.tag = true; kn.userData.hot = hot; blockers.push(leaf);
+  }
+  scene.add(g); built.push(g);
+}
+function buildManila() {             // octagonal table with a cabinet under it, two chairs, notes on the table
+  const g = new THREE.Group(); g.position.set((M.i + .5) * S, 0, (M.j + .5) * S);
+  const top = new THREE.Mesh(GEO.tableTop, MAT.furn), cab = new THREE.Mesh(GEO.cabinet, MAT.furnDark), paper = new THREE.Mesh(GEO.paper, MAT.paper);
+  paper.rotation.y = .35;
+  const notes = { kind: "notes", label: "桌上的筆記", ly: .25 }, cabinet = { kind: "cabinet", label: "桌下的櫃子", ly: .1 };
+  top.userData.hot = notes; paper.userData.hot = notes; paper.userData.tag = true; cab.userData.hot = cabinet; cab.userData.tag = true;
+  g.add(top, cab, paper);
+  for (const [cx, cz, ry] of [[-1.2, .25, Math.PI / 2], [1.15, -.3, -Math.PI / 2]]) {
+    const ch = new THREE.Group(); ch.position.set(cx, 0, cz); ch.rotation.y = ry;
+    ch.add(new THREE.Mesh(GEO.seat, MAT.furn), new THREE.Mesh(GEO.chairBack, MAT.furn));
+    for (const [lx, lz] of [[-.19, -.19], [.19, -.19], [-.19, .19], [.19, .19]]) { const l = new THREE.Mesh(GEO.leg, MAT.furn); l.position.set(lx, 0, lz); ch.add(l); }
+    g.add(ch);
+  }
+  scene.add(g); built.push(g);
+}
+
 /* ================= stations & exits ================= */
 function stationPos(i, j, d) { return new THREE.Vector3(i * S - DV[d][0] * BACK, EYE, j * S - DV[d][1] * BACK); }
 const yawOf = d => -d * Math.PI / 2;
@@ -535,7 +732,7 @@ function rebuildExits() {
     const t = edgeAt(cur.i, cur.j, d); if (!passable(t)) continue;
     const pl = new THREE.Mesh(GEO.exit, MAT.exit);
     pl.position.set(cur.i * S + DV[d][0] * S / 2, 0, cur.j * S + DV[d][1] * S / 2); pl.rotation.y = yawOf(d);
-    pl.userData.exit = { d, name: name + (t === "arch" ? "（拱門）" : "") };
+    pl.userData.exit = { d, name: name + (t === "arch" ? "（拱門）" : isOpenDoor(t) ? "（門）" : "") };
     scene.add(pl); exitMeshes.push(pl); pickables.push(pl);
   }
   for (const m of built) m.traverse(o => { if (o.userData.hot || o.userData.flick) pickables.push(o); });
@@ -544,8 +741,10 @@ function rebuildExits() {
 function itemsHere() { const c = cells.get(ck(cur.i, cur.j)); return c ? c.items : []; }
 function updateNear() {
   const items = itemsHere();
-  $("near").innerHTML = items.map((it, k) => `<button data-near="${k}"><span>腳邊</span>${it.name}<b>撿起</b></button>`).join("");
-  $("near").querySelectorAll("button").forEach(b => b.onclick = () => { if (!busy) pickUp(items[+b.dataset.near]); });
+  const room = zone(cur.i, cur.j) === "manila";   // the table sits diagonally from every station, so offer it here too (phones in portrait cannot see it)
+  $("near").innerHTML = items.map((it, k) => `<button data-near="${k}"><span>腳邊</span>${it.name}<b>撿起</b></button>`).join("") +
+    (room ? `<button data-room="notes"><span>房間裡</span>桌上的筆記<b>翻看</b></button><button data-room="cabinet"><span>房間裡</span>桌下的櫃子<b>打開</b></button>` : "");
+  $("near").querySelectorAll("button").forEach(b => b.onclick = () => { if (busy || modal) return; if (b.dataset.room) return b.dataset.room === "notes" ? openNotes() : openCabinet(); pickUp(items[+b.dataset.near]); });
 }
 function pickUp(it) {
   const c = cells.get(ck(it.i, it.j)); if (!c) return;
@@ -557,10 +756,10 @@ function pickUp(it) {
 /* ================= post-processing (old-photo look) ================= */
 const rt = new THREE.WebGLRenderTarget(2, 2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
 const post = new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uQ: { value: 1 } },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uQ: { value: 1 }, uRed: { value: 0 } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uQ; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uQ; uniform float uRed; varying vec2 vUv;
     float rnd(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime) * 43758.5453); }
     void main(){
       vec2 uv = vUv, c = uv - .5, px = 1.0 / uRes; float r2 = dot(c,c);
@@ -573,6 +772,7 @@ const post = new THREE.ShaderMaterial({
       col = 1. - exp(-col * 1.35);
       col *= vec3(1.06, 1.0, .80);
       float l = dot(col, vec3(.299,.587,.114)); col = mix(vec3(l), col, .82);
+      col = mix(col, col * vec3(1.2, .76, .7), uRed);
       col *= 1. - r2 * 1.25;
       col += (rnd(uv * uRes) - .5) * (uQ > 1.5 ? .07 : .09);
       gl_FragColor = vec4(col, 1.);
@@ -591,14 +791,30 @@ function resize() {
 }
 
 /* ================= render ================= */
-let flickT = 0, flickV = 1, torchTarget = 0;
+let flickT = 0, flickV = 1, torchTarget = 0, tubeT = 0, tubeV = 1;
 const camDir = new THREE.Vector3();
+function tubeAt(t) {                 // brightness of the dying tubes. Flashing off: slow, smooth dimming only — never a strobe
+  if (reduceMotion) return .85;
+  if (flash) { if (t - tubeT > 55) { tubeT = t; tubeV = Math.random() < .22 ? .08 + Math.random() * .3 : .9 + Math.random() * .1; } return tubeV; }
+  return .5 + .5 * sstep(-1.2, .6, Math.sin(t / 830) + Math.sin(t / 1970 + 1.3) + Math.sin(t / 3100 + 4.1));
+}
+function powerAt(t) {                // the outage curve: stutters when flashing is on, a plain fade when it is off
+  if (!powerAnim) return power;
+  const k = (t - powerAnim.t0) / powerAnim.dur;
+  if (k >= 1) { power = powerAnim.to; powerAnim = null; computeSteady(); return power; }
+  if (flash && !reduceMotion) { const seq = powerAnim.to ? [0, .5, 0, .7, .15, .9, .6, 1] : [1, .2, 1, .1, .7, .05, 0, 0]; return seq[Math.floor(k * seq.length)]; }
+  return powerAnim.from + (powerAnim.to - powerAnim.from) * ease(k);
+}
 function render(t = performance.now()) {
   if (flickerKey) {
     if (flash && !reduceMotion) { if (t - flickT > 70) { flickT = t; flickV = Math.random() < .3 ? .25 + Math.random() * .4 : 1; } }
     else flickV = reduceMotion ? .9 : .78 + .22 * Math.sin(t / 700);
     MAT.flicker.color.setRGB(flickV, flickV * .97, flickV * .82);
   }
+  const pw = powerAt(t), fv = tubeAt(t);
+  shared.uPower.value = pw; shared.uFlick.value = fv;
+  MAT.panel.color.setScalar(.22 + .78 * pw); MAT.fpanel.color.setScalar(.22 + .78 * pw * fv);
+  if (AU.on && AU.lv) AU.n.crk.gain.setTargetAtTime(AU.lv.fl ? (1 - fv) * .22 * pw : 0, AU.ctx.currentTime, .03);
   shared.uTorch.value += (torchTarget - shared.uTorch.value) * .2;
   camera.getWorldDirection(camDir); shared.uCam.value.copy(camera.position); shared.uCamDir.value.copy(camDir);
   post.uniforms.uTime.value = (t / 1000) % 100;
@@ -606,10 +822,22 @@ function render(t = performance.now()) {
   renderer.setRenderTarget(null); post.uniforms.tDiffuse.value = rt.texture; renderer.render(postScene, postCam);
   if (hints) placeLabels(); else $("labels").innerHTML = "";
 }
-let loopOn = false;
-function loop(t) { if (!loopOn) return; render(t); requestAnimationFrame(loop); }
+let loopOn = false, steady = false, doorAnim = false, lastFrame = 0;
+function loop(t) {
+  if (!loopOn) return;
+  const tr = transient();
+  if (!steady && !tr) { loopOn = false; return; }
+  if (tr || t - lastFrame > 66) { lastFrame = t; render(t); }   // a steady flicker only needs ~15 fps; save the battery
+  requestAnimationFrame(loop);
+}
 function setLoop(on) { if (on && !loopOn) { loopOn = true; requestAnimationFrame(loop); } else if (!on) loopOn = false; }
-function needsLoop() { return (flickerKey && visibleSet().has(ck(...edgeCells(flickerKey)[0]))) || Math.abs(shared.uTorch.value - torchTarget) > .01; }
+function computeSteady() {          // animate only when something that moves is actually on screen
+  const vis = visibleSet();
+  steady = !!(flickerKey && vis.has(ck(...edgeCells(flickerKey)[0])));
+  if (!steady && power > 0 && !outageLeft) for (const k of vis) { const c = cells.get(k); if (c?.panel?.flick && Math.hypot(c.i - cur.i, c.j - cur.j) <= 3) { steady = true; break; } }
+}
+const transient = () => Math.abs(shared.uTorch.value - torchTarget) > .01 || !!powerAnim || doorAnim;
+function kick() { computeSteady(); setLoop(steady || transient()); }   // keep animating only while something on screen moves
 
 const v3 = new THREE.Vector3(), occRay = new THREE.Raycaster(), occDir = new THREE.Vector3();
 function occluded(pos) {            // is a wall, pillar or arch between the camera and this point?
@@ -624,7 +852,8 @@ function placeLabels() {
     if (p.userData.exit) { text = "→ " + p.userData.exit.name; pos = v3.copy(p.position).setY(1.3); }
     else if (p.userData.flick) { text = "閃爍的牆"; pos = v3.copy(p.position).setY(1.5); }
     else if (p.userData.proxy) { text = "保溫瓶"; p.getWorldPosition(v3); v3.y += .5; pos = v3; }
-    else if (p.userData.hot && !p.parent?.isGroup) { text = p.userData.hot.label; pos = v3.copy(p.position); }
+    else if (p.userData.hot?.kind === "door" && p.userData.tag) { const h = p.userData.hot; text = h.label; pos = v3.subVectors(camera.position, h.lp).setY(0).normalize().multiplyScalar(.22).add(h.lp); }
+    else if (p.userData.hot && (p.userData.tag || !p.parent?.isGroup)) { text = p.userData.hot.label; p.getWorldPosition(v3); v3.y += p.userData.hot.ly || 0; pos = v3; }
     else continue;
     if (pos.distanceTo(camera.position) > 13) continue;
     const q = pos.clone().project(camera);
@@ -653,7 +882,7 @@ function tween(fromP, ctrlP, toP, fromY, toY, ms, done) {
     camera.rotation.y = fromY + (toY - fromY) * e; camera.rotation.x = fromX + (PITCH - fromX) * e;
     render(now);
     if (k < 1) requestAnimationFrame(step);
-    else { busy = false; setBusyButtons(false); done(); autoQuality(); setLoop(needsLoop()); }
+    else { busy = false; setBusyButtons(false); done(); autoQuality(); kick(); }
   };
   requestAnimationFrame(step);
 }
@@ -667,11 +896,24 @@ function move(d, after) {
   const fy = camera.rotation.y, ty = shortest(fy, yawOf(d)), zonePrev = zone(cur.i, cur.j);
   ensureAround(ni, nj);
   cur = { i: ni, j: nj, d }; rebuild();   // build and light the destination before walking there
-  torchTarget = zone(ni, nj) === "dark" ? 1 : 0;
+  torchTarget = zone(ni, nj) === "dark" || outageLeft ? 1 : 0;
+  post.uniforms.uRed.value = redTint(ni, nj);
+  sfx.step(surfaceOf(ni, nj), 3); ambience();
   tween(from, ctrl, to, fy, ty, reduceMotion ? 1 : (straight ? 900 : 1050), () => {
     moves++; $("mv").textContent = moves;
     const z = zone(ni, nj);
-    if (z !== zonePrev) say({ arch: "牆變成了淡色，開著一個個拱門。地毯深得會陷進去。這種地方據說不會偏移。", pillar: "一大片柱子，整齊得像格子一樣，一直排到看不見的地方。", dark: "燈全滅了。地上積著到腳踝的水，四周安靜得只剩你的呼吸。你打開了手電筒。", pit: "地上開始出現坑洞，一個一個排成格子。最好別靠太近。", hall: zonePrev === "dark" ? "嗡嗡聲回來了。你從來沒想過會想念它。你關掉了手電筒。" : "又是黃色的走廊。嗡嗡聲沒有停過。" }[z]);
+    if (z === "red") {               // 封閉迴圈: walking into a red room is an ending
+      sfx.redEnd(); cap("〔嗡嗡聲停了。只剩下很低、很慢的聲音，像在呼吸〕");
+      setTimeout(() => showEnd("封閉迴圈", "你走進了紅色的房間。回頭的時候，進來的開口已經不在了。四面都是紅色的牆，燈一直亮著。你不記得自己在這裡待了多久。（結局圖鑑：封閉迴圈。正式版裡，靠近時的徵兆就是讓你掉頭的機會。）", true), reduceMotion ? 0 : 900);
+      return;
+    }
+    if (z !== zonePrev) say(zonePrev === "manila" ? "你走出房間，關不住的嗡嗡聲一下子全部湧了回來。" : { arch: "牆變成了淡色，開著一個個拱門。地毯深得會陷進去。這種地方據說不會偏移。", pillar: "一大片柱子，整齊得像格子一樣，一直排到看不見的地方。", dark: "燈全滅了。地上積著到腳踝的水，四周安靜得只剩你的呼吸。你打開了手電筒。", pit: "地上開始出現坑洞，一個一個排成格子。最好別靠太近。", manila: "牛皮紙色的壁紙，木頭地板，房間正中間有一張八角桌和兩張椅子。嗡嗡聲停了。遠遠的有人在彈鋼琴，但是房間裡沒有鋼琴。", hall: zonePrev === "dark" ? "嗡嗡聲回來了。你從來沒想過會想念它。你關掉了手電筒。" : "又是黃色的走廊。嗡嗡聲沒有停過。" }[z]);
+    const rd = redDist(ni, nj);         // red-room signs, stronger the closer you get
+    if (rd <= 1.01 && redStage < 2) { redStage = 2; say("前面那個房間整個是紅色的。牆、地毯、燈光，全都是。你的腳不太想停下來。"); }
+    else if (rd <= 2.3 && redStage < 1) { redStage = 1; say("地毯黏黏的，每走一步鞋底都被輕輕扯住。燈光好像偏紅了一點。空氣裡有一點鐵鏽的味道。"); }
+    else if (rd > 3.5) redStage = 0;
+    if (outageLeft > 0) { if (--outageLeft === 0) restorePower(); }
+    else if (moves >= 8 && moves - lastOutage > 14 && (z === "hall" || z === "pillar") && Math.random() < .06) startOutage();
     let changed = false;
     if (!reduceMotion && Math.random() < .35) changed = shiftUnseen() > 0;
     changed = maybeFlicker() || changed;
@@ -688,7 +930,7 @@ function turnAround() {
   const nd = (cur.d + 2) % 4;
   const from = camera.position.clone(), to = stationPos(cur.i, cur.j, nd), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
   const fy = camera.rotation.y, ty = fy + Math.PI;
-  cur = { ...cur, d: nd };
+  cur = { ...cur, d: nd }; sfx.step(surfaceOf(cur.i, cur.j), 2);
   tween(from, mid, to, fy, ty, reduceMotion ? 1 : 1100, () => {
     say(stable(cur.i, cur.j) && n === 0 ? "你回頭看。拱門區沒有變，跟剛才一模一樣。" : n > 0 ? "你回頭看。剛才走過的路……不一樣了。" : "你回頭看。");
     rebuildExits(); render();
@@ -709,20 +951,75 @@ function maybeFlicker() {
   let i = cur.i, j = cur.j;
   for (let s = 0; s < 4; s++) {
     const k = edgeKey(i, j, cur.d), t = edges.get(k);
-    if (t === "wall" && s >= 1) { edges.set(k, "flicker"); flickerKey = k; say("走廊盡頭的牆在閃。不是燈在閃，是牆本身。"); return true; }
+    if (t === "wall" && s >= 1 && !edgeCells(k).some(([a, b]) => stable(a, b))) { edges.set(k, "flicker"); flickerKey = k; say("走廊盡頭的牆在閃。不是燈在閃，是牆本身。"); return true; }
     if (!passable(t)) return false;
     i += DV[cur.d][0]; j += DV[cur.d][1];
   }
   return false;
 }
 function maybeFigure() {          // subtle sanity effect: a shadow far down a straight corridor, gone on the next look
-  if (moves < 4 || Math.random() > .14 || zone(cur.i, cur.j) === "dark") return;
+  if (moves < 4 || Math.random() > .14 || zone(cur.i, cur.j) === "dark" || zone(cur.i, cur.j) === "manila") return;
   let i = cur.i, j = cur.j, s = 0;
   while (s < 4 && passable(edgeAt(i, j, cur.d))) { i += DV[cur.d][0]; j += DV[cur.d][1]; s++; }
   if (s < 3) return;
   figure = new THREE.Mesh(GEO.figure, MAT.figure);
   figure.position.set(i * S + (hash(i, j, 5) - .5), 0, j * S + (hash(i, j, 6) - .5)); figure.rotation.y = yawOf(cur.d);
 }
+
+const surfaceOf = (i, j) => { const z = zone(i, j); return z === "dark" ? "water" : z === "manila" ? "wood" : redDist(i, j) <= 2.3 ? "sticky" : "carpet"; };
+function startOutage() {
+  powerAnim = { from: power, to: 0, t0: performance.now(), dur: reduceMotion ? 1 : flash ? 900 : 1600 };
+  outageLeft = 3 + Math.floor(Math.random() * 3); lastOutage = moves; torchTarget = 1;
+  sfx.clunk(); cap("〔啪的一聲。嗡嗡聲停了〕");
+  say("啪的一聲，所有的燈同時熄滅了。嗡嗡聲跟著停下來，安靜得讓人耳鳴。你打開了手電筒。");
+  ambience(); kick();
+}
+function restorePower() {
+  powerAnim = { from: 0, to: 1, t0: performance.now(), dur: reduceMotion ? 1 : flash ? 1100 : 2200 };
+  outageLeft = 0; torchTarget = zone(cur.i, cur.j) === "dark" ? 1 : 0;
+  sfx.relight(); cap("〔喀、喀……燈管一根接一根亮回來〕");
+  say("燈管一根接一根亮了回來，嗡嗡聲也跟著回來了。你關掉手電筒，發現自己的手在發抖。");
+  ambience(); kick();
+}
+function openDoor(h) {
+  const [[a, b], [c, d]] = edgeCells(h.key);
+  if (!((a === cur.i && b === cur.j) || (c === cur.i && d === cur.j))) return say("門在那邊，得先走過去。");
+  if (h.door === "metal") { sfx.rattle(); cap("〔門把喀喀作響，轉不動〕"); return say("金屬門鎖住了。門把轉不動，門縫底下有一點涼涼的風。（正式版：用撬棍撬開，或找到鑰匙。）"); }
+  const [lx, , lz] = h.lp.toArray(), ang = swingAway(lx, lz, h.rot), inside = zone(cur.i, cur.j) === "manila";
+  doorAng.set(h.key, ang); busy = true; doorAnim = true; setBusyButtons(true);
+  sfx.creak(); cap("〔門軸吱呀作響〕");
+  const r0 = h.group.rotation.y, t0 = performance.now(), dur = reduceMotion ? 1 : 900;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur); h.group.rotation.y = r0 + ang * ease(k); render(now);
+    if (k < 1) return requestAnimationFrame(step);
+    edges.set(h.key, h.type + "-open"); busy = false; doorAnim = false; setBusyButtons(false);
+    rebuild(); render(); ambience(); kick();
+    say(h.door === "manila" && !inside ? "門後是一個小房間，牛皮紙色的壁紙，木頭地板。嗡嗡聲……到門口就停了。" : "門開了。後面是另一段走廊，一樣的黃色。");
+  };
+  requestAnimationFrame(step);
+}
+/* the Manila Room's notes persist across runs (the formal game keeps them in the run-independent save) */
+const NOTE_KEY = "backrooms-demo:manila-notes";
+function loadNotes() { try { const a = JSON.parse(localStorage.getItem(NOTE_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch (_) { return []; } }
+function saveNotes(a) { try { localStorage.setItem(NOTE_KEY, JSON.stringify(a.slice(-8))); return true; } catch (_) { return false; } }
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function openNotes() {
+  if (zone(cur.i, cur.j) !== "manila") return say("桌上好像放著幾張紙。得先走進房間。");
+  const mine = loadNotes();
+  $("shBody").innerHTML =
+    `<p class="note">「如果你是剛掉進來的：這個房間是安全的，至少現在是。出去以後，找一面會閃的牆——不是燈在閃，是牆本身在閃。不要猶豫，整個人撲進去。猶豫的人都還在外面。」<small>打字機打的，邊角被翻得很軟</small></p>` +
+    `<p class="note">「櫃子裡的水是乾淨的。拿一瓶就好，剩下的留給下一個人。」<small>手寫的。字跡……很眼熟</small></p>` +
+    mine.map(n => `<p class="note">「${esc(n.t)}」<small>你留下的（種子 ${esc(n.seed)}）</small></p>`).join("");
+  $("shText").value = ""; $("sheet").hidden = false; modal = true; sfx.paper();
+}
+function closeNotes() { $("sheet").hidden = true; modal = false; }
+function openCabinet() {
+  if (zone(cur.i, cur.j) !== "manila") return say("桌子底下好像有個櫃子。得先走進房間。");
+  sfx.creak(.5);
+  if (!cabinetTaken) { cabinetTaken = true; say("櫃子裡整齊放著幾瓶杏仁水和幾個罐頭。最上面那瓶貼著一張紙條，寫著「給下一個人」。你拿了一瓶。"); }
+  else say("櫃子裡還有一些。你決定留給下一個人。");
+}
+function showEnd(h, p, red) { $("endH").textContent = h; $("endP").textContent = p; $("end").classList.toggle("red", !!red); $("end").classList.add("on"); setLoop(false); hints = false; $("bHint").setAttribute("aria-pressed", false); MAT.exit.opacity = 0; $("labels").innerHTML = ""; }
 
 /* ================= quality ================= */
 function setTier(t, auto) {
@@ -741,11 +1038,119 @@ function autoQuality() {
 }
 $("bQ").onclick = () => { const order = ["low", "mid", "high", "auto"]; const idx = autoQ ? 3 : order.indexOf(tier); const n = order[(idx + 1) % 4]; if (n === "auto") setTier("mid", true); else setTier(n, false); };
 
+/* ================= sound: everything synthesised with Web Audio, no files ================= */
+const AU = { ctx: null, on: false, n: null, lv: null };
+function auStart() {
+  if (!AU.ctx) { try { AU.ctx = new (window.AudioContext || window.webkitAudioContext)(); auBuild(); } catch (e) { AU.ctx = null; return false; } }
+  AU.ctx.resume(); return true;
+}
+function auBuild() {
+  const C = AU.ctx, N = AU.n = {};
+  const gain = (v, to) => { const g = C.createGain(); g.gain.value = v; if (to) g.connect(to); return g; };
+  const filt = (type, f, q, to) => { const b = C.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; if (to) b.connect(to); return b; };
+  const osc = (type, f, to) => { const o = C.createOscillator(); o.type = type; o.frequency.value = f; o.connect(to); o.start(); return o; };
+  N.master = gain(0, C.destination);
+  const len = Math.floor(C.sampleRate * 2.4), ir = C.createBuffer(2, len, C.sampleRate);    // a small room's reverb from decaying noise
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+  N.verb = C.createConvolver(); N.verb.buffer = ir; N.verb.connect(gain(.35, N.master));
+  N.noise = C.createBuffer(1, C.sampleRate * 2, C.sampleRate); const nd = N.noise.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+  const loopNoise = () => { const s = C.createBufferSource(); s.buffer = N.noise; s.loop = true; s.start(); return s; };
+  // fluorescent hum: mains hum and its harmonics, plus the thin whine of the tubes
+  N.hum = gain(0, N.master); N.humF = filt("lowpass", 650, .7, N.hum);
+  N.h1 = osc("sawtooth", 120, gain(.2, N.humF)); N.h2 = osc("sine", 60, gain(.45, N.humF)); osc("sine", 240.6, gain(.05, N.humF));
+  loopNoise().connect(filt("bandpass", 5200, 1.2, gain(.03, N.hum)));
+  N.crk = gain(0, N.master); loopNoise().connect(filt("highpass", 1800, .5, N.crk));          // a dying ballast crackles with the tube
+  N.drone = gain(0, N.master); const df = filt("lowpass", 180, .5, N.drone);                  // the red room: low and slow, like breathing
+  osc("sine", 41, df); osc("sine", 41.6, df); osc("triangle", 55.2, gain(.3, df));
+  N.buzz = gain(0, N.master); osc("square", 180, filt("lowpass", 900, 2, N.buzz));            // the flickering wall
+  N.piano = gain(0, N.master); N.piano.connect(N.verb); N.pianoF = filt("lowpass", 900, .5, N.piano);
+}
+const TUNE = [[57, 1], [64, 1], [60, 2], [59, 1], [57, 1], [52, 2], [0, 1], [53, 1], [57, 1], [60, 2], [59, 1.5], [55, .5], [57, 3], [0, 2]];   // an original, unhurried tune in A minor
+let pianoAt = 0, pianoIdx = 0;
+function pnote(m, t, v) {
+  const C = AU.ctx, f = 440 * Math.pow(2, (m - 69) / 12) * (1 + (Math.random() - .5) * .006);    // an old, slightly out-of-tune piano
+  const g = C.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .006); g.gain.exponentialRampToValueAtTime(v * .3, t + .4); g.gain.exponentialRampToValueAtTime(.0008, t + 3.2); g.connect(AU.n.pianoF);
+  for (const [type, mul, amp] of [["triangle", 1, 1], ["sine", 2.003, .35], ["sine", 3.01, .12]]) { const o = C.createOscillator(); o.type = type; o.frequency.value = f * mul; const og = C.createGain(); og.gain.value = amp; o.connect(og); og.connect(g); o.start(t); o.stop(t + 3.3); }
+}
+setInterval(() => {
+  if (!AU.on || !AU.lv || AU.lv.piano < .01) return;
+  const C = AU.ctx; if (pianoAt < C.currentTime) pianoAt = C.currentTime + .1;
+  while (pianoAt < C.currentTime + .6) {
+    const [m, b] = TUNE[pianoIdx];
+    if (m) pnote(m, pianoAt, .22); if (pianoIdx % 4 === 0) pnote((m || 57) - 24, pianoAt, .1);
+    pianoAt += b * .78; pianoIdx = (pianoIdx + 1) % TUNE.length;
+  }
+}, 200);
+function burst(t, dur, type, f, q, vol) {
+  const C = AU.ctx, s = C.createBufferSource(), b = C.createBiquadFilter(), g = C.createGain();
+  s.buffer = AU.n.noise; b.type = type; b.frequency.value = f; b.Q.value = q;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
+  s.connect(b); b.connect(g); g.connect(AU.n.master); g.connect(AU.n.verb); s.start(t, Math.random() * 1.5); s.stop(t + dur + .05);
+}
+function thump(t, f, dur, vol) {
+  const C = AU.ctx, o = C.createOscillator(), g = C.createGain();
+  o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * .5, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
+  o.connect(g); g.connect(AU.n.master); o.start(t); o.stop(t + dur + .05);
+}
+const sfx = {
+  step(surface, n) {
+    if (!AU.on) return; const t0 = AU.ctx.currentTime + .12;
+    for (let k = 0; k < n; k++) {
+      const t = t0 + k * .34 + Math.random() * .03;
+      if (surface === "water") { burst(t, .18, "bandpass", 900 + Math.random() * 400, 1.2, .22); burst(t + .06, .25, "bandpass", 2200, 2, .08); }
+      else if (surface === "wood") { burst(t, .07, "bandpass", 520, 1.5, .3); thump(t, 95, .12, .22); }
+      else { burst(t, .09, "lowpass", 420, .7, .28); if (surface === "sticky") burst(t + .1, .03, "highpass", 3000, .7, .07); }
+    }
+  },
+  creak(len = 1) {
+    if (!AU.on) return; const C = AU.ctx, t = C.currentTime, o = C.createOscillator(), b = C.createBiquadFilter(), g = C.createGain();
+    o.type = "sawtooth"; o.frequency.setValueAtTime(38, t); o.frequency.linearRampToValueAtTime(64, t + .5 * len); o.frequency.linearRampToValueAtTime(30, t + .9 * len);
+    b.type = "bandpass"; b.frequency.value = 1100; b.Q.value = 6;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16, t + .06); g.gain.linearRampToValueAtTime(.1, t + .7 * len); g.gain.linearRampToValueAtTime(0, t + len);
+    o.connect(b); b.connect(g); g.connect(AU.n.master); g.connect(AU.n.verb); o.start(t); o.stop(t + len + .05);
+    if (len >= 1) thump(t + .95, 70, .25, .18);
+  },
+  rattle() { if (!AU.on) return; const t = AU.ctx.currentTime; for (let k = 0; k < 4; k++) { burst(t + k * .11, .05, "bandpass", 2600 + Math.random() * 600, 4, .3); thump(t + k * .11, 140, .06, .12); } },
+  clunk() { if (!AU.on) return; const t = AU.ctx.currentTime; thump(t, 70, .5, .55); burst(t, .25, "lowpass", 300, .7, .35); },
+  relight() { if (!AU.on) return; const t = AU.ctx.currentTime; for (let k = 0; k < 5; k++) burst(t + k * .2 + Math.random() * .06, .03, "highpass", 2500, .7, .18); },
+  paper() { if (!AU.on) return; const t = AU.ctx.currentTime; burst(t, .12, "highpass", 3500, .5, .08); burst(t + .1, .1, "highpass", 4200, .5, .05); },
+  whoosh() { if (!AU.on) return; burst(AU.ctx.currentTime, 1.2, "lowpass", 600, .5, .5); },
+  redEnd() { if (!AU.on) return; const n = AU.n, t = AU.ctx.currentTime; n.hum.gain.setTargetAtTime(0, t, .2); n.piano.gain.setTargetAtTime(0, t, .2); n.drone.gain.setTargetAtTime(.75, t, 1.2); }
+};
+/* ambience follows where you stand; captions are shown even with sound off (phones are often muted, and for deaf players) */
+let capTimer = 0, capState = {};
+function cap(text) { const el = $("cap"); el.textContent = text; clearTimeout(capTimer); capTimer = setTimeout(() => { el.textContent = ""; }, 6500); }
+function ambience() {
+  const z = zone(cur.i, cur.j), inM = z === "manila";
+  const dm = Math.hypot(cur.i - (M.i + .5), cur.j - (M.j + .5)), dr = redDist(cur.i, cur.j);
+  let lit = 0, fl = 0;
+  for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const c = cells.get(ck(cur.i + di, cur.j + dj)); if (c?.panel && c.panel !== "dead" && !c.panel.red && !inManila(c.i, c.j)) { lit++; if (c.panel.flick) fl++; } }
+  const pw = outageLeft ? 0 : 1, near = 1 - sstep(1.5, 7, dm), redK = 1 - sstep(.8, 3.2, dr);
+  const lv = { hum: inM ? 0 : (.03 + .035 * lit) * pw * sstep(1.2, 4.5, dm), piano: inM ? .8 : .65 * near, cut: inM ? 5200 : 280 + 1500 * near * near, drone: .32 * redK, buzz: 0, fl: fl * pw };
+  if (flickerKey) { const [[a, b], [c, d]] = edgeCells(flickerKey); lv.buzz = .05 * (1 - sstep(.5, 3.5, Math.hypot((a + c) / 2 - cur.i, (b + d) / 2 - cur.j))); }
+  AU.lv = lv;
+  const st = { inM, piano: lv.piano > .06, red: redK > .25, buzz: lv.buzz > .008, crk: fl > 0 && pw > 0 };
+  if (inM && !capState.inM) cap("〔嗡嗡聲停了。鋼琴聲很清楚〕");
+  else if (!inM && capState.inM) cap("〔嗡嗡聲又回來了〕");
+  else if (!inM && lv.piano > .1 && !capState.piano) cap("〔很遠的地方，有人在彈鋼琴〕");
+  else if (redK > .4 && !capState.red) cap("〔嗡嗡聲變得又低又悶〕");
+  else if (lv.buzz > .015 && !capState.buzz) cap("〔細細的電流聲〕");
+  else if (st.crk && !capState.crk) cap("〔燈管劈啪作響〕");
+  capState = st;
+  if (!AU.ctx) return;
+  const n = AU.n, now = AU.ctx.currentTime, set = (p, v, tc) => p.setTargetAtTime(v, now, tc);
+  set(n.hum.gain, lv.hum, pw ? .7 : .25);
+  set(n.h1.frequency, pw ? 120 - 22 * redK : 70, .5); set(n.h2.frequency, pw ? 60 - 11 * redK : 35, .5);   // near a red room the hum sinks lower
+  set(n.humF.frequency, 650 - 320 * redK, .8);
+  set(n.piano.gain, lv.piano, 1.2); set(n.pianoF.frequency, lv.cut, 1.2); set(n.drone.gain, lv.drone, 1.5); set(n.buzz.gain, lv.buzz, .8);
+}
+
 /* ================= input ================= */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 const look = { yaw: 0, pitch: 0 };       // free look offset from the facing direction (drag to look around)
 let downAt = null, dragging = false, lookStart = null;
-canvas.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; dragging = false; lookStart = { ...look }; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
+canvas.addEventListener("pointerdown", e => { if (modal) return; downAt = [e.clientX, e.clientY]; dragging = false; lookStart = { ...look }; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
 canvas.addEventListener("pointermove", e => {
   if (downAt && !busy) {
     const dx = e.clientX - downAt[0], dy = e.clientY - downAt[1];
@@ -768,8 +1173,11 @@ canvas.addEventListener("pointerup", e => {
   const hit = pick(e); if (!hit) return;
   const u = hit.object.userData;
   if (u.exit) return move(u.exit.d);
-  if (u.flick) { $("end").classList.add("on"); setLoop(false); return; }
+  if (u.flick) { sfx.whoosh(); return showEnd("你撲進了閃爍的牆。", "技術展示到此結束。正式版會在這裡進入 Level 1。"); }
   const h = u.hot;
+  if (h.kind === "door") return openDoor(h);
+  if (h.kind === "notes") return openNotes();
+  if (h.kind === "cabinet") return openCabinet();
   if (h.kind === "item") {
     const it = h.item, dx = it.i - cur.i, dz = it.j - cur.j;
     if (!dx && !dz) return pickUp(it);
@@ -800,17 +1208,52 @@ function say(text) { const el = $("say"); el.textContent = text; clearTimeout(sa
 $("bBack").onclick = () => { if (!busy) turnAround(); };
 $("bL").onclick = () => { if (!busy) turnSide(-1); };
 $("bR").onclick = () => { if (!busy) turnSide(1); };
-window.addEventListener("keydown", e => { if (busy || e.target.closest?.("input, textarea")) return; if (e.key === "ArrowLeft") turnSide(-1); else if (e.key === "ArrowRight") turnSide(1); else if (e.key === "ArrowDown") turnAround(); });
+window.addEventListener("keydown", e => { if (modal && e.key === "Escape") return closeNotes(); if (busy || modal || e.target.closest?.("input, textarea, select")) return; if (e.key === "ArrowLeft") turnSide(-1); else if (e.key === "ArrowRight") turnSide(1); else if (e.key === "ArrowDown") turnAround(); });
 function setBusyButtons(b) { for (const id of ["bBack", "bL", "bR"]) $(id).disabled = b; }
 $("bHint").onclick = () => { hints = !hints; $("bHint").setAttribute("aria-pressed", hints); MAT.exit.opacity = hints ? .13 : 0; render(); };
-$("bFlash").onclick = () => { flash = !flash; $("bFlash").setAttribute("aria-pressed", flash); $("bFlash").querySelector("small").textContent = flash ? "已開啟" : "預設關閉"; render(); setLoop(needsLoop()); };
+$("bFlash").onclick = () => { flash = !flash; $("bFlash").setAttribute("aria-pressed", flash); $("bFlash").querySelector("small").textContent = flash ? "已開啟" : "預設關閉"; render(); kick(); };
+$("bSound").onclick = () => {
+  if (!AU.on && !auStart()) return say("這個瀏覽器沒辦法播放聲音。字幕還是會照常顯示。");
+  AU.on = !AU.on; AU.n.master.gain.setTargetAtTime(AU.on ? .9 : 0, AU.ctx.currentTime, .3);
+  $("bSound").setAttribute("aria-pressed", AU.on); $("bSound").querySelector("small").textContent = AU.on ? "已開啟" : "關閉";
+  ambience();
+};
+$("jump").onchange = e => { const v = e.target.value; e.target.value = ""; e.target.blur(); if (v) teleport(v); };
+$("shClose").onclick = closeNotes;
+$("shSave").onclick = () => {
+  const t = $("shText").value.trim(); if (!t) return closeNotes();
+  const a = loadNotes(); a.push({ t, seed: SEED.toString(36).toUpperCase(), at: Date.now() });
+  const ok = saveNotes(a); closeNotes();
+  say(ok ? "你把紙條壓在桌上那疊筆記的最下面。下一次來的時候，它應該還在。" : "紙條……放不下去。（這個瀏覽器不允許儲存資料）");
+};
 $("bSeed").onclick = () => { SEED = (Math.random() * 1e9) | 0; start(); };
 $("bAgain").onclick = () => { $("end").classList.remove("on"); SEED = (Math.random() * 1e9) | 0; start(); };
 window.addEventListener("resize", resize);
 
+const SPOTS = {     // demo teleport targets: [i, j, facing, narration]
+  start: [0, 0, 0, "回到起點。"],
+  arch: [3, -3, 0, "拱門區。這裡不會偏移，可以當作地圖上的錨點。往東邊走，牆上有一扇木門。"],
+  manila: [4, -4, 1, "拱門區的東邊。眼前的牆是牛皮紙色的，中間有一扇木門。嗡嗡聲在這裡小了很多。"],
+  red: [0, 2, 2, "往前兩格就是紅房間。注意地毯、燈光、壁紙和聲音的變化。走進去就是「封閉迴圈」結局。"],
+  pit: [3, 0, 2, "坑洞區的邊緣。"],
+  dark: [0, -6, 0, "斷電區的入口。"]
+};
+function teleport(v) {
+  if (busy || modal) return;
+  if (v === "outage") { const z = zone(cur.i, cur.j); if (outageLeft || powerAnim || z === "manila" || z === "red" || z === "dark") return say("這裡沒有可以熄滅的燈。"); return startOutage(); }
+  const [i, j, d, text] = SPOTS[v]; clearFigure(); $("near").innerHTML = "";
+  outageLeft = 0; power = 1; powerAnim = null; redStage = 0; capState = {};
+  cur = { i, j, d }; ensureAround(i, j);
+  if (v === "pit") { edges.set(edgeKey(3, 0, 2), "open"); edges.set(edgeKey(3, 1, 2), "open"); }
+  if (v === "red") { edges.set(edgeKey(0, 2, 2), "open"); edges.set(edgeKey(0, 3, 2), "open"); }
+  camera.position.copy(stationPos(i, j, d)); camera.rotation.set(PITCH, yawOf(d), 0, "YXZ"); look.yaw = 0; look.pitch = 0;
+  torchTarget = zone(i, j) === "dark" ? 1 : 0; shared.uTorch.value = torchTarget; post.uniforms.uRed.value = redTint(i, j);
+  rebuild(); render(); ambience(); kick(); say(text);
+}
 function start() {
-  setLoop(false); clearFigure();
-  cells.clear(); edges.clear(); picked.clear(); FIXED.clear();
+  setLoop(false); clearFigure(); closeNotes();
+  cells.clear(); edges.clear(); picked.clear(); FIXED.clear(); coreCache.clear(); doorAng.clear();
+  power = 1; powerAnim = null; outageLeft = 0; lastOutage = 0; redStage = 0; cabinetTaken = false; post.uniforms.uRed.value = 0;
   cur = { i: 0, j: 0, d: 0 }; moves = 0; shifted = 0; flickerKey = null; torchTarget = 0; shared.uTorch.value = 0;
   $("mv").textContent = 0; $("sh").textContent = 0; $("sd").textContent = SEED.toString(36).toUpperCase();
   shared.uSeedOff.value.set(hash(1, 2, 3) * 100, hash(4, 5, 6) * 100);
@@ -819,11 +1262,11 @@ function start() {
   for (let j = -2; j >= -7; j--) edges.set(edgeKey(0, j, 0), "open");          // a straight run into the blackout zone ahead
   for (const k of edges.keys()) FIXED.add(k);
   ensureAround(0, 0);
-  if (location.hash === "#pit") { edges.set(edgeKey(3, 0, 2), "open"); edges.set(edgeKey(3, 1, 2), "open"); cur = { i: 3, j: 0, d: 2 }; ensureAround(3, 0); }   // jump straight to the pit zone (for testing)
   camera.position.copy(stationPos(cur.i, cur.j, cur.d)); camera.rotation.set(PITCH, yawOf(cur.d), 0, "YXZ");
   rebuild(); resize();
-  look.yaw = 0; look.pitch = 0;
-  say("你在嗡嗡聲裡醒來。點畫面裡的開口就能走過去；按住畫面拖曳可以轉頭看四周，兩側的箭頭可以左轉、右轉。");
+  look.yaw = 0; look.pitch = 0; ambience(); kick();
+  say("你在嗡嗡聲裡醒來。點畫面裡的開口就能走過去；按住畫面拖曳可以轉頭看四周，兩側的箭頭可以左轉、右轉。上方的「傳送」可以直接去各個展示點。");
+  const h = location.hash.slice(1); if (SPOTS[h]) teleport(h);   // e.g. #manila, #red, #pit (for testing)
 }
 start();
 })();
