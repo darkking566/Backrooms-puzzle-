@@ -15,3 +15,8 @@ export function elapsedMessages(minutes: number, watch: boolean, perceived?: Tex
     slept: T(`……你醒了過來。睡了${duration.zh}。`, `...You wake. You slept ${duration.en}.`)
   };
 }
+
+/** How long the dimmed "time passes" overlay stays up: longer waits feel longer (15 min ≈ 1.5 s, 1 h ≈ 2.3 s, 8 h ≈ 3.5 s). */
+export function skipMs(minutes: number) {
+  return Math.round(Math.min(3600, Math.max(1500, 1500 + 400 * Math.log2(minutes / 15))));
+}

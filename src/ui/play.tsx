@@ -9,7 +9,7 @@ import { edgeCells, passable } from "../world/level0";
 import { ctx, L, U, lang, save } from "./ctx";
 import type { InvItem } from "../state/types";
 import { NotebookMap } from "./notebook-map";
-import { elapsedMessages } from "./time";
+import { elapsedMessages, skipMs } from "./time";
 import { LockedPackPanel } from "./locked-pack";
 import { RoomPersonPanel } from "./room-person";
 
@@ -26,7 +26,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const [caption, setCaption] = useState<Text | null>(null);
   const [hints, setHints] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [skip, setSkip] = useState<{ id: number; text: Text; long: boolean } | null>(null);   // the screen dims while time passes
+  const [skip, setSkip] = useState<{ id: number; text: Text; ms: number } | null>(null);   // the screen dims while time passes
   const [delta, setDelta] = useState<{ id: number; text: string } | null>(null);              // "+20 min" next to the clock
   const holdUntil = useRef(0);
   const capTimer = useRef(0);
@@ -81,10 +81,10 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     const messages = elapsedMessages(m, g.has("watch"), perceived), id = performance.now();
     setDelta({ id, text: L(messages.delta) });
     if (ended || cmd.type === "move" || cmd.type === "turn" || m < 15) return;   // walking already shows time passing; short things don't need a pause
-    const long = m >= 120;
-    setSkip({ id, long, text: cmd.type === "rest" ? messages.slept : messages.passed });
-    holdUntil.current = id + (long ? 1500 : 900);
-    setTimeout(() => setSkip(s => (s && s.id === id ? null : s)), long ? 2600 : 1700);
+    const ms = skipMs(m);
+    setSkip({ id, ms, text: cmd.type === "rest" ? messages.slept : messages.passed });
+    holdUntil.current = id + ms * .6;
+    setTimeout(() => setSkip(s => (s && s.id === id ? null : s)), ms);
   }
   const moveThen = (d: Dir, cmd: Command) => act({ type: "move", d }, () => act(cmd));
   function adjacentDir(i: number, j: number): Dir | null {
@@ -186,7 +186,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         </div>
         <button class="turn l" disabled={lock} aria-label={U("left")} onClick={() => act({ type: "turn", dir: -1 })}>‹<small>{U("left")}</small></button>
         <button class="turn r" disabled={lock} aria-label={U("right")} onClick={() => act({ type: "turn", dir: 1 })}>›<small>{U("right")}</small></button>
-        {skip && <div key={skip.id} class={"skip" + (skip.long ? " long" : "")} aria-live="polite"><span>{L(skip.text)}</span></div>}
+        {skip && <div key={skip.id} class="skip" style={{ animationDuration: skip.ms + "ms" }} aria-live="polite"><span>{L(skip.text)}</span></div>}
         <div class="over">
           {!lock && near.length > 0 && <div class="near">{near.map((n, k) => <button key={k} onClick={n.run}><span>{n.tag}</span>{n.label}<b>{n.verb}</b></button>)}</div>}
           {caption && <div class="cap" aria-live="polite">{L(caption)}</div>}
