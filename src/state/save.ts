@@ -52,6 +52,7 @@ function runDefaults(r: RunState): RunState {
     r.l1.hazards = { ...newLevel1Hazards(), ...r.l1.hazards };
     r.l1.power ??= { phase: "normal", nextAt: 0 };
     r.l1.power.phase ??= "normal"; r.l1.power.nextAt ??= 0;
+    r.l1.searches ??= r.world.cells.filter(c => c.searched).length; r.l1.baseVisits ??= r.l1.baseClaimed ? 1 : 0;
     if (r.l1.encounter) r.l1.encounter.direction ??= r.pos.d;
   }
   r.pendingRewards ??= [];

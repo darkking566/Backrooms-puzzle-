@@ -1,0 +1,862 @@
+{
+  "sourceCommit": "4b23188",
+  "policy": "16 shared-Meta campaigns; at most 10 runs; stop at 4000-action Level 0 censor; no purchases; seed=100000+campaign*1000+runIndex; policy random seed=seed*7919+1",
+  "samples": [
+    {
+      "campaign": 0,
+      "seed": 100000,
+      "run": 1,
+      "ending": "exit_level72",
+      "minutes": 4950,
+      "points": 531
+    },
+    {
+      "campaign": 0,
+      "seed": 100001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 3048,
+      "points": 46
+    },
+    {
+      "campaign": 0,
+      "seed": 100002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 2169,
+      "points": 637
+    },
+    {
+      "campaign": 0,
+      "seed": 100003,
+      "run": 4,
+      "ending": "exit_level1",
+      "minutes": 2398,
+      "points": 322
+    },
+    {
+      "campaign": 0,
+      "seed": 100004,
+      "run": 5,
+      "ending": "exit_level72",
+      "minutes": 3074,
+      "points": 236
+    },
+    {
+      "campaign": 0,
+      "seed": 100005,
+      "run": 6,
+      "ending": "exit_level1",
+      "minutes": 1954,
+      "points": 320
+    },
+    {
+      "campaign": 0,
+      "seed": 100006,
+      "run": 7,
+      "ending": "death_dehydration",
+      "minutes": 6581,
+      "points": 76
+    },
+    {
+      "campaign": 0,
+      "seed": 100007,
+      "run": 8,
+      "ending": "death_dehydration",
+      "minutes": 3349,
+      "points": 38
+    },
+    {
+      "campaign": 0,
+      "seed": 100008,
+      "run": 9,
+      "ending": "exit_level1",
+      "minutes": 3614,
+      "points": 340
+    },
+    {
+      "campaign": 0,
+      "seed": 100009,
+      "run": 10,
+      "ending": "no_one_returned",
+      "minutes": 3316,
+      "points": 48
+    },
+    {
+      "campaign": 1,
+      "seed": 101000,
+      "run": 1,
+      "ending": "death_dehydration",
+      "minutes": 5754,
+      "points": 130
+    },
+    {
+      "campaign": 1,
+      "seed": 101001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 4610,
+      "points": 69
+    },
+    {
+      "campaign": 1,
+      "seed": 101002,
+      "run": 3,
+      "ending": "death_dehydration",
+      "minutes": 4721,
+      "points": 56
+    },
+    {
+      "campaign": 1,
+      "seed": 101003,
+      "run": 4,
+      "ending": "exit_level1",
+      "minutes": 1841,
+      "points": 635
+    },
+    {
+      "campaign": 1,
+      "seed": 101004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 3704,
+      "points": 340
+    },
+    {
+      "campaign": 1,
+      "seed": 101005,
+      "run": 6,
+      "ending": "death_dehydration",
+      "minutes": 3764,
+      "points": 40
+    },
+    {
+      "campaign": 1,
+      "seed": 101006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 3231,
+      "points": 336
+    },
+    {
+      "campaign": 1,
+      "seed": 101007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 4611,
+      "points": 354
+    },
+    {
+      "campaign": 1,
+      "seed": 101008,
+      "run": 9,
+      "ending": "death_dehydration",
+      "minutes": 3590,
+      "points": 38
+    },
+    {
+      "campaign": 1,
+      "seed": 101009,
+      "run": 10,
+      "ending": "death_dehydration",
+      "minutes": 5823,
+      "points": 72
+    },
+    {
+      "campaign": 2,
+      "seed": 102000,
+      "run": 1,
+      "ending": "death_dehydration",
+      "minutes": 3617,
+      "points": 95
+    },
+    {
+      "campaign": 2,
+      "seed": 102001,
+      "run": 2,
+      "ending": "exit_level72",
+      "minutes": 2133,
+      "points": 435
+    },
+    {
+      "campaign": 2,
+      "seed": 102002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 2306,
+      "points": 652
+    },
+    {
+      "campaign": 2,
+      "seed": 102003,
+      "run": 4,
+      "ending": "death_dehydration",
+      "minutes": 5944,
+      "points": 72
+    },
+    {
+      "campaign": 2,
+      "seed": 102004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 3548,
+      "points": 338
+    },
+    {
+      "campaign": 2,
+      "seed": 102005,
+      "run": 6,
+      "ending": "death_dehydration",
+      "minutes": 4745,
+      "points": 56
+    },
+    {
+      "campaign": 2,
+      "seed": 102006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 3121,
+      "points": 336
+    },
+    {
+      "campaign": 2,
+      "seed": 102007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 4005,
+      "points": 342
+    },
+    {
+      "campaign": 2,
+      "seed": 102008,
+      "run": 9,
+      "ending": "exit_level1",
+      "minutes": 3333,
+      "points": 338
+    },
+    {
+      "campaign": 2,
+      "seed": 102009,
+      "run": 10,
+      "ending": "exit_level1",
+      "minutes": 3147,
+      "points": 336
+    },
+    {
+      "campaign": 3,
+      "seed": 103000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 3316,
+      "points": 713
+    },
+    {
+      "campaign": 3,
+      "seed": 103001,
+      "run": 2,
+      "ending": "no_one_returned",
+      "minutes": 2043,
+      "points": 30
+    },
+    {
+      "campaign": 3,
+      "seed": 103002,
+      "run": 3,
+      "ending": "death_dehydration",
+      "minutes": 3360,
+      "points": 63
+    },
+    {
+      "campaign": 3,
+      "seed": 103003,
+      "run": 4,
+      "ending": "no_one_returned",
+      "minutes": 2056,
+      "points": 20
+    },
+    {
+      "campaign": 3,
+      "seed": 103004,
+      "run": 5,
+      "ending": "exit_level72",
+      "minutes": 3789,
+      "points": 440
+    },
+    {
+      "campaign": 3,
+      "seed": 103005,
+      "run": 6,
+      "ending": "exit_level72",
+      "minutes": 2312,
+      "points": 222
+    },
+    {
+      "campaign": 3,
+      "seed": 103006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 3278,
+      "points": 338
+    },
+    {
+      "campaign": 3,
+      "seed": 103007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 6567,
+      "points": 376
+    },
+    {
+      "campaign": 3,
+      "seed": 103008,
+      "run": 9,
+      "ending": "exit_level1",
+      "minutes": 2030,
+      "points": 320
+    },
+    {
+      "campaign": 3,
+      "seed": 103009,
+      "run": 10,
+      "ending": "exit_level1",
+      "minutes": 3401,
+      "points": 338
+    },
+    {
+      "campaign": 4,
+      "seed": 104000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 1977,
+      "points": 665
+    },
+    {
+      "campaign": 4,
+      "seed": 104001,
+      "run": 2,
+      "ending": "exit_level72",
+      "minutes": 6127,
+      "points": 519
+    },
+    {
+      "campaign": 4,
+      "seed": 104002,
+      "run": 3,
+      "ending": "death_dehydration",
+      "minutes": 4375,
+      "points": 64
+    },
+    {
+      "campaign": 4,
+      "seed": 104003,
+      "run": 4,
+      "ending": "death_dehydration",
+      "minutes": 3644,
+      "points": 40
+    },
+    {
+      "campaign": 4,
+      "seed": 104004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 3301,
+      "points": 338
+    },
+    {
+      "campaign": 4,
+      "seed": 104005,
+      "run": 6,
+      "ending": "no_one_returned",
+      "minutes": 1960,
+      "points": 30
+    },
+    {
+      "campaign": 4,
+      "seed": 104006,
+      "run": 7,
+      "ending": "alive",
+      "minutes": 7250,
+      "points": null
+    },
+    {
+      "campaign": 5,
+      "seed": 105000,
+      "run": 1,
+      "ending": "death_dehydration",
+      "minutes": 3548,
+      "points": 93
+    },
+    {
+      "campaign": 5,
+      "seed": 105001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 4551,
+      "points": 69
+    },
+    {
+      "campaign": 5,
+      "seed": 105002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 1883,
+      "points": 635
+    },
+    {
+      "campaign": 5,
+      "seed": 105003,
+      "run": 4,
+      "ending": "exit_level1",
+      "minutes": 3238,
+      "points": 336
+    },
+    {
+      "campaign": 5,
+      "seed": 105004,
+      "run": 5,
+      "ending": "death_dehydration",
+      "minutes": 3355,
+      "points": 38
+    },
+    {
+      "campaign": 5,
+      "seed": 105005,
+      "run": 6,
+      "ending": "death_dehydration",
+      "minutes": 3793,
+      "points": 40
+    },
+    {
+      "campaign": 5,
+      "seed": 105006,
+      "run": 7,
+      "ending": "alive",
+      "minutes": 3020,
+      "points": null
+    },
+    {
+      "campaign": 6,
+      "seed": 106000,
+      "run": 1,
+      "ending": "alive",
+      "minutes": 1933,
+      "points": null
+    },
+    {
+      "campaign": 7,
+      "seed": 107000,
+      "run": 1,
+      "ending": "no_one_returned",
+      "minutes": 2206,
+      "points": 62
+    },
+    {
+      "campaign": 7,
+      "seed": 107001,
+      "run": 2,
+      "ending": "exit_level1",
+      "minutes": 2453,
+      "points": 652
+    },
+    {
+      "campaign": 7,
+      "seed": 107002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 3628,
+      "points": 370
+    },
+    {
+      "campaign": 7,
+      "seed": 107003,
+      "run": 4,
+      "ending": "alive",
+      "minutes": 2380,
+      "points": null
+    },
+    {
+      "campaign": 8,
+      "seed": 108000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 3962,
+      "points": 717
+    },
+    {
+      "campaign": 8,
+      "seed": 108001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 3502,
+      "points": 48
+    },
+    {
+      "campaign": 8,
+      "seed": 108002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 5331,
+      "points": 373
+    },
+    {
+      "campaign": 8,
+      "seed": 108003,
+      "run": 4,
+      "ending": "exit_level1",
+      "minutes": 3002,
+      "points": 336
+    },
+    {
+      "campaign": 8,
+      "seed": 108004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 2009,
+      "points": 320
+    },
+    {
+      "campaign": 8,
+      "seed": 108005,
+      "run": 6,
+      "ending": "no_one_returned",
+      "minutes": 3437,
+      "points": 48
+    },
+    {
+      "campaign": 8,
+      "seed": 108006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 3452,
+      "points": 338
+    },
+    {
+      "campaign": 8,
+      "seed": 108007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 3005,
+      "points": 336
+    },
+    {
+      "campaign": 8,
+      "seed": 108008,
+      "run": 9,
+      "ending": "exit_level1",
+      "minutes": 3495,
+      "points": 338
+    },
+    {
+      "campaign": 8,
+      "seed": 108009,
+      "run": 10,
+      "ending": "exit_level1",
+      "minutes": 4940,
+      "points": 356
+    },
+    {
+      "campaign": 9,
+      "seed": 109000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 2965,
+      "points": 666
+    },
+    {
+      "campaign": 9,
+      "seed": 109001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 3200,
+      "points": 76
+    },
+    {
+      "campaign": 9,
+      "seed": 109002,
+      "run": 3,
+      "ending": "death_dehydration",
+      "minutes": 4570,
+      "points": 69
+    },
+    {
+      "campaign": 9,
+      "seed": 109003,
+      "run": 4,
+      "ending": "exit_level1",
+      "minutes": 6217,
+      "points": 374
+    },
+    {
+      "campaign": 9,
+      "seed": 109004,
+      "run": 5,
+      "ending": "death_dehydration",
+      "minutes": 3349,
+      "points": 53
+    },
+    {
+      "campaign": 9,
+      "seed": 109005,
+      "run": 6,
+      "ending": "exit_level1",
+      "minutes": 4745,
+      "points": 356
+    },
+    {
+      "campaign": 9,
+      "seed": 109006,
+      "run": 7,
+      "ending": "death_dehydration",
+      "minutes": 4596,
+      "points": 54
+    },
+    {
+      "campaign": 9,
+      "seed": 109007,
+      "run": 8,
+      "ending": "alive",
+      "minutes": 1673,
+      "points": null
+    },
+    {
+      "campaign": 10,
+      "seed": 110000,
+      "run": 1,
+      "ending": "death_dehydration",
+      "minutes": 3207,
+      "points": 76
+    },
+    {
+      "campaign": 10,
+      "seed": 110001,
+      "run": 2,
+      "ending": "alive",
+      "minutes": 3000,
+      "points": null
+    },
+    {
+      "campaign": 11,
+      "seed": 111000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 3212,
+      "points": 696
+    },
+    {
+      "campaign": 11,
+      "seed": 111001,
+      "run": 2,
+      "ending": "exit_level1",
+      "minutes": 1965,
+      "points": 335
+    },
+    {
+      "campaign": 11,
+      "seed": 111002,
+      "run": 3,
+      "ending": "alive",
+      "minutes": 2051,
+      "points": null
+    },
+    {
+      "campaign": 12,
+      "seed": 112000,
+      "run": 1,
+      "ending": "alive",
+      "minutes": 4356,
+      "points": null
+    },
+    {
+      "campaign": 13,
+      "seed": 113000,
+      "run": 1,
+      "ending": "death_dehydration",
+      "minutes": 4564,
+      "points": 109
+    },
+    {
+      "campaign": 13,
+      "seed": 113001,
+      "run": 2,
+      "ending": "exit_level1",
+      "minutes": 3464,
+      "points": 668
+    },
+    {
+      "campaign": 13,
+      "seed": 113002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 3775,
+      "points": 340
+    },
+    {
+      "campaign": 13,
+      "seed": 113003,
+      "run": 4,
+      "ending": "death_dehydration",
+      "minutes": 4620,
+      "points": 54
+    },
+    {
+      "campaign": 13,
+      "seed": 113004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 2948,
+      "points": 351
+    },
+    {
+      "campaign": 13,
+      "seed": 113005,
+      "run": 6,
+      "ending": "exit_level1",
+      "minutes": 3686,
+      "points": 340
+    },
+    {
+      "campaign": 13,
+      "seed": 113006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 1986,
+      "points": 320
+    },
+    {
+      "campaign": 13,
+      "seed": 113007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 3835,
+      "points": 340
+    },
+    {
+      "campaign": 13,
+      "seed": 113008,
+      "run": 9,
+      "ending": "exit_level1",
+      "minutes": 3791,
+      "points": 340
+    },
+    {
+      "campaign": 13,
+      "seed": 113009,
+      "run": 10,
+      "ending": "death_dehydration",
+      "minutes": 4528,
+      "points": 54
+    },
+    {
+      "campaign": 14,
+      "seed": 114000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 3292,
+      "points": 713
+    },
+    {
+      "campaign": 14,
+      "seed": 114001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 3772,
+      "points": 65
+    },
+    {
+      "campaign": 14,
+      "seed": 114002,
+      "run": 3,
+      "ending": "death_dehydration",
+      "minutes": 3661,
+      "points": 40
+    },
+    {
+      "campaign": 14,
+      "seed": 114003,
+      "run": 4,
+      "ending": "alive",
+      "minutes": 5290,
+      "points": null
+    },
+    {
+      "campaign": 15,
+      "seed": 115000,
+      "run": 1,
+      "ending": "exit_level1",
+      "minutes": 3144,
+      "points": 696
+    },
+    {
+      "campaign": 15,
+      "seed": 115001,
+      "run": 2,
+      "ending": "death_dehydration",
+      "minutes": 3238,
+      "points": 76
+    },
+    {
+      "campaign": 15,
+      "seed": 115002,
+      "run": 3,
+      "ending": "exit_level1",
+      "minutes": 4458,
+      "points": 354
+    },
+    {
+      "campaign": 15,
+      "seed": 115003,
+      "run": 4,
+      "ending": "no_one_returned",
+      "minutes": 1855,
+      "points": 30
+    },
+    {
+      "campaign": 15,
+      "seed": 115004,
+      "run": 5,
+      "ending": "exit_level1",
+      "minutes": 4414,
+      "points": 354
+    },
+    {
+      "campaign": 15,
+      "seed": 115005,
+      "run": 6,
+      "ending": "death_dehydration",
+      "minutes": 4392,
+      "points": 54
+    },
+    {
+      "campaign": 15,
+      "seed": 115006,
+      "run": 7,
+      "ending": "exit_level1",
+      "minutes": 3598,
+      "points": 338
+    },
+    {
+      "campaign": 15,
+      "seed": 115007,
+      "run": 8,
+      "ending": "exit_level1",
+      "minutes": 1994,
+      "points": 320
+    },
+    {
+      "campaign": 15,
+      "seed": 115008,
+      "run": 9,
+      "ending": "death_dehydration",
+      "minutes": 4441,
+      "points": 54
+    },
+    {
+      "campaign": 15,
+      "seed": 115009,
+      "run": 10,
+      "ending": "death_dehydration",
+      "minutes": 3515,
+      "points": 38
+    }
+  ]
+}

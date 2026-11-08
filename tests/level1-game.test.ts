@@ -30,7 +30,7 @@ describe("same-run warehouse exploration", () => {
     const state = JSON.stringify(loaded.save()); loaded.dispatch({ type: "baseSupplies" });
     expect(JSON.stringify(loaded.save())).not.toBe(state); // a feedback line is recorded, no new resources
     if (loaded.world.level !== "level-1") throw new Error("warehouse expected");
-    expect(loaded.world.crates.get("base")!.items).toHaveLength(5);
+    expect(loaded.world.crates.get("base")!.items).toHaveLength(3);
     expect(loaded.run.pendingRewards).toHaveLength(2); expect(loaded.run.l1!.baseClaimed).toBe(true);
   });
   it("opens crates without a crowbar only after examining the side latch", () => {

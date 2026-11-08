@@ -1,0 +1,3236 @@
+{
+  "baselineCommit": "4b23188",
+  "sampleDate": "2026-11-08",
+  "quantiles": "empirical sorted[floor(n*p)]; median averages middle pair",
+  "policy": {
+    "freshSeeds": "1000..1299; fresh Meta each run; frozen Level 0 policy seed=index*7919+1",
+    "sharedSeeds": "16 shared-Meta campaigns; at most 10 runs; stop at 4000-action Level 0 censor; no purchases; seed=100000+campaign*1000+runIndex; policy random seed=seed*7919+1",
+    "level0ActionLimit": 4000,
+    "level1ActionLimit": 3000,
+    "warehouse": "Follow marks to Alpha before searching; claim once, hear allowed elder fragments, read notice, forage crates and at most 8 searches, eat/drink, return to sleep, close light on warning and retreat on sighting; no purchases, no imported supplies. Censored runs do not pay points or become new runs."
+  },
+  "settings": {
+    "arrival": 300,
+    "firstArrivalExtra": 250,
+    "elderFragment": 20,
+    "level1SurvivalMultiplier": 0.2,
+    "level1SurvivalCap": 40,
+    "basePack": [
+      "almond_water",
+      "snack_bar",
+      "bandage"
+    ],
+    "crateWaterChance": 0.25,
+    "crateFoodChance": 0.5,
+    "cacheCountMax": 5,
+    "searchLimit": 8,
+    "searchChance": 0.18,
+    "powerNormalMinutes": [
+      180,
+      360
+    ],
+    "smilerDamage": 20
+  },
+  "fresh": {
+    "beforePoints": {
+      "n": 283,
+      "mean": 451.8621908127208,
+      "min": 60,
+      "p10": 93,
+      "p25": 111,
+      "median": 680,
+      "p75": 711,
+      "p90": 728,
+      "max": 766
+    },
+    "beforeCensored": 17,
+    "beforeBankedMeanPerStart": 426.25666666666666,
+    "after": {
+      "entered": 156,
+      "reachedBase": 155,
+      "metElder": 155,
+      "returned": 153,
+      "noticed": 198,
+      "avoided": 198,
+      "endings": {
+        "level-1:death_dehydration": 155,
+        "level-0:death_dehydration": 95,
+        "level-1:death_injury": 1,
+        "level-0:exit_level72": 11,
+        "level-0:no_one_returned": 18,
+        "level-0:alive": 17,
+        "level-0:death_injury": 3
+      },
+      "deathHours": {
+        "n": 156,
+        "mean": 84.62884615384617,
+        "min": 0.8333333333333334,
+        "p10": 49.75,
+        "p25": 64.7,
+        "median": 84.35833333333333,
+        "p75": 106.2,
+        "p90": 120.95,
+        "max": 164.23333333333332
+      },
+      "censoredHours": {
+        "n": 0,
+        "mean": null,
+        "min": null,
+        "p10": null,
+        "p25": null,
+        "median": null,
+        "p75": null,
+        "p90": null,
+        "max": null
+      },
+      "points": {
+        "n": 283,
+        "mean": 463.1201413427562,
+        "min": 60,
+        "p10": 93,
+        "p25": 111,
+        "median": 695,
+        "p75": 724,
+        "p90": 749,
+        "max": 783
+      },
+      "censoredRuns": 17,
+      "bankedMeanPerStart": 436.87666666666667,
+      "meanRatio": 1.0249145663410935
+    },
+    "level1Score": {
+      "n": 156,
+      "mean": 11.032051282051283,
+      "min": 0,
+      "p10": 7,
+      "p25": 8,
+      "median": 11.0,
+      "p75": 14,
+      "p90": 18,
+      "max": 22
+    },
+    "level1Samples": [
+      {
+        "seed": 1000,
+        "hours": 87.06666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 702
+      },
+      {
+        "seed": 1001,
+        "hours": 83.96666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 734
+      },
+      {
+        "seed": 1006,
+        "hours": 73.1,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 735
+      },
+      {
+        "seed": 1009,
+        "hours": 77.5,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 733
+      },
+      {
+        "seed": 1010,
+        "hours": 65.93333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 731
+      },
+      {
+        "seed": 1011,
+        "hours": 76.85,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 750
+      },
+      {
+        "seed": 1012,
+        "hours": 50.2,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 9,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 732
+      },
+      {
+        "seed": 1013,
+        "hours": 2.8,
+        "ending": "death_injury",
+        "baseVisits": 1,
+        "searches": 0,
+        "hazards": {
+          "outages": 0,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 708
+      },
+      {
+        "seed": 1015,
+        "hours": 100.38333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 691
+      },
+      {
+        "seed": 1017,
+        "hours": 60.65,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 668
+      },
+      {
+        "seed": 1018,
+        "hours": 130.5,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 24,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 678
+      },
+      {
+        "seed": 1019,
+        "hours": 40.266666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 727
+      },
+      {
+        "seed": 1020,
+        "hours": 37.56666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 7,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 742
+      },
+      {
+        "seed": 1021,
+        "hours": 112.05,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 772
+      },
+      {
+        "seed": 1024,
+        "hours": 92.2,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 704
+      },
+      {
+        "seed": 1026,
+        "hours": 56.38333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 761
+      },
+      {
+        "seed": 1027,
+        "hours": 21.016666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 4,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 709
+      },
+      {
+        "seed": 1029,
+        "hours": 137.91666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 26,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 739
+      },
+      {
+        "seed": 1031,
+        "hours": 62,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 746
+      },
+      {
+        "seed": 1032,
+        "hours": 100.81666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 707
+      },
+      {
+        "seed": 1033,
+        "hours": 151.38333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 28,
+          "noticed": 4,
+          "avoided": 4,
+          "hits": 0
+        },
+        "points": 712
+      },
+      {
+        "seed": 1035,
+        "hours": 105.78333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 735
+      },
+      {
+        "seed": 1036,
+        "hours": 132.73333333333332,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 25,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 708
+      },
+      {
+        "seed": 1040,
+        "hours": 69.66666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 698
+      },
+      {
+        "seed": 1044,
+        "hours": 53.96666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 715
+      },
+      {
+        "seed": 1046,
+        "hours": 107.71666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 737
+      },
+      {
+        "seed": 1047,
+        "hours": 65.9,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 731
+      },
+      {
+        "seed": 1049,
+        "hours": 91.06666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 733
+      },
+      {
+        "seed": 1051,
+        "hours": 55.766666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 715
+      },
+      {
+        "seed": 1052,
+        "hours": 46.38333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 9,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 725
+      },
+      {
+        "seed": 1054,
+        "hours": 43.71666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 9,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 712
+      },
+      {
+        "seed": 1055,
+        "hours": 106.56666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 768
+      },
+      {
+        "seed": 1056,
+        "hours": 120.95,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 24,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 710
+      },
+      {
+        "seed": 1057,
+        "hours": 61,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 716
+      },
+      {
+        "seed": 1058,
+        "hours": 119.96666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 24,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 707
+      },
+      {
+        "seed": 1061,
+        "hours": 82.51666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1062,
+        "hours": 100.01666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1063,
+        "hours": 128.5,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 26,
+          "noticed": 4,
+          "avoided": 4,
+          "hits": 0
+        },
+        "points": 739
+      },
+      {
+        "seed": 1067,
+        "hours": 154.06666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 31,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 714
+      },
+      {
+        "seed": 1069,
+        "hours": 83.25,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 688
+      },
+      {
+        "seed": 1071,
+        "hours": 82.2,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 703
+      },
+      {
+        "seed": 1072,
+        "hours": 64.7,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 699
+      },
+      {
+        "seed": 1078,
+        "hours": 83.08333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 749
+      },
+      {
+        "seed": 1079,
+        "hours": 107.25,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 691
+      },
+      {
+        "seed": 1080,
+        "hours": 68.15,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1082,
+        "hours": 38.43333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 7,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 727
+      },
+      {
+        "seed": 1088,
+        "hours": 84.83333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1093,
+        "hours": 43.6,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 740
+      },
+      {
+        "seed": 1095,
+        "hours": 70.01666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1096,
+        "hours": 126.91666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 24,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 759
+      },
+      {
+        "seed": 1100,
+        "hours": 152.71666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 30,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 763
+      },
+      {
+        "seed": 1102,
+        "hours": 63.25,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 714
+      },
+      {
+        "seed": 1106,
+        "hours": 102.18333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 19,
+          "noticed": 4,
+          "avoided": 4,
+          "hits": 0
+        },
+        "points": 691
+      },
+      {
+        "seed": 1108,
+        "hours": 55.78333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 733
+      },
+      {
+        "seed": 1112,
+        "hours": 106.68333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 691
+      },
+      {
+        "seed": 1114,
+        "hours": 106.58333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1115,
+        "hours": 110.81666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 774
+      },
+      {
+        "seed": 1116,
+        "hours": 121.38333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 710
+      },
+      {
+        "seed": 1119,
+        "hours": 76.3,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 720
+      },
+      {
+        "seed": 1122,
+        "hours": 92.75,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 672
+      },
+      {
+        "seed": 1123,
+        "hours": 53.5,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 713
+      },
+      {
+        "seed": 1125,
+        "hours": 115.38333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 769
+      },
+      {
+        "seed": 1128,
+        "hours": 76.78333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 733
+      },
+      {
+        "seed": 1133,
+        "hours": 93.43333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 687
+      },
+      {
+        "seed": 1135,
+        "hours": 49.916666666666664,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 764
+      },
+      {
+        "seed": 1136,
+        "hours": 81.56666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 767
+      },
+      {
+        "seed": 1139,
+        "hours": 139.43333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 5,
+        "searches": 8,
+        "hazards": {
+          "outages": 26,
+          "noticed": 5,
+          "avoided": 5,
+          "hits": 0
+        },
+        "points": 757
+      },
+      {
+        "seed": 1140,
+        "hours": 72.33333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 769
+      },
+      {
+        "seed": 1141,
+        "hours": 110.63333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 722
+      },
+      {
+        "seed": 1143,
+        "hours": 69.95,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 714
+      },
+      {
+        "seed": 1144,
+        "hours": 34.88333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 7,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 745
+      },
+      {
+        "seed": 1145,
+        "hours": 84.75,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 704
+      },
+      {
+        "seed": 1147,
+        "hours": 107.86666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 750
+      },
+      {
+        "seed": 1152,
+        "hours": 112.15,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1153,
+        "hours": 43.2,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 695
+      },
+      {
+        "seed": 1154,
+        "hours": 49.75,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 9,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 783
+      },
+      {
+        "seed": 1155,
+        "hours": 41.766666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 744
+      },
+      {
+        "seed": 1157,
+        "hours": 109.18333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 722
+      },
+      {
+        "seed": 1158,
+        "hours": 57.11666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 715
+      },
+      {
+        "seed": 1160,
+        "hours": 95.56666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 720
+      },
+      {
+        "seed": 1162,
+        "hours": 106.16666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 724
+      },
+      {
+        "seed": 1163,
+        "hours": 61.11666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 738
+      },
+      {
+        "seed": 1164,
+        "hours": 116.01666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 743
+      },
+      {
+        "seed": 1165,
+        "hours": 107.23333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 691
+      },
+      {
+        "seed": 1170,
+        "hours": 85.53333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 751
+      },
+      {
+        "seed": 1171,
+        "hours": 86.85,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 701
+      },
+      {
+        "seed": 1174,
+        "hours": 74.4,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 720
+      },
+      {
+        "seed": 1175,
+        "hours": 66.61666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 716
+      },
+      {
+        "seed": 1177,
+        "hours": 69.26666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 764
+      },
+      {
+        "seed": 1179,
+        "hours": 65.36666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 4,
+          "avoided": 4,
+          "hits": 0
+        },
+        "points": 729
+      },
+      {
+        "seed": 1181,
+        "hours": 164.23333333333332,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 32,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 747
+      },
+      {
+        "seed": 1182,
+        "hours": 83.45,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 749
+      },
+      {
+        "seed": 1183,
+        "hours": 86.56666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 703
+      },
+      {
+        "seed": 1185,
+        "hours": 80.53333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1186,
+        "hours": 105.36666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 19,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1189,
+        "hours": 86.83333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 703
+      },
+      {
+        "seed": 1191,
+        "hours": 68.9,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 714
+      },
+      {
+        "seed": 1193,
+        "hours": 66.53333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 653
+      },
+      {
+        "seed": 1195,
+        "hours": 95.45,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 672
+      },
+      {
+        "seed": 1196,
+        "hours": 93.48333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 755
+      },
+      {
+        "seed": 1198,
+        "hours": 104.18333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 739
+      },
+      {
+        "seed": 1200,
+        "hours": 81.73333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 703
+      },
+      {
+        "seed": 1201,
+        "hours": 52.95,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 731
+      },
+      {
+        "seed": 1202,
+        "hours": 63.81666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 731
+      },
+      {
+        "seed": 1204,
+        "hours": 53.7,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 5,
+          "avoided": 5,
+          "hits": 0
+        },
+        "points": 750
+      },
+      {
+        "seed": 1205,
+        "hours": 85.38333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 703
+      },
+      {
+        "seed": 1206,
+        "hours": 60.1,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 764
+      },
+      {
+        "seed": 1207,
+        "hours": 75.45,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 4,
+          "avoided": 4,
+          "hits": 0
+        },
+        "points": 750
+      },
+      {
+        "seed": 1209,
+        "hours": 102.95,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 752
+      },
+      {
+        "seed": 1212,
+        "hours": 107.48333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 723
+      },
+      {
+        "seed": 1214,
+        "hours": 85.66666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 717
+      },
+      {
+        "seed": 1216,
+        "hours": 5.566666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 1,
+        "searches": 3,
+        "hazards": {
+          "outages": 1,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 708
+      },
+      {
+        "seed": 1218,
+        "hours": 106.31666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 706
+      },
+      {
+        "seed": 1219,
+        "hours": 36.3,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 699
+      },
+      {
+        "seed": 1220,
+        "hours": 81.6,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 702
+      },
+      {
+        "seed": 1221,
+        "hours": 72.16666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 720
+      },
+      {
+        "seed": 1223,
+        "hours": 58.71666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 715
+      },
+      {
+        "seed": 1225,
+        "hours": 63.45,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 716
+      },
+      {
+        "seed": 1227,
+        "hours": 75.51666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 15,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 716
+      },
+      {
+        "seed": 1231,
+        "hours": 116.01666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 756
+      },
+      {
+        "seed": 1234,
+        "hours": 110.21666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 738
+      },
+      {
+        "seed": 1236,
+        "hours": 70.4,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1238,
+        "hours": 89.08333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 749
+      },
+      {
+        "seed": 1241,
+        "hours": 104.9,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 737
+      },
+      {
+        "seed": 1244,
+        "hours": 90.85,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1246,
+        "hours": 92.41666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 3,
+          "avoided": 3,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1248,
+        "hours": 130.25,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 25,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 710
+      },
+      {
+        "seed": 1249,
+        "hours": 79.03333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 736
+      },
+      {
+        "seed": 1250,
+        "hours": 0.8333333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 0,
+        "searches": 0,
+        "hazards": {
+          "outages": 0,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 704
+      },
+      {
+        "seed": 1251,
+        "hours": 105.88333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 19,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 721
+      },
+      {
+        "seed": 1252,
+        "hours": 88.25,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 751
+      },
+      {
+        "seed": 1254,
+        "hours": 98,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 721
+      },
+      {
+        "seed": 1257,
+        "hours": 79.28333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 14,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 749
+      },
+      {
+        "seed": 1259,
+        "hours": 79.71666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 704
+      },
+      {
+        "seed": 1260,
+        "hours": 133.33333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 25,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 754
+      },
+      {
+        "seed": 1261,
+        "hours": 95.01666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 18,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 748
+      },
+      {
+        "seed": 1263,
+        "hours": 113.36666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 22,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 720
+      },
+      {
+        "seed": 1265,
+        "hours": 88.75,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 701
+      },
+      {
+        "seed": 1266,
+        "hours": 102.3,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 676
+      },
+      {
+        "seed": 1271,
+        "hours": 132.86666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 25,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 728
+      },
+      {
+        "seed": 1272,
+        "hours": 67.38333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 13,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 699
+      },
+      {
+        "seed": 1275,
+        "hours": 85.3,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 702
+      },
+      {
+        "seed": 1276,
+        "hours": 83.13333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 16,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 734
+      },
+      {
+        "seed": 1280,
+        "hours": 57.31666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 747
+      },
+      {
+        "seed": 1281,
+        "hours": 88.03333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 688
+      },
+      {
+        "seed": 1282,
+        "hours": 106.2,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 20,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 754
+      },
+      {
+        "seed": 1283,
+        "hours": 64.46666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 12,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 715
+      },
+      {
+        "seed": 1284,
+        "hours": 116.26666666666667,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 23,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 740
+      },
+      {
+        "seed": 1285,
+        "hours": 59.53333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 11,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 745
+      },
+      {
+        "seed": 1288,
+        "hours": 82.11666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 735
+      },
+      {
+        "seed": 1289,
+        "hours": 44.38333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 8,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 730
+      },
+      {
+        "seed": 1291,
+        "hours": 111.83333333333333,
+        "ending": "death_dehydration",
+        "baseVisits": 2,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 742
+      },
+      {
+        "seed": 1293,
+        "hours": 90.06666666666666,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 17,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 718
+      },
+      {
+        "seed": 1296,
+        "hours": 104.35,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 21,
+          "noticed": 2,
+          "avoided": 2,
+          "hits": 0
+        },
+        "points": 721
+      },
+      {
+        "seed": 1297,
+        "hours": 55.666666666666664,
+        "ending": "death_dehydration",
+        "baseVisits": 4,
+        "searches": 8,
+        "hazards": {
+          "outages": 10,
+          "noticed": 1,
+          "avoided": 1,
+          "hits": 0
+        },
+        "points": 713
+      },
+      {
+        "seed": 1299,
+        "hours": 135.43333333333334,
+        "ending": "death_dehydration",
+        "baseVisits": 3,
+        "searches": 8,
+        "hazards": {
+          "outages": 26,
+          "noticed": 0,
+          "avoided": 0,
+          "hits": 0
+        },
+        "points": 726
+      }
+    ]
+  },
+  "shared": {
+    "beforeStarts": 107,
+    "beforeCensored": 9,
+    "beforeBankedMeanPerStart": 247.55140186915887,
+    "comparison": {
+      "before": {
+        "n": 98,
+        "mean": 270.2857142857143,
+        "min": 20,
+        "p10": 40,
+        "p25": 62,
+        "median": 328.5,
+        "p75": 354,
+        "p90": 652,
+        "max": 717
+      },
+      "after": {
+        "n": 98,
+        "mean": 276.2142857142857,
+        "min": 20,
+        "p10": 40,
+        "p25": 55,
+        "median": 340,
+        "p75": 361,
+        "p90": 666,
+        "max": 742
+      },
+      "ratio": 1.0219344608879493,
+      "starts": 107,
+      "censored": [
+        {
+          "seed": 104006,
+          "level": "level-0",
+          "hours": 120.83333333333333
+        },
+        {
+          "seed": 105006,
+          "level": "level-0",
+          "hours": 50.333333333333336
+        },
+        {
+          "seed": 106000,
+          "level": "level-0",
+          "hours": 32.21666666666667
+        },
+        {
+          "seed": 107003,
+          "level": "level-0",
+          "hours": 39.666666666666664
+        },
+        {
+          "seed": 109007,
+          "level": "level-0",
+          "hours": 27.883333333333333
+        },
+        {
+          "seed": 110001,
+          "level": "level-0",
+          "hours": 50
+        },
+        {
+          "seed": 111002,
+          "level": "level-0",
+          "hours": 34.18333333333333
+        },
+        {
+          "seed": 112000,
+          "level": "level-0",
+          "hours": 72.6
+        },
+        {
+          "seed": 114003,
+          "level": "level-0",
+          "hours": 88.16666666666667
+        }
+      ],
+      "bankedMeanPerStart": 252.98130841121494
+    },
+    "samples": [
+      {
+        "campaign": 0,
+        "seed": 100000,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 82.5,
+        "points": 531
+      },
+      {
+        "campaign": 0,
+        "seed": 100001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 50.8,
+        "points": 46
+      },
+      {
+        "campaign": 0,
+        "seed": 100002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 139.83333333333334,
+        "points": 651
+      },
+      {
+        "campaign": 0,
+        "seed": 100003,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 164.45,
+        "points": 340
+      },
+      {
+        "campaign": 0,
+        "seed": 100004,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 51.233333333333334,
+        "points": 236
+      },
+      {
+        "campaign": 0,
+        "seed": 100005,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 124.26666666666667,
+        "points": 332
+      },
+      {
+        "campaign": 0,
+        "seed": 100006,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 109.68333333333334,
+        "points": 76
+      },
+      {
+        "campaign": 0,
+        "seed": 100007,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 55.81666666666667,
+        "points": 38
+      },
+      {
+        "campaign": 0,
+        "seed": 100008,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 157.8,
+        "points": 354
+      },
+      {
+        "campaign": 0,
+        "seed": 100009,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 55.266666666666666,
+        "points": 48
+      },
+      {
+        "campaign": 1,
+        "seed": 101000,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 95.9,
+        "points": 130
+      },
+      {
+        "campaign": 1,
+        "seed": 101001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 76.83333333333333,
+        "points": 69
+      },
+      {
+        "campaign": 1,
+        "seed": 101002,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 78.68333333333334,
+        "points": 56
+      },
+      {
+        "campaign": 1,
+        "seed": 101003,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 135.1,
+        "points": 649
+      },
+      {
+        "campaign": 1,
+        "seed": 101004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 138.86666666666667,
+        "points": 350
+      },
+      {
+        "campaign": 1,
+        "seed": 101005,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 62.733333333333334,
+        "points": 40
+      },
+      {
+        "campaign": 1,
+        "seed": 101006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 91.75,
+        "points": 340
+      },
+      {
+        "campaign": 1,
+        "seed": 101007,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 154.5,
+        "points": 364
+      },
+      {
+        "campaign": 1,
+        "seed": 101008,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 59.833333333333336,
+        "points": 38
+      },
+      {
+        "campaign": 1,
+        "seed": 101009,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 97.05,
+        "points": 72
+      },
+      {
+        "campaign": 2,
+        "seed": 102000,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 60.28333333333333,
+        "points": 95
+      },
+      {
+        "campaign": 2,
+        "seed": 102001,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 35.55,
+        "points": 435
+      },
+      {
+        "campaign": 2,
+        "seed": 102002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 143.23333333333332,
+        "points": 666
+      },
+      {
+        "campaign": 2,
+        "seed": 102003,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 99.06666666666666,
+        "points": 72
+      },
+      {
+        "campaign": 2,
+        "seed": 102004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 129.81666666666666,
+        "points": 346
+      },
+      {
+        "campaign": 2,
+        "seed": 102005,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 79.08333333333333,
+        "points": 56
+      },
+      {
+        "campaign": 2,
+        "seed": 102006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 144.21666666666667,
+        "points": 348
+      },
+      {
+        "campaign": 2,
+        "seed": 102007,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 182.56666666666666,
+        "points": 357
+      },
+      {
+        "campaign": 2,
+        "seed": 102008,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 163.55,
+        "points": 353
+      },
+      {
+        "campaign": 2,
+        "seed": 102009,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 164.15,
+        "points": 351
+      },
+      {
+        "campaign": 3,
+        "seed": 103000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 166.88333333333333,
+        "points": 738
+      },
+      {
+        "campaign": 3,
+        "seed": 103001,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 34.05,
+        "points": 30
+      },
+      {
+        "campaign": 3,
+        "seed": 103002,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 56,
+        "points": 53
+      },
+      {
+        "campaign": 3,
+        "seed": 103003,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 34.266666666666666,
+        "points": 20
+      },
+      {
+        "campaign": 3,
+        "seed": 103004,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 63.15,
+        "points": 440
+      },
+      {
+        "campaign": 3,
+        "seed": 103005,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 38.53333333333333,
+        "points": 222
+      },
+      {
+        "campaign": 3,
+        "seed": 103006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 113.03333333333333,
+        "points": 345
+      },
+      {
+        "campaign": 3,
+        "seed": 103007,
+        "ending": "death_injury",
+        "level": "level-1",
+        "hours": 109.6,
+        "points": 386
+      },
+      {
+        "campaign": 3,
+        "seed": 103008,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 123.38333333333334,
+        "points": 331
+      },
+      {
+        "campaign": 3,
+        "seed": 103009,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 115.71666666666667,
+        "points": 345
+      },
+      {
+        "campaign": 4,
+        "seed": 104000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 100.9,
+        "points": 683
+      },
+      {
+        "campaign": 4,
+        "seed": 104001,
+        "ending": "exit_level72",
+        "level": "level-0",
+        "hours": 102.11666666666666,
+        "points": 519
+      },
+      {
+        "campaign": 4,
+        "seed": 104002,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 72.91666666666667,
+        "points": 54
+      },
+      {
+        "campaign": 4,
+        "seed": 104003,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 60.733333333333334,
+        "points": 40
+      },
+      {
+        "campaign": 4,
+        "seed": 104004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 212.41666666666666,
+        "points": 360
+      },
+      {
+        "campaign": 4,
+        "seed": 104005,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 32.666666666666664,
+        "points": 30
+      },
+      {
+        "campaign": 4,
+        "seed": 104006,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 120.83333333333333,
+        "points": null
+      },
+      {
+        "campaign": 5,
+        "seed": 105000,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 59.13333333333333,
+        "points": 93
+      },
+      {
+        "campaign": 5,
+        "seed": 105001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 75.85,
+        "points": 69
+      },
+      {
+        "campaign": 5,
+        "seed": 105002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 170.31666666666666,
+        "points": 654
+      },
+      {
+        "campaign": 5,
+        "seed": 105003,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 142.38333333333333,
+        "points": 347
+      },
+      {
+        "campaign": 5,
+        "seed": 105004,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 55.916666666666664,
+        "points": 38
+      },
+      {
+        "campaign": 5,
+        "seed": 105005,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 63.21666666666667,
+        "points": 40
+      },
+      {
+        "campaign": 5,
+        "seed": 105006,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 50.333333333333336,
+        "points": null
+      },
+      {
+        "campaign": 6,
+        "seed": 106000,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 32.21666666666667,
+        "points": null
+      },
+      {
+        "campaign": 7,
+        "seed": 107000,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 36.766666666666666,
+        "points": 62
+      },
+      {
+        "campaign": 7,
+        "seed": 107001,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 94.15,
+        "points": 669
+      },
+      {
+        "campaign": 7,
+        "seed": 107002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 140.9,
+        "points": 381
+      },
+      {
+        "campaign": 7,
+        "seed": 107003,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 39.666666666666664,
+        "points": null
+      },
+      {
+        "campaign": 8,
+        "seed": 108000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 175.56666666666666,
+        "points": 742
+      },
+      {
+        "campaign": 8,
+        "seed": 108001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 58.36666666666667,
+        "points": 38
+      },
+      {
+        "campaign": 8,
+        "seed": 108002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 152.35,
+        "points": 381
+      },
+      {
+        "campaign": 8,
+        "seed": 108003,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 148.58333333333334,
+        "points": 350
+      },
+      {
+        "campaign": 8,
+        "seed": 108004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 142.25,
+        "points": 335
+      },
+      {
+        "campaign": 8,
+        "seed": 108005,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 57.28333333333333,
+        "points": 48
+      },
+      {
+        "campaign": 8,
+        "seed": 108006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 127.21666666666667,
+        "points": 346
+      },
+      {
+        "campaign": 8,
+        "seed": 108007,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 120.45,
+        "points": 344
+      },
+      {
+        "campaign": 8,
+        "seed": 108008,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 161.3,
+        "points": 352
+      },
+      {
+        "campaign": 8,
+        "seed": 108009,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 111.26666666666667,
+        "points": 359
+      },
+      {
+        "campaign": 9,
+        "seed": 109000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 97.2,
+        "points": 680
+      },
+      {
+        "campaign": 9,
+        "seed": 109001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 53.333333333333336,
+        "points": 66
+      },
+      {
+        "campaign": 9,
+        "seed": 109002,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 76.16666666666667,
+        "points": 69
+      },
+      {
+        "campaign": 9,
+        "seed": 109003,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 194.41666666666666,
+        "points": 386
+      },
+      {
+        "campaign": 9,
+        "seed": 109004,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 55.81666666666667,
+        "points": 53
+      },
+      {
+        "campaign": 9,
+        "seed": 109005,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 165.98333333333332,
+        "points": 367
+      },
+      {
+        "campaign": 9,
+        "seed": 109006,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 76.6,
+        "points": 54
+      },
+      {
+        "campaign": 9,
+        "seed": 109007,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 27.883333333333333,
+        "points": null
+      },
+      {
+        "campaign": 10,
+        "seed": 110000,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 53.45,
+        "points": 76
+      },
+      {
+        "campaign": 10,
+        "seed": 110001,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 50,
+        "points": null
+      },
+      {
+        "campaign": 11,
+        "seed": 111000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 98.16666666666667,
+        "points": 710
+      },
+      {
+        "campaign": 11,
+        "seed": 111001,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 143.06666666666666,
+        "points": 350
+      },
+      {
+        "campaign": 11,
+        "seed": 111002,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 34.18333333333333,
+        "points": null
+      },
+      {
+        "campaign": 12,
+        "seed": 112000,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 72.6,
+        "points": null
+      },
+      {
+        "campaign": 13,
+        "seed": 113000,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 76.06666666666666,
+        "points": 109
+      },
+      {
+        "campaign": 13,
+        "seed": 113001,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 120.41666666666667,
+        "points": 676
+      },
+      {
+        "campaign": 13,
+        "seed": 113002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 116.21666666666667,
+        "points": 347
+      },
+      {
+        "campaign": 13,
+        "seed": 113003,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 77,
+        "points": 54
+      },
+      {
+        "campaign": 13,
+        "seed": 113004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 94.18333333333334,
+        "points": 355
+      },
+      {
+        "campaign": 13,
+        "seed": 113005,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 144.18333333333334,
+        "points": 351
+      },
+      {
+        "campaign": 13,
+        "seed": 113006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 115.4,
+        "points": 331
+      },
+      {
+        "campaign": 13,
+        "seed": 113007,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 115.25,
+        "points": 347
+      },
+      {
+        "campaign": 13,
+        "seed": 113008,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 186.53333333333333,
+        "points": 358
+      },
+      {
+        "campaign": 13,
+        "seed": 113009,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 75.46666666666667,
+        "points": 54
+      },
+      {
+        "campaign": 14,
+        "seed": 114000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 156.18333333333334,
+        "points": 737
+      },
+      {
+        "campaign": 14,
+        "seed": 114001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 62.86666666666667,
+        "points": 55
+      },
+      {
+        "campaign": 14,
+        "seed": 114002,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 61.016666666666666,
+        "points": 40
+      },
+      {
+        "campaign": 14,
+        "seed": 114003,
+        "ending": "censored",
+        "level": "level-0",
+        "hours": 88.16666666666667,
+        "points": null
+      },
+      {
+        "campaign": 15,
+        "seed": 115000,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 141.33333333333334,
+        "points": 717
+      },
+      {
+        "campaign": 15,
+        "seed": 115001,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 53.96666666666667,
+        "points": 66
+      },
+      {
+        "campaign": 15,
+        "seed": 115002,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 134.1,
+        "points": 361
+      },
+      {
+        "campaign": 15,
+        "seed": 115003,
+        "ending": "no_one_returned",
+        "level": "level-0",
+        "hours": 30.916666666666668,
+        "points": 30
+      },
+      {
+        "campaign": 15,
+        "seed": 115004,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 130.5,
+        "points": 361
+      },
+      {
+        "campaign": 15,
+        "seed": 115005,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 73.2,
+        "points": 54
+      },
+      {
+        "campaign": 15,
+        "seed": 115006,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 95.65,
+        "points": 342
+      },
+      {
+        "campaign": 15,
+        "seed": 115007,
+        "ending": "death_dehydration",
+        "level": "level-1",
+        "hours": 162.36666666666667,
+        "points": 338
+      },
+      {
+        "campaign": 15,
+        "seed": 115008,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 74.01666666666667,
+        "points": 54
+      },
+      {
+        "campaign": 15,
+        "seed": 115009,
+        "ending": "death_dehydration",
+        "level": "level-0",
+        "hours": 58.583333333333336,
+        "points": 38
+      }
+    ]
+  }
+}

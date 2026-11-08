@@ -37,8 +37,12 @@ export class Level1 implements World<Level1Zone, Level1WorldData> {
       data.opened.forEach(([k, a]) => this.opened.set(k, a)); data.picked.forEach(k => this.picked.add(k));
       data.crates.forEach(c => this.crates.set(c.id, c)); data.generated.forEach(k => this.generated.add(k));
       this.corpse = data.corpse;
-    } else this.crates.set("arrival", { id: "arrival", i: 0, j: 0, kind: "emergency", examined: true, opened: true,
+    } else {
+      const [bi, bj] = this.base.map(n => Math.floor(n / 8));
+      for (let a = -rules.supplies.radius; a <= rules.supplies.radius; a++) for (let b = -rules.supplies.radius; b <= rules.supplies.radius; b++) if (Math.abs(a) + Math.abs(b) <= rules.supplies.radius) this.populate(bi + a, bj + b);
+      this.crates.set("arrival", { id: "arrival", i: 0, j: 0, kind: "emergency", examined: true, opened: true,
       items: rules.supplies.emergency.flatMap(x => Array.from({ length: x.count }, (_, n) => ({ key: `l1:arrival:${x.item}:${n}`, id: x.item }))) });
+    }
   }
   hash(...n: number[]) { return hashWith(this.seed, 1901, ...n); }
   global(u: number, v: number): [number, number] {
@@ -84,9 +88,13 @@ export class Level1 implements World<Level1Zone, Level1WorldData> {
     return { i, j, ver: 0, panel: this.zone(i, j) === "alpha" || this.hash(i, j, 5) < .75 ? { int: 1, warm: 1 } : "dead",
       hole: false, pits: [], items: [], searched: false, salt: false };
   }
+  inSupplyArea(i: number, j: number) {
+    return Math.abs(Math.floor(i / 8) - Math.floor(this.base[0] / 8)) + Math.abs(Math.floor(j / 8) - Math.floor(this.base[1] / 8)) <= this.rules.supplies.radius;
+  }
   private populate(bi: number, bj: number) {
+    if (!this.inSupplyArea(bi * 8, bj * 8)) return;
     const k = ck(bi, bj); if (this.generated.has(k)) return; this.generated.add(k);
-    for (let n = 0; n < 2; n++) {
+    for (let n = 0; n < this.rules.supplies.perChunk; n++) {
       const i = bi * 8 + 1 + Math.floor(this.hash(bi, bj, n, 10) * 6), j = bj * 8 + 1 + Math.floor(this.hash(bi, bj, n, 11) * 6);
       if (this.zone(i, j) === "alpha") continue;
       const id = `crate:${bi},${bj}:${n}`, items: InvItem[] = [];

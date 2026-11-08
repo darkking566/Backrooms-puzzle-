@@ -260,7 +260,7 @@ export class Game {
       case "elderChoice":
         if (this.zoneHere() === "alpha") { for (const t of hearElder(r, this.meta, this.elder, cmd.id)) this.say(t); this.out.important = true; } break;
       case "readNotice":
-        if (this.zoneHere() === "alpha") { this.say(this.elder.text.supplies); this.out.important = true; } break;
+        if (this.zoneHere() === "alpha") { this.say(this.elder.text.supplies); this.say(this.supplyNotice()); this.out.important = true; } break;
     }
     if (!r.ended && cmd.type !== "mapMark" && cmd.type !== "rereadNotebook") {
       const entered = from.i !== r.pos.i || from.j !== r.pos.j || !hadNotebook;
@@ -773,11 +773,23 @@ export class Game {
     this.out.sfx.push("paper");
   }
 
-  /* ---------- developer panel (?dev) ---------- */
+  /* ---------- Base Alpha ---------- */
+  private supplyNotice(): Text {
+    if (this.world.level !== "level-1") return this.elder.text.exhausted;
+    const p = this.run.pos, crates = [...this.world.crates.values()].filter(c => c.kind !== "base" && c.kind !== "emergency" && (!c.opened || c.items.length))
+      .sort((a, b) => Math.abs(a.i-p.i)+Math.abs(a.j-p.j)-Math.abs(b.i-p.i)-Math.abs(b.j-p.j));
+    if (!crates.length) return this.elder.text.exhausted;
+    const c = crates[0], east = c.i-p.i, south = c.j-p.j;
+    const zh = [east ? `${east > 0 ? "東" : "西"} ${Math.abs(east)} 格` : "", south ? `${south > 0 ? "南" : "北"} ${Math.abs(south)} 格` : ""].filter(Boolean).join("、");
+    const en = [east ? `${Math.abs(east)} ${east > 0 ? "east" : "west"}` : "", south ? `${Math.abs(south)} ${south > 0 ? "south" : "north"}` : ""].filter(Boolean).join(", ");
+    return T(`最近的未收集標記：從這裡往${zh}。隔板可能要繞路。箱子可能在停電時消失；回來再核對告示。`, `Nearest uncollected marking: ${en} cells from here. Dividers may require a detour. Crates can vanish during blackouts; check the notice again when you return.`);
+  }
+
   get elder() { return this.c.npcs[0]; }
   elderChoices() { return this.elder.choices.filter(ch => elderChoiceVisible(this.run, this.meta, ch)); }
   private meetAlphaElder() { for (const t of meetElder(this.run, this.meta, this.elder)) this.say(t); }
 
+  /* ---------- developer panel (?dev) ---------- */
   devJump(where: "manila" | "red" | "flicker" | "outage" | "day" | "level1" | "alpha") {
     if (where === "level1") {
       if (this.run.level === "level-0") { this.out = { say: [], anim: { kind: "none" }, sfx: [], minutes: 0 }; this.enterLevel1(); } return;
@@ -806,7 +818,7 @@ export class Game {
     const r = this.run, first = !this.meta.discoveries.includes("level1") && !this.meta.endings.includes("exit_level1"), rules = this.c.levels[0];
     r.mapPages.push({ level: r.level, map: r.map, mapMarks: r.mapMarks }); r.map = {}; r.mapMarks = {};
     r.level = "level-1";
-    r.l1 = { enteredAt: r.time, power: { phase: "normal", nextAt: 0 }, encounter: null, hazards: newLevel1Hazards(), baseClaimed: false, elder: { met: false, meeting: null } };
+    r.l1 = { enteredAt: r.time, power: { phase: "normal", nextAt: 0 }, encounter: null, hazards: newLevel1Hazards(), baseClaimed: false, searches: 0, baseVisits: 0, elder: { met: false, meeting: null } };
     r.fakePiano = null; r.pendingEvent = null;
     this.world = new Level1(r.seed, rules); r.pos = { i: 0, j: 0, d: this.world.rotation };
     this.world.ensureAround(0, 0); this.placeCorpse(); r.world = this.world.toData();

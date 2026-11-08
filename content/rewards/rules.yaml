@@ -1,4 +1,4 @@
-# Provisional until the full Level 1 economy comparison (commit 7).
+# Calibrated against frozen 4b23188 fresh/shared-Meta BOT campaigns; see DESIGN §21.
 - id: level1
   arrival: 300
   firstArrival: 250

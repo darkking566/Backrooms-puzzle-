@@ -40,7 +40,7 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
       w.ensureAround(r.pos.i, r.pos.j); out.anim = { kind: "move", from, d: cmd.d }; out.rebuild = true;
       x.pass(10 + Math.floor(x.rand() * 7) + (r.l1?.power.phase === "blackout" && w.zone(r.pos.i, r.pos.j) !== "alpha" && !(has("flashlight") && r.flashlightOn) ? 8 : 0), "walk"); if (r.ended) return true;
       const zone = w.zone(r.pos.i, r.pos.j);
-      if (zone !== previous) { x.say(rules.zones[zone]); if (zone === "alpha") { x.discover("base_alpha"); x.meetElder(); out.important = true; } }
+      if (zone !== previous) { x.say(rules.zones[zone]); if (zone === "alpha") { x.discover("base_alpha"); r.l1!.baseVisits++; x.meetElder(); out.important = true; } }
       if (w.corpse?.[0] === r.pos.i && w.corpse[1] === r.pos.j) x.say(T("水泥柱旁躺著一具遺體。", "A body lies beside the concrete pillar."), "warn");
       return true;
     }
@@ -63,12 +63,16 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
       if (r.l1?.power.phase === "blackout" && w.zone(cell.i, cell.j) !== "alpha" && !(has("flashlight") && r.flashlightOn)) { x.say(T("黑暗裡看不清箱子與木板。", "You cannot make out the crates and boards in the dark.")); return true; }
       if (cell.searched) { x.say(T("這一帶你已經翻過了。", "You have already been over this area.")); return true; }
       cell.searched = true;
-      if (w.zone(cell.i, cell.j) !== "alpha" && x.rand() < .25) {
+      const mayFind = w.zone(cell.i, cell.j) !== "alpha" && w.inSupplyArea(cell.i, cell.j) && r.l1!.searches < rules.supplies.searchLimit;
+      if (mayFind) r.l1!.searches++;
+      if (mayFind && x.rand() < rules.supplies.searchChance) {
         const pool = ["snack_bar", "almond_water", "bandage", "flashlight", "notebook", "bottle"], id = pool[Math.floor(x.rand() * pool.length)];
         cell.items.push({ key: `l1:search:${cell.i},${cell.j}`, id, x: .3, z: .2,
           bottle: id === "bottle" ? w.rollBottle(cell.i, cell.j, 0) : undefined });
         x.say(T("木板下面壓著一件東西。", "Something lies beneath the boards.")); out.rebuild = true;
-      } else x.say(T("你翻過木板和空紙盒。只有灰塵。", "You turn over boards and empty cartons. Only dust."));
+      } else x.say(!w.inSupplyArea(cell.i, cell.j) || r.l1!.searches >= rules.supplies.searchLimit
+        ? T("這裡的紙盒早已翻空。告示上的補給只在基地附近，不會一直補上。", "These cartons were emptied long ago. The supplies on the notice are near the base, and do not keep replenishing.")
+        : T("你翻過木板和空紙盒。只有灰塵。", "You turn over boards and empty cartons. Only dust."));
       return true;
     }
     case "readGuide":

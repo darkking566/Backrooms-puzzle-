@@ -83,6 +83,8 @@ export interface Level1Run {
   encounter: { phase: "noticed" | "approaching"; retreat: { i: number; j: number }; direction: Dir } | null;
   hazards: { outages: number; noticed: number; avoided: number; hits: number };
   baseClaimed: boolean;
+  searches: number;
+  baseVisits: number;
   elder: { met: boolean; meeting: number | null };
 }
 export const newLevel1Hazards = () => ({ outages: 0, noticed: 0, avoided: 0, hits: 0 });

@@ -52,7 +52,7 @@ export const Level = z.object({
   id: z.literal("level-1"), name: Text, arrival: Text, again: Text, guide: Text, sign: Text,
   zones: z.object({ arrival: Text, warehouse: Text, storage: Text, alpha: Text }).strict(),
   layout: z.object({ chunkSize: z.literal(8), baseMin: z.number().int().min(8), baseMax: z.number().int().max(12) }).strict(),
-  supplies: z.object({ emergency: Supplies, base: Supplies, waterChance: Chance, foodChance: Chance, toolChance: Chance }).strict(),
+  supplies: z.object({ emergency: Supplies, base: Supplies, waterChance: Chance, foodChance: Chance, toolChance: Chance, radius: z.number().int().min(0).max(2), perChunk: z.number().int().min(1).max(2), searchLimit: z.number().int().nonnegative(), searchChance: Chance }).strict(),
   crate: z.object({ name: Text, description: Text, latch: Text, opened: Text, empty: Text, needLatch: Text,
     examineMinutes: z.number().int().positive(), openMinutes: z.number().int().positive(), crowbarMinutes: z.number().int().positive() }).strict(),
   base: z.object({ name: Text, supplies: Text, claimed: Text, rest: Text, outsideRest: Text }).strict(),

@@ -16,9 +16,13 @@
   layout: { chunkSize: 8, baseMin: 8, baseMax: 12 }
   supplies:
     emergency: [{ item: almond_water, count: 1 }, { item: bandage, count: 1 }]
-    base: [{ item: almond_water, count: 2 }, { item: snack_bar, count: 2 }, { item: bandage, count: 1 }]
-    waterChance: 0.65
-    foodChance: 0.8
+    base: [{ item: almond_water, count: 1 }, { item: snack_bar, count: 1 }, { item: bandage, count: 1 }]
+    waterChance: 0.25
+    radius: 1
+    perChunk: 1
+    searchLimit: 8
+    searchChance: 0.18
+    foodChance: 0.5
     toolChance: 0.25
   crate:
     name: { zh: 補給箱, en: Supply crate }

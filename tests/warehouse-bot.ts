@@ -4,7 +4,7 @@ import { DV, ck, type Dir } from "../src/core/types";
 import { passable } from "../src/world/types";
 import { reachableCrate } from "../src/core/level1";
 
-export function playWarehouse(g: Game, limit = 500) {
+export function playWarehouse(g: Game, limit = 3000) {
   const w = g.world; if (w.level !== "level-1") throw new Error("warehouse expected");
   let reachedBase = false, talked = false;
   for (let n = 0; n < limit && !g.run.ended; n++) {
@@ -30,10 +30,16 @@ export function playWarehouse(g: Game, limit = 500) {
       if (it) { g.dispatch({ type: "crateTake", id: local.id, key: it.key }); continue; }
     }
     if (zone === "alpha" && r.stats.awake > 18 * 60) { g.dispatch({ type: "rest", hours: 8 }); continue; }
+    const loose = g.cellHere().items.find(i => useful(i.id) && g.weight() + g.item(i.id).weight <= 8);
+    if (loose) { g.dispatch({ type: "pickup", key: loose.key }); continue; }
+    const searchesLeft = r.l1!.searches < w.rules.supplies.searchLimit;
+    if (reachedBase && searchesLeft && zone !== "alpha" && w.inSupplyArea(r.pos.i, r.pos.j) && !g.cellHere().searched) { g.dispatch({ type: "search" }); continue; }
     const returnBase = !reachedBase || r.stats.awake > 18 * 60;
     const target = returnBase ? { i: w.base[0], j: w.base[1] } : [...w.crates.values()]
       .filter(c => !c.opened || c.items.some(i => useful(i.id) && g.weight() + g.item(i.id).weight <= 8))
-      .sort((a, b) => Math.abs(a.i - r.pos.i) + Math.abs(a.j - r.pos.j) - Math.abs(b.i - r.pos.i) - Math.abs(b.j - r.pos.j))[0];
+      .sort((a, b) => Math.abs(a.i - r.pos.i) + Math.abs(a.j - r.pos.j) - Math.abs(b.i - r.pos.i) - Math.abs(b.j - r.pos.j))[0]
+      ?? (searchesLeft ? [...w.cells.values()].filter(c => !c.searched && w.zone(c.i, c.j) !== "alpha" && w.inSupplyArea(c.i, c.j)).sort((a, b) => Math.abs(a.i-r.pos.i)+Math.abs(a.j-r.pos.j)-Math.abs(b.i-r.pos.i)-Math.abs(b.j-r.pos.j))[0] : undefined)
+      ?? { i: w.base[0], j: w.base[1] };
     if (!target) { g.dispatch({ type: "move", d: r.pos.d }); continue; }
     const queue = [{ i: r.pos.i, j: r.pos.j, first: null as Dir | null }], seen = new Set([ck(r.pos.i, r.pos.j)]);
     let dir: Dir | null = null;
@@ -48,5 +54,7 @@ export function playWarehouse(g: Game, limit = 500) {
     if (dir === null) g.dispatch({ type: "rest", hours: 2 });
     else g.dispatch({ type: "move", d: dir });
   }
-  return { reachedBase, hours: (g.run.time - g.run.l1!.enteredAt) / 60 };
+  return { reachedBase, metElder: rElder(g), hours: (g.run.time - g.run.l1!.enteredAt) / 60 };
 }
+
+const rElder = (g: Game) => !!g.run.l1?.elder.met;
