@@ -267,7 +267,7 @@ export class Game {
     if (c.searched) return this.say(T("這一帶你已經翻過了。", "You have already been over this area."));
     c.searched = true;
     if (this.rand("loot") < .08) {
-      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 13], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2]]);
+      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 6], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2]]);
       this.drop_(c.items, id, c.i, c.j, "s" + r.time);
       this.say(T(`你在牆角的地毯縫裡找到了東西：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Wedged where the carpet meets the wall, you find something: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
       this.out.rebuild = true;
