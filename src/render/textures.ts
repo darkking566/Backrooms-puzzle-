@@ -51,6 +51,16 @@ function doorTex(kind: "wood" | "metal" | "manila") {
 export function makeTextures(maxAniso: number) {
   aniso = maxAniso;
   return {
+  concrete: canvasTex(256, 256, (x, w, h) => {
+    const r = mulberry(1901); x.fillStyle = "#9b9fa0"; x.fillRect(0, 0, w, h);
+    noise(x, w, h, 35, r); x.strokeStyle = "rgba(38,43,45,.3)"; x.lineWidth = 2;
+    x.strokeRect(1, 1, w - 2, h - 2);
+    for (let n = 0; n < 24; n++) { const a = r() * w, b = r() * h; x.beginPath(); x.moveTo(a, b); x.lineTo(a + r() * 12, b + r() * 18); x.stroke(); }
+  }),
+  alphaSign: canvasTex(128, 128, (x, w, h) => {
+    x.fillStyle = "#697879"; x.fillRect(0, 0, w, h); x.strokeStyle = "#eeeedd"; x.lineWidth = 6; x.strokeRect(10, 10, w - 20, h - 20);
+    x.fillStyle = "#eeeedd"; x.font = "bold 82px sans-serif"; x.textAlign = "center"; x.fillText("A", w / 2, 96);
+  }),
   walls: [0, 1, 2].map(k => wallpaper("#cdb75a", "rgba(225,205,120,.35)", 11 + k, 3 + k * 2)),
   pale: wallpaper("#d8d0a8", "rgba(240,232,200,.4)", 41, 2),
   carpet: canvasTex(256, 256, (x, w, h) => {        // tight Berber loops, seamless on all four edges

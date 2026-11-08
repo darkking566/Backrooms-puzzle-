@@ -9,9 +9,9 @@ import { perceive, PIANO_CAPTION } from "../src/systems/hallucinations";
 const c = loadContent();
 function setup(dm = 20) {
   const g = Game.newRun(c, newMeta(), 2024, []); g.run.stats.sanity = 20;
-  vi.spyOn(g.world, "zone").mockReturnValue("hall");
-  vi.spyOn(g.world, "manilaDist").mockReturnValue(dm);
-  vi.spyOn(g.world, "redDist").mockReturnValue(99);
+  vi.spyOn(g.level0, "zone").mockReturnValue("hall");
+  vi.spyOn(g.level0, "manilaDist").mockReturnValue(dm);
+  vi.spyOn(g.level0, "redDist").mockReturnValue(99);
   const audio = new Audio(), captions: Text[] = []; audio.onCaption = t => captions.push(t);
   return { g, audio, captions };
 }
@@ -19,6 +19,13 @@ beforeEach(() => { vi.useFakeTimers(); });
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe("auditory perceptions", () => {
+  it("shows warehouse captions while muted without advancing state or random streams", () => {
+    const { g, audio, captions } = setup(); g.devJump("level1");
+    const before = JSON.stringify(g.save()); audio.ambience(g); audio.ambience(g);
+    expect(captions.some(t => t.zh.includes("水泥"))).toBe(true);
+    expect(audio.on).toBe(false); expect(audio.lv.piano).toBe(0);
+    expect(JSON.stringify(g.save())).toBe(before);
+  });
   it("uses identical sound levels, timbre and captions for real and false piano", () => {
     const real = setup(4), fake = setup();
     fake.g.run.fakePiano = { i: 4, j: 0, until: 180, heard: true };
@@ -41,7 +48,7 @@ describe("auditory perceptions", () => {
     const { g, audio, captions } = setup(); g.run.status.hearing_damage = 100;
     g.run.halluc.pianoAfter = 1000;
     const values = [0, .5, 0];
-    const out = perceive(g.run, g.world, { action: "move", minutes: 13, previousSanity: 20, important: false }, () => values.shift() ?? .99);
+    const out = perceive(g.run, g.level0, { action: "move", minutes: 13, previousSanity: 20, important: false }, () => values.shift() ?? .99);
     expect(out.caption).toEqual(T("〔遠處有腳步聲〕", "[Footsteps in the distance]"));
     audio.caption(out.caption!, g);
     const genuine = T("〔門軸吱呀作響〕", "[The hinges creak]"); audio.caption(genuine, g);
@@ -61,7 +68,7 @@ describe("auditory perceptions", () => {
   it("announces piano when it crosses the subtitle threshold, even after a fainter approach", () => {
     const { g, audio, captions } = setup(5.8);
     audio.ambience(g); expect(captions).not.toContainEqual(PIANO_CAPTION);
-    vi.mocked(g.world.manilaDist).mockReturnValue(5);
+    vi.mocked(g.level0.manilaDist).mockReturnValue(5);
     audio.ambience(g); audio.ambience(g);
     expect(captions.filter(t => t.en === PIANO_CAPTION.en)).toHaveLength(1);
   });

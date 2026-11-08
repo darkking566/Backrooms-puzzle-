@@ -2,7 +2,7 @@
    with sound off (phones are often muted; deaf players). Hearing damage muffles both. */
 import { sstep, T, type Text } from "../core/types";
 import type { Game } from "../core/game";
-import { edgeCells } from "../world/level0";
+import { edgeCells } from "../world/types";
 import { hasStatus } from "../systems/survival";
 import { pianoLevels, PIANO_AUDIBLE, PIANO_CAPTION } from "../systems/hallucinations";
 
@@ -39,6 +39,9 @@ export class Audio {
     N.crk = gain(0, N.master); loopNoise().connect(filt("highpass", 1800, .5, N.crk));
     N.drone = gain(0, N.master); const df = filt("lowpass", 180, .5, N.drone); osc("sine", 41, df); osc("sine", 41.6, df); osc("triangle", 55.2, gain(.3, df));
     N.buzz = gain(0, N.master); osc("square", 180, filt("lowpass", 900, 2, N.buzz));
+    N.voices = gain(0, N.master); const voiceMod = gain(.5, N.voices);
+    loopNoise().connect(filt("bandpass", 480, 1.4, voiceMod));
+    const voicePulse = C.createGain(); voicePulse.gain.value = .45; voicePulse.connect(voiceMod.gain); osc("sine", 2.3, voicePulse);
     N.piano = gain(0, N.master); N.piano.connect(N.verb); N.pianoF = filt("lowpass", 900, .5, N.piano);
   }
   private pnote(m: number, t: number, v: number) {
@@ -67,12 +70,12 @@ export class Audio {
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
     o.connect(g); g.connect(this.n.master); o.start(t); o.stop(t + dur + .05);
   }
-  step(surface: "carpet" | "water" | "wood" | "sticky", n: number) {
+  step(surface: "carpet" | "water" | "wood" | "sticky" | "concrete", n: number) {
     if (!this.on || !this.ctx) return; const t0 = this.ctx.currentTime + .12;
     for (let k = 0; k < n; k++) {
       const t = t0 + k * .34 + Math.random() * .03;
       if (surface === "water") { this.burst(t, .18, "bandpass", 900 + Math.random() * 400, 1.2, .22); this.burst(t + .06, .25, "bandpass", 2200, 2, .08); }
-      else if (surface === "wood") { this.burst(t, .07, "bandpass", 520, 1.5, .3); this.thump(t, 95, .12, .22); }
+      else if (surface === "wood" || surface === "concrete") { this.burst(t, .07, "bandpass", surface === "concrete" ? 1500 : 520, 1.5, .3); this.thump(t, 95, .12, .22); }
       else { this.burst(t, .09, "lowpass", 420, .7, .28); if (surface === "sticky") this.burst(t + .1, .03, "highpass", 3000, .7, .07); }
     }
   }
@@ -95,14 +98,15 @@ export class Audio {
     else if (name === "distant_knocks") { this.thump(t, 125, .1, .045); this.thump(t + .42, 125, .1, .04); }
     else if (name === "whoosh") this.burst(t, 1.2, "lowpass", 600, .5, .5);
     else if (name === "spike") { const o = C.createOscillator(), g = C.createGain(); o.type = "sawtooth"; o.frequency.value = 2400; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .3); g.gain.linearRampToValueAtTime(0, t + 2.5); o.connect(g); g.connect(this.n.master); o.start(t); o.stop(t + 2.6); }
-    else if (name === "end") { this.n.hum.gain.setTargetAtTime(0, t, .3); this.n.piano.gain.setTargetAtTime(0, t, .3); }
+    else if (name === "end") { this.n.hum.gain.setTargetAtTime(0, t, .3); this.n.piano.gain.setTargetAtTime(0, t, .3); this.n.voices.gain.setTargetAtTime(0, t, .3); }
   }
   /** Every spoken caption takes the same hearing-damage path, even with sound disabled. */
   caption(text: Text, g: Game) { this.onCaption(hasStatus(g.run, "hearing_damage") ? muffle(text) : text); }
 
   /** Follow where you stand. Captions appear once when something becomes audible. */
   ambience(g: Game) {
-    const { i, j } = g.run.pos, w = g.world, z = w.zone(i, j), inM = z === "manila";
+    if (g.world.level === "level-1") { this.warehouseAmbience(g); return; }
+    const { i, j } = g.run.pos, w = g.level0, z = w.zone(i, j), inM = z === "manila";
     const dm = w.manilaDist(i, j), dr = w.redDist(i, j);
     let lit = 0, fl = 0;
     for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const c = w.cells.get((i + di) + "," + (j + dj)); const p = c?.panel; if (p && p !== "dead" && !p.red && !w.inManila(c!.i, c!.j)) { lit++; if (p.flick) fl++; } }
@@ -124,11 +128,27 @@ export class Audio {
     this.capState = st;
     if (!this.ctx) return;
     const n = this.n, now = this.ctx.currentTime, set = (p: AudioParam, v: number, tc: number) => p.setTargetAtTime(v, now, tc);
+    set(n.voices.gain, 0, .3);
     set(n.out.frequency, this.muffled ? 700 : 18000, .5);
     set(n.hum.gain, lv.hum, pw ? .7 : .25);
     set(n.h1.frequency, pw ? 120 - 22 * redK : 70, .5); set(n.h2.frequency, pw ? 60 - 11 * redK : 35, .5);
     set(n.humF.frequency, 650 - 320 * redK, .8);
     set(n.piano.gain, lv.piano, 1.2); set(n.pianoF.frequency, lv.cut, 1.2); set(n.drone.gain, lv.drone, 1.5); set(n.buzz.gain, this.muffled ? 0 : lv.buzz, .8);
+  }
+  private warehouseAmbience(g: Game) {
+    const alpha = g.zoneHere() === "alpha", dark = g.powerOut();
+    const entering = !this.capState.warehouse;
+    this.lv = { hum: dark ? 0 : alpha ? .06 : .13, piano: 0, cut: 900, drone: 0, buzz: 0, fl: 0 };
+    if (!this.capState.warehouse) this.caption(T("〔水滴落在水泥地上，回聲很長〕", "[Water drips onto concrete. A long echo]"), g);
+    if (alpha && !this.capState.alpha) this.caption(T("〔隔板後有人交談，椅腳擦過地面〕", "[Voices behind the partition. A chair scrapes the floor]"), g);
+    this.capState = { warehouse: true, alpha };
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    if (entering && this.on) { this.thump(t, 900, .08, .04); this.burst(t + .03, .25, "bandpass", 1400, 3, .025); }
+    this.n.hum.gain.setTargetAtTime(this.lv.hum, t, .5);
+    this.n.voices.gain.setTargetAtTime(alpha ? .025 : 0, t, .5);
+    for (const key of ["piano", "drone", "buzz", "crk"]) this.n[key].gain.setTargetAtTime(0, t, .4);
+    this.n.out.frequency.setTargetAtTime(hasStatus(g.run, "hearing_damage") ? 700 : 18000, t, .5);
   }
   crackle(v: number) { if (this.on && this.ctx) this.n.crk.gain.setTargetAtTime(this.lv.fl ? v : 0, this.ctx.currentTime, .03); }
 }

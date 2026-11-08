@@ -86,7 +86,7 @@ function End({ again, title }: { again: () => void; title: () => void }) {
   const g = ctx.game!, e = g.run.ended!, def = ctx.content.endings.find(x => x.id === e.ending)!;
   return <div class={"end" + (e.ending === "closed_loop" ? " red" : "")} role="dialog"><div class="col">
     <h2>{L(def.title)}</h2>
-    <p class="story">{L(def.text)}</p>
+    <p class="story">{L(e.level === "level-1" ? def.textByLevel?.["level-1"] ?? def.text : def.text)}</p>
     <h3 class="muted" style="font-weight:400;margin:6px 0 0">{U("endMemories")}</h3>
     <table><tbody>{e.breakdown.map((b, k) => <tr key={k}><td>{L(b.label)}</td><td>+{b.pts}</td></tr>)}<tr><td><b>{U("total")}</b></td><td><b>+{e.points}</b></td></tr></tbody></table>
     <p class="muted">{U("nowHave", { n: ctx.meta.points })}</p>
@@ -96,7 +96,7 @@ function End({ again, title }: { again: () => void; title: () => void }) {
 }
 
 function Codex({ back }: { back: () => void }) {
-  const m = ctx.meta, all = ctx.content.endings;
+  const m = ctx.meta, all = ctx.content.endings.filter(e => !e.legacy || m.endings.includes(e.id));
   return <div class="screen"><div class="col">
     <h2>{U("codex")}</h2>
     <h3 class="muted" style="font-weight:400;margin:0">{U("endings")} · {m.endings.length}/{all.length}</h3>

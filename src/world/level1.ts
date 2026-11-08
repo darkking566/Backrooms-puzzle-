@@ -3,10 +3,10 @@ import type { LevelData } from "../../tools/content-schema";
 import { ck, DV, type Dir } from "../core/types";
 import { hashWith } from "../core/rng";
 import type { InvItem } from "../state/types";
-import { edgeKey, edgeCells, VIEW, type Cell, type Edge, type Level1Zone, type Listener, type Pose, type World } from "./types";
+import { edgeKey, edgeCells, VIEW, type Bottle, type Cell, type Edge, type Level1Zone, type Listener, type Pose, type World } from "./types";
 
 export interface SupplyCrate {
-  id: string; i: number; j: number; kind: "emergency" | "supply" | "tools";
+  id: string; i: number; j: number; kind: "emergency" | "supply" | "tools" | "base";
   examined: boolean; opened: boolean; items: InvItem[];
 }
 export interface Level1WorldData {
@@ -54,6 +54,11 @@ export class Level1 implements World<Level1Zone, Level1WorldData> {
     if (u >= this.distance && u <= this.distance + 1 && v >= 0 && v <= 1) return "alpha";
     if (i === 0 && j === 0) return "arrival";
     return v !== 0 && this.hash(Math.floor(u / 8), Math.floor(v / 8), 3) < .5 ? "storage" : "warehouse";
+  }
+  rollBottle(i: number, j: number, ver: number): Bottle {
+    const h = this.hash(i, j, ver, 90), color = h < .5 ? "grey" : h < .7 ? "green" : h < .85 ? "blue" : "reddish";
+    return { liquid: color === "grey" ? "aw_grey" : color === "green" ? "aw_green" : color === "blue" ? "aw_blue" : this.hash(i, j, ver, 91) < .5 ? "aw_red" : "liquid_pain",
+      color, full: true, sealed: true, spoiled: false };
   }
   stable(_i: number, _j: number) { return true; }
   wet(i: number, j: number) { return this.zone(i, j) !== "alpha" && (this.hash(i, j, 4) < .24 || (i === 0 && j === 0)); }

@@ -7,23 +7,23 @@ import { loadContent } from "../tools/content-plugin";
 const c = loadContent();
 function archGame() {
   const m = newMeta(); m.runs = 1; const g = Game.newRun(c, m, 1234, []);
-  const cell = [...g.world.cells.values()].find(c => g.world.zone(c.i, c.j) === "arch")!;
-  g.run.pos = { i: cell.i, j: cell.j, d: 0 }; g.world.ensureAround(cell.i, cell.j);
+  const cell = [...g.level0.cells.values()].find(c => g.level0.zone(c.i, c.j) === "arch")!;
+  g.run.pos = { i: cell.i, j: cell.j, d: 0 }; g.level0.ensureAround(cell.i, cell.j);
   g.run.moves = 8; g.run.packPlan = "arch"; return g;
 }
 describe("unseen pack placement", () => {
   it("only chooses stable reachable arch cells outside the movement's old and new views", () => {
     const g = archGame(), before = { ...g.run.pos };
-    const d = ([0, 1, 2, 3] as Dir[]).find(d => traversable(g.world.edgeAt(before.i, before.j, d)) && g.world.zone(before.i + DV[d][0], before.j + DV[d][1]) === "arch")!;
-    g.world.edges.set(edgeKey(before.i, before.j, d), "open"); g.dispatch({ type: "move", d });
-    const p = g.run.lockedPack!; expect(p).not.toBeNull(); expect(g.world.zone(p.pos.i, p.pos.j)).toBe("arch");
-    expect(g.world.visibleFrom([before, g.run.pos]).has(ck(p.pos.i, p.pos.j))).toBe(false);
-    const old = structuredClone(p); g.world.shiftUnseen(new Set()); g.world.ensureAround(100, 100); g.world.ensureAround(p.pos.i, p.pos.j); expect(g.run.lockedPack).toEqual(old);
+    const d = ([0, 1, 2, 3] as Dir[]).find(d => traversable(g.level0.edgeAt(before.i, before.j, d)) && g.level0.zone(before.i + DV[d][0], before.j + DV[d][1]) === "arch")!;
+    g.level0.edges.set(edgeKey(before.i, before.j, d), "open"); g.dispatch({ type: "move", d });
+    const p = g.run.lockedPack!; expect(p).not.toBeNull(); expect(g.level0.zone(p.pos.i, p.pos.j)).toBe("arch");
+    expect(g.level0.visibleFrom([before, g.run.pos]).has(ck(p.pos.i, p.pos.j))).toBe(false);
+    const old = structuredClone(p); g.level0.shiftUnseen(new Set()); g.level0.ensureAround(100, 100); g.level0.ensureAround(p.pos.i, p.pos.j); expect(g.run.lockedPack).toEqual(old);
   });
   it("waits when no unseen reachable candidate exists", () => {
-    const g = archGame(); expect(g.world.unseenArchSite([g.run.pos])).not.toBeNull();
-    const poses = [...g.world.cells.values()].flatMap(c => ([0, 1, 2, 3] as Dir[]).map(d => ({ i: c.i, j: c.j, d })));
-    expect(g.world.unseenArchSite(poses)).toBeNull();
+    const g = archGame(); expect(g.level0.unseenArchSite([g.run.pos])).not.toBeNull();
+    const poses = [...g.level0.cells.values()].flatMap(c => ([0, 1, 2, 3] as Dir[]).map(d => ({ i: c.i, j: c.j, d })));
+    expect(g.level0.unseenArchSite(poses)).toBeNull();
   });
   it("has no first-run packs and preselects later runs reproducibly", () => {
     const first = Game.newRun(c, newMeta(), 1, []); expect(first.run.packPlan).toBe("none"); expect(first.run.rng.counters.puzzles).toBe(0);

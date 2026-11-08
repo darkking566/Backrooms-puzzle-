@@ -16,6 +16,7 @@ function markLabel(mark: MapMark): string {
 }
 function zoneLabel(cell: MapCell): string {
   switch (cell.zone) {
+    case "warehouse": return U("mapWarehouse"); case "storage": return U("mapStorage"); case "alpha": return U(cell.visited ? "mapAlpha" : "mapRoom"); case "arrival": return U("mapArrival");
     case "unknown": return U("mapUnknown");
     case "arch": return U("mapArch");
     case "manila": return cell.visited ? U("mapManila") : U("mapRoom");
@@ -52,7 +53,10 @@ function Edge({ edge, d }: { edge: MapEdge; d: number }) {
   </g>;
 }
 
-export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
+export function NotebookMap({ run: source, act }: { run: RunState; act: Act }) {
+  const [page, setPage] = useState(-1);
+  const archived = page >= 0 ? source.mapPages[page] : null;
+  const r = archived ? { ...source, map: archived.map, mapMarks: archived.mapMarks } : source;
   const svg = useRef<SVGSVGElement>(null);
   const [view, setView] = useState({ x: r.pos.i, y: r.pos.j, span: 7 });
   const [selected, setSelected] = useState<MapKey | null>(null);
@@ -60,10 +64,10 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
   const drag = useRef<{ id: number; x: number; y: number; cx: number; cy: number; scale: number; moved: boolean } | null>(null);
   const hasNotebook = r.inv.some(x => x.id === "notebook");
   const cell = selected ? r.map[selected] : undefined, mark = selected ? r.mapMarks[selected] : undefined;
-  const block = notebookReadBlock(r);
+  const block = notebookReadBlock(source);
   const zoom = (factor: number) => setView(v => ({ ...v, span: Math.max(4, Math.min(32, v.span * factor)) }));
   const select = (key: MapKey) => { setSelected(key); const m = r.mapMarks[key]; setCustom(m?.kind === "custom" ? m.text : ""); };
-  const setMark = (value: MapMark | null) => { if (selected) act({ type: "mapMark", key: selected, mark: value }); };
+  const setMark = (value: MapMark | null) => { if (selected && !archived) act({ type: "mapMark", key: selected, mark: value }); };
   const choosePoint = (x: number, y: number) => {
     const matrix = svg.current?.getScreenCTM(); if (!matrix) return;
     const p = new DOMPoint(x, y).matrixTransform(matrix.inverse()), key = mapKey(Math.round(p.x), Math.round(p.y));
@@ -72,6 +76,11 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
 
   if (!hasNotebook) return <p class="story">{U("mapMissing")}</p>;
   return <div class="notebook">
+    {source.mapPages.length > 0 && <div class="map-tools">
+      <button aria-pressed={!archived} onClick={() => { setPage(-1); setSelected(null); setView(v => ({ ...v, x: source.pos.i, y: source.pos.j })); }}>{U("mapCurrent")} · {source.level.replace("level-", "Level ")}</button>
+      {source.mapPages.map((p, n) => <button key={n} aria-pressed={page === n} onClick={() => { const [i, j] = (Object.keys(p.map)[0] ?? "0,0").split(",").map(Number); setPage(n); setSelected(null); setView(v => ({ ...v, x: i, y: j })); }}>{U("mapPrevious")} · {p.level.replace("level-", "Level ")}</button>)}
+    </div>}
+    {archived && <p class="muted small">{U("mapArchived")}</p>}
     <p class="muted small map-hint">{U("mapHint")}</p>
     <div class="map-tools" aria-label={U("mapControls")}>
       <button type="button" onClick={() => zoom(.8)} aria-label={U("mapZoomIn")}>＋</button>
@@ -103,11 +112,12 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
           const [i, j] = key.split(",").map(Number), entryKey = key as MapKey, note = r.mapMarks[entryKey];
           const angle = memory.messy ? (hashWith(r.seed, i, j, memory.ver, 801) - .5) * 6 : 0;
           const skew = memory.messy ? (hashWith(r.seed, i, j, memory.ver, 802) - .5) * 5 : 0;
-          const zone = memory.zone === "manila" && !memory.visited ? "hall" : memory.zone;
+          const zone = memory.zone === "manila" && !memory.visited ? "hall" : memory.zone === "alpha" && !memory.visited ? "warehouse" : memory.zone;
           return <g key={key} transform={`translate(${i} ${j})`}>
             <g opacity={mapOpacity(r.time, memory.t)} transform={`rotate(${angle}) skewX(${skew})`}>
               <rect class={`map-cell zone-${zone}`} x={-.49} y={-.49} width={.98} height={.98} />
               {memory.walls.map((edge, d) => <Edge key={d} edge={edge} d={d} />)}
+              {zone === "alpha" && memory.visited && <text class="map-zone" x={0} y={.12}>A</text>}
               {zone === "arch" && <text class="map-zone" x={0} y={.12}>∩</text>}
               {zone === "manila" && <text class="map-zone" x={0} y={.12}>M</text>}
               {zone === "unknown" && <text class="map-zone" x={.28} y={.35}>?</text>}
@@ -121,9 +131,9 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
             </rect>
           </g>;
         })}
-        <g transform={`translate(${r.pos.i} ${r.pos.j}) rotate(${r.pos.d * 90})`} class="map-player" aria-label={U("mapYou")}>
+        {!archived && <g transform={`translate(${r.pos.i} ${r.pos.j}) rotate(${r.pos.d * 90})`} class="map-player" aria-label={U("mapYou")}>
           <path d="M 0,-.3 L .19,.21 L 0,.12 L -.19,.21 Z" /><title>{U("mapYou")}</title>
-        </g>
+        </g>}
       </svg>
     </div>
     <div class="map-legend small"><span>▲ {U("mapYou")}</span><span>━ {U("mapWall")}</span><span>▰ {U("mapDoor")}</span><span>∩ {U("mapArch")}</span><span>M {U("mapManila")}</span><span>⌁ {U("mapFlicker")}</span><span>? {U("mapUnknown")}</span></div>
@@ -132,7 +142,7 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
       <p class="small"><b>{zoneLabel(cell)}</b> · {U(cell.visited ? "mapVisited" : "mapSeen")}{cell.messy && <span class="map-messy"> · {U("mapMessy")}</span>}</p>
       <p class="small muted">{recordedAt(r, cell)}</p>
       {mark && <p class="map-note">{markLabel(mark)}</p>}
-      <div class="map-mark-tools">{(["water", "danger", "exit"] as const).map(kind => <button type="button" key={kind}
+      {!archived && <><div class="map-mark-tools">{(["water", "danger", "exit"] as const).map(kind => <button type="button" key={kind}
         aria-pressed={mark?.kind === kind} onClick={() => setMark({ kind })}>{markLabel({ kind })}</button>)}
         <button type="button" disabled={!mark} onClick={() => { setMark(null); setCustom(""); }}>{U("mapErase")}</button>
       </div>
@@ -140,7 +150,7 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
         <label for="map-custom" class="small muted">{U("mapCustom")}</label>
         <div class="map-custom-row"><input type="text" id="map-custom" maxLength={20} value={custom}
           onInput={e => setCustom(e.currentTarget.value)} /><button type="submit" disabled={!custom.trim()}>{U("mapSaveMark")}</button></div>
-      </form>
+      </form></>}
     </div> : <p class="muted small">{U("mapSelect")}</p>}
     <button class="opt" disabled={!!block || !!r.pendingEvent} onClick={() => act({ type: "rereadNotebook" })}>
       {U("mapReread")}<small>{U("minutes", { m: 10 })}</small>

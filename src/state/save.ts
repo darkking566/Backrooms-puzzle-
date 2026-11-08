@@ -33,7 +33,10 @@ export function migrateMeta(m: (Partial<Meta> & { corpse?: Corpse | null }) | un
   const base = newMeta();
   if (!m || typeof m !== "object") return base;
   const { corpse, ...rest } = m;
+  const discoveries = [...(m.discoveries ?? [])];
+  if (m.endings?.includes("exit_level1") && !discoveries.includes("level1")) discoveries.push("level1");
   return { ...base, ...rest,
+    discoveries,
     corpses: { ...(m.corpses ?? (corpse ? { "level-0": corpse } : {})) },
     symbolLock: { ...base.symbolLock, ...m.symbolLock },
     roomPerson: { ...base.roomPerson, ...m.roomPerson, flags: { ...base.roomPerson.flags, ...m.roomPerson?.flags } },

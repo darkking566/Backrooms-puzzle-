@@ -2,6 +2,12 @@
 import type { Lang, Text } from "../core/types";
 const t = (zh: string, en: string): Text => ({ zh, en });
 export const UI = {
+  supplyCrate: t("補給箱", "Supply crate"), survivalGuide: t("求生紙條", "Survival note"), routeSign: t("白色標記", "White markings"),
+  baseSupplies: t("應急補給", "Emergency supplies"), collectSupplies: t("領取", "Collect"), crateExamine: t("查看側板", "Examine side panel"),
+  crateOpen: t("拉開滑閂", "Slide the latch"), crateCrowbar: t("用撬棍打開", "Open with crowbar"),
+  mapCurrent: t("目前這一頁", "Current page"), mapPrevious: t("之前的地圖", "Earlier map"),
+  mapArchived: t("這是先前畫下的那一頁。", "A page drawn earlier."),
+  mapWarehouse: t("主倉間", "Main warehouse"), mapStorage: t("貨架側道", "Storage aisles"), mapAlpha: t("Alpha 基地", "Base Alpha"), mapArrival: t("落點", "Arrival bay"),
   flashlightOn: t("打開手電筒", "Switch flashlight on"), flashlightOff: t("關閉手電筒", "Switch flashlight off"),
   talk: t("交談", "Talk"), personWaterChoice: t("要交出的水", "Water to give"),
   personBack: t("起身，回到房間裡", "Stand up and return to the room"),

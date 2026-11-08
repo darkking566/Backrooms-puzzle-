@@ -49,7 +49,7 @@ describe("game", () => {
   });
   it("the Manila Room cabinet and notes persist in meta", () => {
     const meta = newMeta(), g = Game.newRun(c, meta, 5, []);
-    const [mi, mj] = g.world.manila; g.run.pos = { i: mi, j: mj, d: 0 }; g.world.ensureAround(mi, mj);
+    const [mi, mj] = g.level0.manila; g.run.pos = { i: mi, j: mj, d: 0 }; g.world.ensureAround(mi, mj);
     const k = meta.cabinet[0].key; g.dispatch({ type: "cabinetTake", key: k });
     expect(g.run.inv.some(x => x.key === k)).toBe(true);
     g.dispatch({ type: "cabinetPut", key: k }); g.dispatch({ type: "writeNote", text: "左轉三次" });

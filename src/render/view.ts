@@ -1,15 +1,17 @@
+import type { ActiveWorld } from "../world/world";
 /* The 3D view: fixed stations, light grid, instanced building, picking, labels, smooth motion, old-photo post.
    It only reads the game; it never changes it. Taps become Pick values for the UI to turn into commands. */
 import * as THREE from "three";
 import { ck, DV, sstep, type Dir } from "../core/types";
 import type { Anim, Game } from "../core/game";
-import { edgeCells, edgeKey, passable, isOpenDoor, solid, S, type Cell } from "../world/level0";
+import { edgeCells, edgeKey, passable, isOpenDoor, solid, S, type Cell } from "../world/types";
 import { makeTextures } from "./textures";
 import { H, litMat, makeGeometry, makeMaterials, shared, type Geometry, type Materials } from "./materials";
 
 export type Pick =
   | { kind: "exit"; d: Dir } | { kind: "item"; key: string; i: number; j: number } | { kind: "door"; edge: string } | { kind: "flicker"; edge: string }
   | { kind: "wall"; edge: string } | { kind: "tally" } | { kind: "peel" } | { kind: "hole" } | { kind: "pit" } | { kind: "salt" } | { kind: "corpse" }
+  | { kind: "crate"; id: string } | { kind: "guide" } | { kind: "routeSign" } | { kind: "baseSupplies" }
   | { kind: "notes" } | { kind: "cabinet" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 export type Quality = "low" | "mid" | "high";
 const TIERS: Record<Quality, { scale: number; R: number; res: number; post: number }> = {
@@ -30,6 +32,7 @@ export class View {
   busy = false; labelText: (p: Pick) => string = () => "";
   onPick: (p: Pick) => void = () => {};
   onLookStart: () => void = () => {};
+  private attachedWorld: ActiveWorld | null = null;
   private built: THREE.Object3D[] = []; private blockers: THREE.Object3D[] = []; private pickables: THREE.Object3D[] = []; private exitMeshes: THREE.Mesh[] = [];
   private dummy = new THREE.Object3D(); private figure: THREE.Mesh | null = null;
   private rt = new THREE.WebGLRenderTarget(2, 2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
@@ -52,10 +55,10 @@ export class View {
     const TEX = makeTextures(this.renderer.capabilities.getMaxAnisotropy());
     this.MAT = makeMaterials(TEX); this.GEO = makeGeometry();
     this.post = new THREE.ShaderMaterial({
-      uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uQ: { value: 1 }, uRed: { value: 0 }, uSan: { value: 0 } },
+      uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uQ: { value: 1 }, uRed: { value: 0 }, uSan: { value: 0 }, uWarehouse: { value: 0 } },
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
       fragmentShader: `
-        uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uQ; uniform float uRed; uniform float uSan; varying vec2 vUv;
+        uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uQ; uniform float uRed; uniform float uSan; uniform float uWarehouse; varying vec2 vUv;
         float rnd(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime) * 43758.5453); }
         void main(){
           vec2 uv = vUv, c = uv - .5, px = 1.0 / uRes; float r2 = dot(c,c);
@@ -66,7 +69,7 @@ export class View {
             col = mix(col, blur, .35); col += max(blur - .72, 0.) * 1.6 * vec3(1., .95, .75);
           }
           col = 1. - exp(-col * 1.35);
-          col *= vec3(1.06, 1.0, .80);
+          col *= mix(vec3(1.06, 1.0, .80), vec3(.94, .99, 1.05), uWarehouse);
           float l = dot(col, vec3(.299,.587,.114)); col = mix(vec3(l), col, .82 - .25 * uSan);
           col = mix(col, col * vec3(1.2, .76, .7), uRed);
           col *= 1. - r2 * (1.25 + 1.6 * uSan);
@@ -82,19 +85,28 @@ export class View {
   }
   private onResize = () => this.resize();
   dispose() {
-    this.loopOn = false; this.game?.world.listeners.splice(this.game.world.listeners.indexOf(this.listener), 1); this.game = null;
+    this.loopOn = false; this.detachWorld(); this.game = null;
     removeEventListener("resize", this.onResize); this.renderer.dispose(); this.renderer.forceContextLoss();
   }
   private get R() { return TIERS[this.tier].R; }
   private RB() { return this.R + 1; }        // drawing range: one ring past R, hidden in fog so new cells never pop into sight
   private setFog() { (this.scene.fog as THREE.FogExp2).density = 1.79 / ((this.R + 1) * S - 2); }
 
+  private detachWorld() {
+    const listeners = this.attachedWorld?.listeners, n = listeners?.indexOf(this.listener) ?? -1;
+    if (listeners && n >= 0) listeners.splice(n, 1);
+    this.attachedWorld = null;
+  }
   attach(game: Game) {
-    this.game?.world.listeners.splice(this.game.world.listeners.indexOf(this.listener), 1);
-    this.game = game; game.world.listeners.push(this.listener);
+    this.detachWorld();
+    this.game = game; this.attachedWorld = game.world; game.world.listeners.push(this.listener);
+    const warehouse = game.world.level === "level-1", color = new THREE.Color(warehouse ? 0x242d30 : 0x2b2613);
+    this.scene.background = color; (this.scene.fog as THREE.FogExp2).color.copy(color);
+    shared.uWarehouse.value = warehouse ? 1 : 0; shared.uCeilingHeight.value = warehouse ? 6 : H;
+    this.post.uniforms.uWarehouse.value = warehouse ? 1 : 0;
     this.tiles.clear(); this.pendingDirty.clear(); this.lights = null; this.figure = null;
     shared.uSeedOff.value.set(game.world.hash(1, 2, 3) * 100, game.world.hash(4, 5, 6) * 100);
-    this.wasOut = game.run.outageLeft > 0; this.power = this.wasOut ? 0 : 1; this.powerAnim = null;
+    this.wasOut = game.powerOut(); this.power = this.wasOut ? 0 : 1; this.powerAnim = null;
     this.setFog(); this.placeCamera(); this.syncEnv(true); this.rebuild(Infinity); this.resize();
   }
   setQuality(q: "auto" | Quality) {
@@ -119,9 +131,9 @@ export class View {
     const g = this.game!; const { i, j } = g.run.pos;
     this.torchTarget = g.isDark() && g.hasLight() ? 1 : 0;
     shared.uAmb.value = g.isDark() && !g.hasLight() ? .03 : .07;
-    const out = g.run.outageLeft > 0;
+    const out = g.powerOut();
     if (out !== this.wasOut) { this.wasOut = out; this.powerAnim = { from: this.power, to: out ? 0 : 1, t0: performance.now(), dur: this.reduceMotion ? 1 : out ? (this.flash ? 900 : 1600) : (this.flash ? 1100 : 2200) }; }
-    this.post.uniforms.uRed.value = (1 - sstep(.8, 3.2, g.world.redDist(i, j))) * .35;
+    this.post.uniforms.uRed.value = g.world.level === "level-0" ? (1 - sstep(.8, 3.2, g.world.redDist(i, j))) * .35 : 0;
     this.post.uniforms.uSan.value = 1 - sstep(15, 60, g.run.stats.sanity);
     if (instant) { shared.uTorch.value = this.torchTarget; this.power = out ? 0 : 1; this.powerAnim = null; }
   }
@@ -165,7 +177,7 @@ export class View {
     let t = this.tiles.get(k); if (!t || t.d.length !== tp * tp * 4) { t = { d: new Uint8Array(tp * tp * 4), f: new Uint8Array(tp * tp * 4), dirty: false }; this.tiles.set(k, t); }
     t.dirty = false;
     if (!this.lights) this.buildLights();
-    const L = this.lights!, cores = w.redCoresNear(ti, tj).map(([a, b]) => [a * S, b * S]), c = w.cells.get(k);
+    const L = this.lights!, cores = (w.level === "level-0" ? w.redCoresNear(ti, tj) : []).map(([a, b]) => [a * S, b * S]), c = w.cells.get(k);
     const wall = (d: number) => solid(w.edges.get(edgeKey(ti, tj, d))), w0 = wall(0), w1 = wall(1), w2 = wall(2), w3 = wall(3), pil = w.zone(ti, tj) === "pillar";
     for (let v = 0; v < tp; v++) for (let u = 0; u < tp; u++) {
       const x = ti * S - S / 2 + (u + .5) * res, z = tj * S - S / 2 + (v + .5) * res;
@@ -256,6 +268,7 @@ export class View {
     const g = this.game!, w = g.world, { i: ci, j: cj } = g.run.pos, RB = this.RB(), M = this.MAT, G = this.GEO;
     for (const m of this.built) { this.scene.remove(m); if ((m as THREE.InstancedMesh).isInstancedMesh) (m as THREE.InstancedMesh).dispose(); }
     this.built = []; this.blockers = [];
+    if (w.level === "level-1") { this.buildWarehouse(); return; }
     const L = { floor: [] as number[][], tile: [] as number[][], ceil: [] as number[][], water: [] as number[][], pit: [] as number[][], hole: [] as number[][], panel: [] as number[][], fpanel: [] as number[][], dead: [] as number[][], pillar: [] as number[][], wood: [] as number[][] };
     const panelOf: (Cell["panel"])[] = [];
     const near_ = (c: { i: number; j: number }) => Math.abs(c.i - ci) <= RB && Math.abs(c.j - cj) <= RB;
@@ -303,8 +316,54 @@ export class View {
     this.bakeLight(ci, cj, near);
     this.rebuildExits();
   }
+  private buildWarehouse() {
+    const g = this.game!, w = g.world; if (w.level !== "level-1") return;
+    const { i: ci, j: cj } = g.run.pos, R = this.RB(), G = this.GEO, M = this.MAT;
+    const floor: number[][] = [], ceiling: number[][] = [], pillars: number[][] = [], panels: number[][] = [], water: number[][] = [], walls: number[][] = [], keys: string[] = [];
+    for (const c of w.cells.values()) {
+      if (Math.abs(c.i - ci) > R || Math.abs(c.j - cj) > R) continue;
+      const x = c.i * S, z = c.j * S, zone = w.zone(c.i, c.j);
+      floor.push([x, 0, z]); ceiling.push([x, 0, z]);
+      if (w.wet(c.i, c.j)) water.push([x, 0, z]);
+      if (c.i % 2 === 0 && c.j % 2 === 0 && zone !== "alpha") pillars.push([x - S / 2, 0, z - S / 2]);
+      if (c.panel && c.panel !== "dead") panels.push([x, 0, z]);
+      if (zone === "storage" && w.hash(c.i, c.j, 70) < .3) {
+        const shelf = new THREE.Mesh(G.box, M.metal); shelf.scale.set(.6, 2.4, 2.4); shelf.position.set(x + 1.5, 1.2, z);
+        this.add(shelf, undefined, true);
+        for (const y of [.25, 1.1, 2]) { const board = new THREE.Mesh(G.box, M.furnDark); board.scale.set(.9, .08, 2.7); board.position.set(x + 1.5, y, z); this.add(board); }
+      }
+      const mark = w.routeMark(c.i, c.j);
+      if (mark !== null) {
+        for (const dx of [-.18, .18]) { const line = new THREE.Mesh(G.box, M.marking); line.scale.set(.06, .015, 2); line.rotation.y = -mark * Math.PI / 2; line.position.set(x + dx * Math.cos(mark * Math.PI / 2), .025, z - dx * Math.sin(mark * Math.PI / 2)); this.add(line); }
+        const sign = new THREE.Mesh(G.box, M.alphaSign); sign.scale.set(.5, .6, .06); sign.position.set(x + 1, 1.3, z);
+        this.add(sign, { pick: { kind: "routeSign" }, label: "routeSign", ly: .2 });
+      }
+      if (zone === "alpha" && w.local(c.i, c.j)[1] === 1) {
+        const bed = new THREE.Mesh(G.box, M.body); bed.scale.set(.85, .35, 1.8); bed.position.set(x + .9, .2, z + .6); this.add(bed);
+        const partition = new THREE.Mesh(G.box, M.metal); partition.scale.set(.08, 2, 2.2); partition.position.set(x - 1.4, 1, z); this.add(partition);
+      }
+    }
+    for (const [k, edge] of w.edges) if (edge === "wall") {
+      const [[i, j]] = edgeCells(k); if (Math.abs(i - ci) > R || Math.abs(j - cj) > R) continue;
+      walls.push([k[0] === "v" ? (i + .5) * S : i * S, 0, k[0] === "v" ? j * S : (j + .5) * S, k[0] === "v" ? Math.PI / 2 : 0]); keys.push(k);
+    }
+    this.inst(G.floor, M.concrete, floor); this.inst(G.warehouseCeil, M.concrete, ceiling);
+    this.inst(G.water, M.water, water); this.inst(G.warehousePanel, M.panel, panels);
+    const p = this.inst(G.warehousePillar, M.concreteWall, pillars); if (p) this.blockers.push(p);
+    const wall = this.inst(G.warehouseWall, M.concreteWall, walls, undefined, keys); if (wall) this.blockers.push(wall);
+    for (const c of w.crates.values()) {
+      if (Math.abs(c.i - ci) > R || Math.abs(c.j - cj) > R) continue;
+      const box = new THREE.Mesh(G.box, M.furnDark); box.scale.set(.9, c.opened ? .25 : .65, .7); box.position.set(c.i * S + .6, c.opened ? .125 : .325, c.j * S + .8);
+      this.add(box, { pick: { kind: "crate", id: c.id }, label: "crate", ly: .5 });
+    }
+    if (Math.abs(ci) <= R && Math.abs(cj) <= R) {
+      const paper = new THREE.Mesh(G.box, M.paper); paper.scale.set(.3, .03, .2); paper.position.set(.6, .28, .8);
+      this.add(paper, { pick: { kind: "guide" }, label: "guide", ly: .4 });
+    }
+    this.objects(ci, cj); this.bakeLight(ci, cj, 2); this.rebuildExits();
+  }
   private decals(ci: number, cj: number) {
-    const w = this.game!.world, R = this.R;
+    const w = this.game!.level0, R = this.R;
     const decal = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, z: number, vert: boolean, side: number, y: number, hot: Hot) => {
       const m = new THREE.Mesh(geo, mat);
       if (vert) { m.position.set(x + side * .076, y, z); m.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2; } else { m.position.set(x, y, z + side * .076); m.rotation.y = side > 0 ? 0 : Math.PI; }
@@ -324,7 +383,7 @@ export class View {
   }
   private objects(ci: number, cj: number) {
     const g = this.game!, w = g.world, R = this.R, M = this.MAT, G = this.GEO;
-    const pack = g.run.lockedPack;
+    const pack = w.level === "level-0" ? g.run.lockedPack : null;
     if (pack && Math.abs(pack.pos.i - ci) <= R && Math.abs(pack.pos.j - cj) <= R) {
       const grp = new THREE.Group();
       const body = new THREE.Mesh(G.box, M.furnDark); body.scale.set(.55, .3, .72); body.position.y = .17; grp.add(body);
@@ -374,7 +433,7 @@ export class View {
     grp.userData.door = k; grp.userData.rot = rot;
   }
   private buildManila() {
-    const w = this.game!.world, M = this.MAT, G = this.GEO, grp = new THREE.Group();
+    const w = this.game!.level0, M = this.MAT, G = this.GEO, grp = new THREE.Group();
     const person = this.game!.run.roomPerson;
     grp.position.set((w.manila[0] + .5) * S, 0, (w.manila[1] + .5) * S);
     const top = new THREE.Mesh(G.tableTop, M.furn), cab = new THREE.Mesh(G.cabinet, M.furnDark), paper = new THREE.Mesh(G.paper, M.paper); paper.rotation.y = .35;
@@ -402,6 +461,7 @@ export class View {
   private maybeFigure() {     // a shadow far down a straight corridor; more often as sanity fails (cosmetic only)
     this.figure = null;
     const g = this.game!, { i, j, d } = g.run.pos, w = g.world;
+    if (w.level !== "level-0") return;
     const chance = .04 + .3 * (1 - sstep(25, 70, g.run.stats.sanity));
     if (g.run.moves < 4 || Math.random() > chance || w.zone(i, j) === "manila" || g.isDark()) return;
     const s = w.straightRun(i, j, d); if (s < 3) return;
@@ -476,7 +536,7 @@ export class View {
   private computeSteady() {
     const g = this.game!, w = g.world, vis = this.visibleCells();
     this.steady = false;
-    for (const k of [w.flickerKey, w.fakeKey]) if (k && vis.has(ck(...edgeCells(k)[0]))) this.steady = true;
+    for (const k of (w.level === "level-0" ? [w.flickerKey, w.fakeKey] : [])) if (k && vis.has(ck(...edgeCells(k)[0]))) this.steady = true;
     if (!this.steady && this.power > 0 && !g.run.outageLeft) for (const k of vis) { const c = w.cells.get(k), p = c?.panel; if (p && p !== "dead" && p.flick && Math.hypot(c!.i - g.run.pos.i, c!.j - g.run.pos.j) <= 3) { this.steady = true; break; } }
   }
   private transient() { return Math.abs(shared.uTorch.value - this.torchTarget) > .01 || !!this.powerAnim || this.doorAnim; }

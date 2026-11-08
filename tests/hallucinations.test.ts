@@ -14,8 +14,8 @@ const action: PerceptionAction = { action: "move", minutes: 13, previousSanity: 
 const draws = (...values: number[]) => { let n = 0; return vi.fn(() => values[n++] ?? .99); };
 function setup(zone: Zone = "hall", sanity = 20, dm = 20) {
   const g = Game.newRun(c, newMeta(), 2024, []); g.run.stats.sanity = sanity; g.run.time = 100;
-  vi.spyOn(g.world, "zone").mockReturnValue(zone);
-  vi.spyOn(g.world, "manilaDist").mockReturnValue(dm);
+  vi.spyOn(g.level0, "zone").mockReturnValue(zone);
+  vi.spyOn(g.level0, "manilaDist").mockReturnValue(dm);
   return g;
 }
 afterEach(() => { vi.restoreAllMocks(); });
@@ -23,67 +23,67 @@ afterEach(() => { vi.restoreAllMocks(); });
 describe("false piano", () => {
   it.each([45, 60, 82])("does not generate a source or lies at sanity %s", sanity => {
     const g = setup("hall", sanity), rand = draws(0);
-    expect(perceive(g.run, g.world, action, rand)).toEqual({ say: [] });
+    expect(perceive(g.run, g.level0, action, rand)).toEqual({ say: [] });
     expect(g.run.fakePiano).toBeNull(); expect(g.run.halluc.history).toEqual([]); expect(rand).not.toHaveBeenCalled();
   });
 
   it("generates a fixed source four to eight cells away for three game hours", () => {
-    const g = setup(); perceive(g.run, g.world, action, draws(0, .4));
+    const g = setup(); perceive(g.run, g.level0, action, draws(0, .4));
     const f = g.run.fakePiano!;
     expect(f).not.toBeNull(); expect(Math.hypot(f.i, f.j)).toBeGreaterThanOrEqual(4);
     expect(Math.hypot(f.i, f.j)).toBeLessThanOrEqual(8); expect(f.until).toBe(280);
-    expect(g.world.inManila(f.i, f.j)).toBe(false);
+    expect(g.level0.inManila(f.i, f.j)).toBe(false);
   });
 
   it("grows louder on approach, fades nearby and vanishes with narration", () => {
     const g = setup(); g.run.fakePiano = { i: 0, j: -5, until: 1000, heard: true };
-    const distant = pianoLevels(g.run, g.world).piano;
-    g.run.pos.j = -2; const closer = pianoLevels(g.run, g.world).piano;
+    const distant = pianoLevels(g.run, g.level0).piano;
+    g.run.pos.j = -2; const closer = pianoLevels(g.run, g.level0).piano;
     expect(closer).toBeGreaterThan(distant);
-    g.run.pos.j = -3; expect(pianoLevels(g.run, g.world).piano).toBeLessThan(closer);
+    g.run.pos.j = -3; expect(pianoLevels(g.run, g.level0).piano).toBeLessThan(closer);
     g.run.pos.j = -4;
-    const out = perceive(g.run, g.world, action, draws(0));
-    expect(g.run.fakePiano).toBeNull(); expect(pianoLevels(g.run, g.world).piano).toBe(0);
+    const out = perceive(g.run, g.level0, action, draws(0));
+    expect(g.run.fakePiano).toBeNull(); expect(pianoLevels(g.run, g.level0).piano).toBe(0);
     expect(out.say).toContainEqual(T("琴聲停了。這裡什麼都沒有。", "The piano stops. There is nothing here."));
     expect(g.run.halluc.pianoAfter).toBe(460);
   });
 
   it.each(["arch", "manila"] as const)("does not generate lies in %s and removes a carried-over source", zone => {
     const g = setup(zone), rand = draws(0);
-    expect(perceive(g.run, g.world, action, rand)).toEqual({ say: [] });
+    expect(perceive(g.run, g.level0, action, rand)).toEqual({ say: [] });
     g.run.fakePiano = { i: 5, j: 0, until: 1000, heard: true };
-    perceive(g.run, g.world, action, rand);
+    perceive(g.run, g.level0, action, rand);
     expect(g.run.fakePiano).toBeNull(); expect(g.run.halluc.history).toEqual([]); expect(rand).not.toHaveBeenCalled();
   });
 
   it.each([5, 7.5])("keeps real piano territory clear of false sources at distance %s", distance => {
     const g = setup("hall", 20, distance);
     // Suppress ordinary lies so this test exercises only source generation.
-    g.run.halluc.lieAfter = 1000; perceive(g.run, g.world, action, draws(0));
+    g.run.halluc.lieAfter = 1000; perceive(g.run, g.level0, action, draws(0));
     expect(g.run.fakePiano).toBeNull();
     g.run.fakePiano = { i: 4, j: 0, until: 1000, heard: true };
-    const levels = pianoLevels(g.run, g.world);
+    const levels = pianoLevels(g.run, g.level0);
     expect(levels.fake).toBe(0); expect(levels.piano).toBe(levels.real);
-    const out = perceive(g.run, g.world, action, draws(0));
+    const out = perceive(g.run, g.level0, action, draws(0));
     expect(g.run.fakePiano).toBeNull(); expect(out.say).toEqual([]);
   });
 
   it.each(["expiry", "recovery"])("clears on %s and observes a six-hour cooldown", reason => {
     const g = setup(); g.run.fakePiano = { i: 5, j: 0, until: reason === "expiry" ? 100 : 1000, heard: true };
     if (reason === "recovery") g.run.stats.sanity = 60;
-    perceive(g.run, g.world, action, draws(.99));
+    perceive(g.run, g.level0, action, draws(.99));
     expect(g.run.fakePiano).toBeNull(); expect(g.run.halluc.pianoAfter).toBe(460);
     g.run.stats.sanity = 20;
-    perceive(g.run, g.world, action, draws(0)); expect(g.run.fakePiano).toBeNull();
-    g.run.time = 460; perceive(g.run, g.world, action, draws(0, .5)); expect(g.run.fakePiano).not.toBeNull();
+    perceive(g.run, g.level0, action, draws(0)); expect(g.run.fakePiano).toBeNull();
+    g.run.time = 460; perceive(g.run, g.level0, action, draws(0, .5)); expect(g.run.fakePiano).not.toBeNull();
   });
 
   it("records deception only when the source becomes audible, and only once", () => {
     const g = setup(); g.run.fakePiano = { i: 7, j: 0, until: 1000, heard: false };
     const quiet = { ...action, action: null };
-    perceive(g.run, g.world, quiet, draws(.99)); expect(g.run.halluc.history).toEqual([]);
+    perceive(g.run, g.level0, quiet, draws(.99)); expect(g.run.halluc.history).toEqual([]);
     g.run.pos.i = 3;
-    perceive(g.run, g.world, quiet, draws(.99)); perceive(g.run, g.world, quiet, draws(.99));
+    perceive(g.run, g.level0, quiet, draws(.99)); perceive(g.run, g.level0, quiet, draws(.99));
     expect(g.run.halluc.history).toHaveLength(1); expect(g.run.halluc.history[0].text).toEqual(PIANO_CAPTION);
     expect(g.run.fakePiano.heard).toBe(true);
   });
@@ -97,24 +97,24 @@ describe("unreliable narration", () => {
 
   it("uses ordinary-looking narration for false familiarity and enforces its cooldown", () => {
     const g = setup(); g.run.halluc.pianoAfter = 1000;
-    const out = perceive(g.run, g.world, action, draws(0, 0, 0));
+    const out = perceive(g.run, g.level0, action, draws(0, 0, 0));
     expect(out.say[0].zh).toContain("這裡你好像來過");
     expect(g.run.halluc.history[0].kind).toBe("memory"); expect(g.run.halluc.lieAfter).toBe(160);
-    expect(perceive(g.run, g.world, action, draws(0))).toEqual({ say: [] });
+    expect(perceive(g.run, g.level0, action, draws(0))).toEqual({ say: [] });
   });
 
   it("never distorts time with a watch or adds lies to important feedback", () => {
     const g = setup(); g.run.inv.push({ id: "watch", key: "watch" });
     const rest = { ...action, action: "rest" as const, minutes: 120 };
-    expect(perceive(g.run, g.world, rest, draws(0)).perceivedTime).toBeUndefined();
+    expect(perceive(g.run, g.level0, rest, draws(0)).perceivedTime).toBeUndefined();
     const rand = draws(0);
-    expect(perceive(g.run, g.world, { ...action, important: true }, rand)).toEqual({ say: [] });
+    expect(perceive(g.run, g.level0, { ...action, important: true }, rand)).toEqual({ say: [] });
     expect(rand).not.toHaveBeenCalled(); expect(g.run.halluc.history).toEqual([]);
   });
 
   it("uses the identical perceived duration in the clock, elapsed overlay and sleep overlay", () => {
     const g = setup(), rest = { ...action, action: "rest" as const, minutes: 120 };
-    const out = perceive(g.run, g.world, rest, draws(0, 0, 0));
+    const out = perceive(g.run, g.level0, rest, draws(0, 0, 0));
     expect(out.perceivedTime).toEqual(T("一會兒", "a moment"));
     expect(g.run.halluc.history[0].actualMinutes).toBe(120);
     const texts = elapsedMessages(120, false, out.perceivedTime);
@@ -134,10 +134,10 @@ describe("unreliable narration", () => {
 
   it("can reflect once on recovery to sixty after a deception", () => {
     const g = setup("arch", 60); rememberHallucination(g.run, "memory", T("轉角。", "The corner."));
-    const out = perceive(g.run, g.world, { ...action, previousSanity: 59 }, draws(0));
+    const out = perceive(g.run, g.level0, { ...action, previousSanity: 59 }, draws(0));
     expect(out.say).toContainEqual(T("你不確定剛才看到的是不是真的。", "You're not sure what you saw earlier was real."));
     expect(g.run.halluc.needsReflection).toBe(false);
-    expect(perceive(g.run, g.world, action, draws(0)).say).toEqual([]);
+    expect(perceive(g.run, g.level0, action, draws(0)).say).toEqual([]);
   });
 });
 
@@ -152,7 +152,7 @@ describe("hallucination integration and saves", () => {
       else {
         const { i, j, d } = g.run.pos;
         const go = ([d, (d + 1) % 4, (d + 3) % 4, (d + 2) % 4] as Dir[])
-          .find(dir => passable(g.world.edgeAt(i, j, dir)) && !["red", "pit"].includes(g.world.zone(i + DV[dir][0], j + DV[dir][1])));
+          .find(dir => passable(g.level0.edgeAt(i, j, dir)) && !["red", "pit"].includes(g.level0.zone(i + DV[dir][0], j + DV[dir][1])));
         command = go === undefined ? { type: "turn", dir: 2 } : { type: "move", d: go };
       }
       commands.push(command); g.dispatch(command);
@@ -200,7 +200,7 @@ describe("hallucination integration and saves", () => {
 
   it("preserves sources, cooldowns, history and RNG on resume without rerolling", async () => {
     await wipe(); const g = setup();
-    perceive(g.run, g.world, action, draws(0, .4));
+    perceive(g.run, g.level0, action, draws(0, .4));
     for (let k = 0; k < 55; k++) rememberHallucination(g.run, "sound", PIANO_CAPTION);
     g.run.halluc.lieAfter = 300;
     const saved = clone(g.save()); await persist(g.meta, saved);

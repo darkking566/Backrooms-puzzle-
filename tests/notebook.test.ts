@@ -10,15 +10,15 @@ import { edgeKey, type Edge } from "../src/world/level0";
 const c = loadContent();
 const make = (items = ["notebook", "flashlight"]) => Game.newRun(c, newMeta(), 2024, items);
 function corridor(g: Game) {
-  for (let j = 0; j >= -4; j--) g.world.edges.set(edgeKey(0, j, 0), "open");
-  g.run.map = {}; recordNotebook(g.run, g.world, true);
+  for (let j = 0; j >= -4; j--) g.level0.edges.set(edgeKey(0, j, 0), "open");
+  g.run.map = {}; recordNotebook(g.run, g.level0, true);
 }
 const copy = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 
 describe("notebook observations", () => {
   it("records nothing without a notebook, and does not reconstruct the route on pickup", () => {
     const g = make([]);
-    g.world.edges.set(edgeKey(0, -1, 0), "open");
+    g.level0.edges.set(edgeKey(0, -1, 0), "open");
     g.dispatch({ type: "move", d: 0 });
     expect(g.run.map).toEqual({});
     g.cellHere().items.push({ id: "notebook", key: "book", x: 0, z: 0 });
@@ -36,14 +36,14 @@ describe("notebook observations", () => {
   });
 
   it.each(["wall", "door-wood", "door-metal", "door-manila", "flicker", "fakeflicker"] as Edge[])("does not see through %s", edge => {
-    const g = make(); g.world.edges.set(edgeKey(0, -1, 0), edge);
-    g.run.map = {}; recordNotebook(g.run, g.world, true);
+    const g = make(); g.level0.edges.set(edgeKey(0, -1, 0), edge);
+    g.run.map = {}; recordNotebook(g.run, g.level0, true);
     expect(Object.keys(g.run.map)).toEqual(["0,0", "0,-1"]);
   });
 
   it("does not draw ahead during a blackout without a flashlight", () => {
     const g = make(["notebook"]); g.run.outageLeft = 3;
-    g.run.map = {}; recordNotebook(g.run, g.world, true);
+    g.run.map = {}; recordNotebook(g.run, g.level0, true);
     expect(Object.keys(g.run.map)).toEqual(["0,0"]);
     expect(g.run.map["0,0"].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
     expect(g.run.map["0,0"].zone).toBe("unknown"); expect(g.run.map["0,0"].visited).toBe(true);
@@ -52,10 +52,10 @@ describe("notebook observations", () => {
   it("records only a visit in a dark zone, without revealing its walls or zone", () => {
     const g = make(["notebook"]);
     let dark: [number, number] | undefined;
-    for (let i = -30; i <= 30 && !dark; i++) for (let j = -30; j <= 30; j++) if (g.world.zone(i, j) === "dark") { dark = [i, j]; break; }
+    for (let i = -30; i <= 30 && !dark; i++) for (let j = -30; j <= 30; j++) if (g.level0.zone(i, j) === "dark") { dark = [i, j]; break; }
     expect(dark).toBeDefined(); const [i, j] = dark!;
-    g.run.pos = { i, j, d: 0 }; g.world.ensureAround(i, j); g.run.map = {}; g.run.stats.sanity = 20;
-    recordNotebook(g.run, g.world, true);
+    g.run.pos = { i, j, d: 0 }; g.level0.ensureAround(i, j); g.run.map = {}; g.run.stats.sanity = 20;
+    recordNotebook(g.run, g.level0, true);
     const cells = Object.values(g.run.map);
     expect(cells).toHaveLength(1); expect(cells[0].zone).toBe("unknown");
     expect(cells[0].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
@@ -64,31 +64,31 @@ describe("notebook observations", () => {
   it("retains older visible drawings and their age when revisiting in total darkness", () => {
     const g = make(["notebook"]), before = copy(g.run.map["0,-1"]);
     g.run.time = 60; g.run.pos.j = -1; g.run.outageLeft = 3;
-    g.world.edges.set(edgeKey(0, -1, 1), "door-metal");
-    expect(recordNotebook(g.run, g.world, true)).toBe(false);
+    g.level0.edges.set(edgeKey(0, -1, 1), "door-metal");
+    expect(recordNotebook(g.run, g.level0, true)).toBe(false);
     expect(g.run.map["0,-1"]).toEqual({ ...before, visited: true });
   });
 
   it("fills unseen details after the light returns without inventing a discrepancy", () => {
     const g = make(["notebook"]); g.run.outageLeft = 3; g.run.map = {};
-    recordNotebook(g.run, g.world, true);
-    g.world.edges.set(edgeKey(0, 0, 1), "door-wood-open");
-    recordNotebookDoor(g.run, g.world, edgeKey(0, 0, 1));
+    recordNotebook(g.run, g.level0, true);
+    g.level0.edges.set(edgeKey(0, 0, 1), "door-wood-open");
+    recordNotebookDoor(g.run, g.level0, edgeKey(0, 0, 1));
     expect(g.run.map["0,0"].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
     g.run.time = 30; g.run.outageLeft = 0;
-    expect(recordNotebook(g.run, g.world)).toBe(false);
+    expect(recordNotebook(g.run, g.level0)).toBe(false);
     expect(g.run.map["0,0"].walls).not.toContain("unknown"); expect(g.run.map["0,0"].zone).toBe("hall");
     expect(g.run.map["0,0"].t).toBe(30);
   });
 
   it("keeps snapshots after a shift and redraws only on entry, with a discrepancy", () => {
     const g = make();
-    g.world.edges.set(edgeKey(0, -1, 1), "wall"); corridor(g);
-    const before = copy(g.run.map), ver = g.world.cells.get("0,-1")!.ver;
-    expect(g.world.shiftUnseen(new Set(["0,0"]))).toBeGreaterThan(0);
-    expect(g.world.cells.get("0,-1")!.ver).toBeGreaterThan(ver);
-    g.world.edges.set(edgeKey(0, -1, 1), "open");
-    recordNotebook(g.run, g.world);
+    g.level0.edges.set(edgeKey(0, -1, 1), "wall"); corridor(g);
+    const before = copy(g.run.map), ver = g.level0.cells.get("0,-1")!.ver;
+    expect(g.level0.shiftUnseen(new Set(["0,0"]))).toBeGreaterThan(0);
+    expect(g.level0.cells.get("0,-1")!.ver).toBeGreaterThan(ver);
+    g.level0.edges.set(edgeKey(0, -1, 1), "open");
+    recordNotebook(g.run, g.level0);
     expect(g.run.map).toEqual(before);
     const out = g.dispatch({ type: "move", d: 0 });
     expect(out.say.some(t => t.en === "This isn't what you drew.")).toBe(true);
@@ -99,9 +99,9 @@ describe("notebook observations", () => {
   });
 
   it("detects a changed shared edge even if the cell's own version is unchanged", () => {
-    const g = make(); g.world.edges.set(edgeKey(0, -1, 1), "wall"); corridor(g);
+    const g = make(); g.level0.edges.set(edgeKey(0, -1, 1), "wall"); corridor(g);
     const ver = g.run.map["0,-1"].ver;
-    g.world.edges.set(edgeKey(0, -1, 1), "open");
+    g.level0.edges.set(edgeKey(0, -1, 1), "open");
     const out = g.dispatch({ type: "move", d: 0 });
     expect(g.run.map["0,-1"].ver).toBe(ver);
     expect(out.say.some(t => t.zh === "這裡跟你畫的不一樣。")).toBe(true);
@@ -110,8 +110,8 @@ describe("notebook observations", () => {
   it("stores real and fake flickering walls as completely identical map data", () => {
     const draw = (edge: Edge) => {
       const g = make(); g.run.stats.sanity = 20; g.run.map = {};
-      g.world.edges.set(edgeKey(0, 0, 0), edge);
-      recordNotebook(g.run, g.world, true);
+      g.level0.edges.set(edgeKey(0, 0, 0), edge);
+      recordNotebook(g.run, g.level0, true);
       return g.run.map;
     };
     expect(draw("flicker")).toEqual(draw("fakeflicker"));
@@ -126,8 +126,8 @@ describe("notebook observations", () => {
   });
 
   it("only updates the observed door when it is opened, retaining the age of the drawing", () => {
-    const g = make(); g.world.edges.set(edgeKey(0, 0, 1), "door-wood");
-    g.run.map = {}; recordNotebook(g.run, g.world, true);
+    const g = make(); g.level0.edges.set(edgeKey(0, 0, 1), "door-wood");
+    g.run.map = {}; recordNotebook(g.run, g.level0, true);
     const before = copy(g.run.map["0,0"]);
     g.dispatch({ type: "door", edge: edgeKey(0, 0, 1) });
     expect(g.run.map["0,0"]).toEqual({ ...before, walls: before.walls.map((w, d) => d === 1 ? "door-open" : w) });
@@ -181,10 +181,10 @@ describe("messy handwriting", () => {
 
   it("does not mistake a pen error or recovered sanity for a shifted corridor", () => {
     const g = make(); g.run.stats.sanity = 20; g.run.map = {};
-    recordNotebook(g.run, g.world, true);
+    recordNotebook(g.run, g.level0, true);
     expect(g.run.map["0,0"].messy).toBe(true);
     g.run.stats.sanity = 60; g.run.time += 60;
-    expect(recordNotebook(g.run, g.world, true)).toBe(false);
+    expect(recordNotebook(g.run, g.level0, true)).toBe(false);
     expect(g.run.map["0,0"].messy).toBe(false);
   });
 });
@@ -205,7 +205,7 @@ describe("map marks and rereading", () => {
 
   it("keeps handwritten marks through shifts and redraws", () => {
     const g = make(); g.dispatch({ type: "mapMark", key: "0,0", mark: { kind: "exit" } });
-    g.world.shiftUnseen(new Set()); recordNotebook(g.run, g.world, true);
+    g.level0.shiftUnseen(new Set()); recordNotebook(g.run, g.level0, true);
     expect(g.run.mapMarks["0,0"]).toEqual({ kind: "exit" });
   });
 

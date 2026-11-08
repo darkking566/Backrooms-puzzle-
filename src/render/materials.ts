@@ -1,6 +1,6 @@
 /* The light-grid shader shared by every surface, the materials and the reusable geometry. */
 import * as THREE from "three";
-import { S } from "../world/level0";
+import { S } from "../world/types";
 import type { Textures } from "./textures";
 
 export const H = 2.75;
@@ -9,6 +9,7 @@ export const shared = {
   uLM: { value: null as THREE.Texture | null }, uLM2: { value: null as THREE.Texture | null }, uFlick: { value: 1 }, uPower: { value: 1 },
   uLMo: { value: new THREE.Vector2() }, uLMs: { value: 1 },
   uCam: { value: new THREE.Vector3() }, uCamDir: { value: new THREE.Vector3() }, uTorch: { value: 0 }, uAmb: { value: .07 },
+  uWarehouse: { value: 0 }, uCeilingHeight: { value: H },
   uSeedOff: { value: new THREE.Vector2() }
 };
 const VERT = `
@@ -28,6 +29,7 @@ const FRAG = `
   uniform sampler2D map; uniform vec2 uRep; uniform vec3 uTint; uniform float uKind; uniform float uAlpha;
   uniform sampler2D uLM; uniform sampler2D uLM2; uniform float uFlick; uniform float uPower;
   uniform vec2 uLMo; uniform float uLMs; uniform vec3 uCam; uniform vec3 uCamDir; uniform float uTorch; uniform float uAmb; uniform vec2 uSeedOff;
+  uniform float uWarehouse; uniform float uCeilingHeight;
   varying vec2 vUv; varying vec3 vW; varying vec3 vN;
   #include <fog_pars_fragment>
   float vh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -51,14 +53,14 @@ const FRAG = `
     vec3 lm = (lms.rgb + texture2D(uLM2, luv).rgb * uFlick) * 2.0 * uPower;
     if (uKind < 2.5 || uKind > 4.5) base = mix(base, base * vec3(1.35, 0.46, 0.38), lms.a * 0.65);
     float amb = uAmb * (0.45 + 0.55 * uPower);
-    float h = clamp(vW.y / 2.75, 0.0, 1.0), k = 1.0;
-    if (uKind > 0.5 && uKind < 1.5) k = mix(0.55, 1.05, h) * mix(0.62, 1.0, smoothstep(0.0, 0.4, vW.y)) * mix(1.0, 0.8, smoothstep(2.45, 2.75, vW.y));
+    float h = clamp(vW.y / uCeilingHeight, 0.0, 1.0), k = 1.0;
+    if (uKind > 0.5 && uKind < 1.5) k = mix(0.55, 1.05, h) * mix(0.62, 1.0, smoothstep(0.0, 0.4, vW.y)) * mix(1.0, 0.8, smoothstep(uCeilingHeight - .3, uCeilingHeight, vW.y));
     else if (uKind > 1.5 && uKind < 2.5) k = 0.4;
     vec3 L = lm * k + vec3(amb);
     vec3 tv = vW - uCam; float td = max(length(tv), 0.001);
     float torch = uTorch * smoothstep(0.72, 0.93, dot(tv / td, uCamDir)) * 4.0 / (1.0 + td * td * 0.22);
     L += vec3(1.0, 0.95, 0.85) * torch;
-    if (uKind > 2.5 && uKind < 3.5) { base = vec3(0.13, 0.11, 0.06); L = lm * 0.55 + vec3(amb) + vec3(1.0,0.95,0.85) * torch * 2.4; }
+    if (uKind > 2.5 && uKind < 3.5) { base = mix(vec3(0.13, 0.11, 0.06), vec3(.14, .19, .21), uWarehouse); L = lm * 0.55 + vec3(amb) + vec3(1.0,0.95,0.85) * torch * 2.4; }
     if (uKind > 3.5 && uKind < 4.5) {
       float dep = clamp(-vW.y / 1.4, 0.0, 1.0);
       vec3 rim = vW.y > -0.035 ? texture2D(map, vW.xz * 0.85).rgb * 0.75 : vec3(0.34, 0.28, 0.18);
@@ -79,6 +81,10 @@ const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
 export function makeMaterials(TEX: Textures) {
   const pit = litMat(TEX.carpet, [1, 1], 4); pit.side = THREE.BackSide;
   return {
+    concrete: litMat(TEX.concrete, [1, 1], 6), concreteWall: litMat(TEX.concrete, [1, 1], 1),
+    metal: litMat(TEX.doorMetal, [1, 1], 6, [.7, .8, .85]),
+    alphaSign: new THREE.MeshBasicMaterial({ map: TEX.alphaSign }),
+    marking: new THREE.MeshBasicMaterial({ color: 0xd4d9ce }),
     walls: TEX.walls.map(t => litMat(t, [1, 1], 1)),
     yellower: TEX.walls.map(t => litMat(t, [1, 1], 1, [1.04, 1.0, .86])),
     pale: litMat(TEX.pale, [1, 1], 1), arch: litMat(TEX.pale, [1 / S, 1 / H], 1), pillar: litMat(TEX.walls[0], [.2, 1], 1),
@@ -112,6 +118,10 @@ export type Materials = ReturnType<typeof makeMaterials>;
 
 export function makeGeometry() {
   return {
+    warehouseWall: new THREE.BoxGeometry(S + .13, 6, .18).translate(0, 3, 0),
+    warehouseCeil: new THREE.PlaneGeometry(S, S).rotateX(Math.PI / 2).translate(0, 6, 0),
+    warehousePillar: new THREE.BoxGeometry(.9, 6, .9).translate(0, 3, 0),
+    warehousePanel: new THREE.PlaneGeometry(.3, 2).rotateX(Math.PI / 2).translate(0, 5.8, 0),
     floor: new THREE.PlaneGeometry(S, S).rotateX(-Math.PI / 2),
     tile: new THREE.PlaneGeometry(.5, .5).rotateX(-Math.PI / 2),
     ceil: new THREE.PlaneGeometry(S, S).rotateX(Math.PI / 2).translate(0, H, 0),

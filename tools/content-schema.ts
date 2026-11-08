@@ -38,7 +38,8 @@ export const Event = z.object({
 }).strict();
 
 export const Ending = z.object({
-  id: z.string(), kind: z.enum(["death", "exit", "ending"]), title: Text, text: Text, points: z.number().default(0)
+  id: z.string(), kind: z.enum(["death", "exit", "ending"]), title: Text, text: Text, points: z.number().default(0),
+  legacy: z.boolean().default(false), textByLevel: z.object({ "level-1": Text }).strict().optional()
 }).strict();
 
 export const Clue = z.object({ id: z.string(), title: Text, text: Text, source: z.string().optional() }).strict();

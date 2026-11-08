@@ -1,14 +1,19 @@
 /* The game engine. Every player action is a serialisable command; dispatch() applies it, advances time
    through one pipeline (command → minutes pass → survival → statuses → events → autosave by the caller)
    and returns what happened for the UI and renderer to show. No Three.js, no DOM. */
+import { Level1 } from "../world/level1";
+import type { ActiveWorld } from "../world/world";
+import { warehouseCommand } from "./level1";
+import { queueReward, warehouseSurvival } from "../systems/rewards";
 import type { ContentData } from "../../tools/content-schema";
 import { draw, pick, type RngState, type Stream } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
-import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone, type Level0World } from "../world/level0";
+import { Level0 } from "../world/level0";
+import { edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type AnyZone, type Level0World } from "../world/types";
 import { newHallucinations, newRoomPersonRun, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
-import { HALLUC_ONSET, perceive } from "../systems/hallucinations";
+import { HALLUC_ONSET, perceive, perceiveWarehouse } from "../systems/hallucinations";
 import { makePack, matchesPack, validCode } from "../systems/symbol-lock";
 import { hasTorch } from "../systems/lighting";
 import { personChoiceVisible, personReady, planRoomPerson, sealedGreyWater } from "../systems/room-person";
@@ -26,6 +31,8 @@ export type Command =
   | { type: "examine"; what: "tally" | "peel" | "notes" }
   | { type: "choose"; index: number }
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
+  | { type: "readGuide" } | { type: "readSign" } | { type: "baseSupplies" }
+  | { type: "crateExamine"; id: string } | { type: "crateOpen"; id: string } | { type: "crateTake"; id: string; key: string }
   | { type: "corpse" } | { type: "toggleFlashlight" }
   | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
   | { type: "packUnjam" } | { type: "packForce" } | { type: "packTake"; key: string }
@@ -33,16 +40,27 @@ export type Command =
   | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
-export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; important?: boolean; sfx: string[]; minutes: number }
+export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; levelChanged?: boolean; rebuild?: boolean; important?: boolean; sfx: string[]; minutes: number }
 
 const COLOR_NAME: Record<string, Text> = { grey: T("灰色", "grey"), green: T("綠色", "green"), blue: T("藍色", "blue"), reddish: T("偏紅的", "reddish") };
 
 export class Game {
-  run: RunState; meta: Meta; world: Level0World; c: ContentData;
+  run: RunState; meta: Meta; world: ActiveWorld; c: ContentData;
   private out!: Outcome;
+  get level0(): Level0World {
+    if (this.world.level !== "level-0") throw new Error("Level 0 capability used outside Level 0");
+    return this.world;
+  }
 
   constructor(c: ContentData, meta: Meta, run: RunState) {
     this.c = c; this.meta = meta; this.run = run;
+    if (run.level === "level-1") {
+      if (!("crates" in run.world) || !run.l1) throw new Error("Missing Level 1 save data");
+      this.world = new Level1(run.seed, c.levels[0], run.world);
+      this.world.ensureAround(run.pos.i, run.pos.j);
+      return;
+    }
+    if ("crates" in run.world) throw new Error("Level 0 save contains warehouse data");
     this.world = new Level0(run.seed, run.world.cells.length ? run.world : undefined);
     if (!run.world.cells.length) {
       this.world.ensureAround(0, 0);
@@ -72,7 +90,7 @@ export class Game {
     if (run.roomPerson.variant === "first") {
       // Move only this run's volunteer bottle. Never remove any stored item.
       const q = g.personQuest, p = c.puzzles.find(p => p.id === q.pack.puzzle)!;
-      run.lockedPack = makePack(p, run, meta, { i: g.world.manila[0], j: g.world.manila[1] }, () => g.rand("puzzles"));
+      run.lockedPack = makePack(p, run, meta, { i: g.level0.manila[0], j: g.level0.manila[1] }, () => g.rand("puzzles"));
       run.lockedPack.story = "room_person";
       run.lockedPack.items = Array.from({ length: q.pack.extraWater }, (_, k) => ({ key: `pack:${run.run}:${k}`, id: "almond_water" }));
       if (topUp) run.lockedPack.items.push({ key: "vol" + meta.runs, id: "almond_water" });   // returned to the cabinet at the end if left in the pack
@@ -87,6 +105,9 @@ export class Game {
   }
   private placeCorpse() {
     if (!this.meta.corpses[this.run.level]) return;
+    if (this.world.level === "level-1") {
+      this.world.corpse = this.world.global(-3, 1); return;
+    }
     for (let k = 0; k < 60; k++) {
       const a = this.world.hash(k, 71) * Math.PI * 2, r = 4 + this.world.hash(k, 72) * 8, i = Math.round(Math.cos(a) * r), j = Math.round(Math.sin(a) * r);
       if (this.world.zone(i, j) === "hall" && !(i === 0 && j === 0)) { this.world.corpse = [i, j]; return; }
@@ -97,7 +118,7 @@ export class Game {
   /* ---------- helpers ---------- */
   item(id: string) { return this.c.items.find(x => x.id === id)!; }
   liquid(id: string) { return this.c.liquids.find(x => x.id === id)!; }
-  zoneHere(): Zone { return this.world.zone(this.run.pos.i, this.run.pos.j); }
+  zoneHere(): AnyZone { return this.world.zone(this.run.pos.i, this.run.pos.j); }
   cellHere() { return this.world.cells.get(ck(this.run.pos.i, this.run.pos.j))!; }
   has(id: string) { return this.run.inv.some(x => x.id === id); }
   weight() { return this.run.inv.reduce((s, x) => s + this.item(x.id).weight, 0); }
@@ -112,10 +133,16 @@ export class Game {
     return T(`液體${l.zh}。${fill.zh}。`, `The liquid is ${l.en.toLowerCase()}; ${fill.en}.`);
   }
   hasLight() { return hasTorch(this.run); }
-  isDark() { return this.zoneHere() === "dark" || this.run.outageLeft > 0; }
+  powerOut() { return this.world.level === "level-1" ? this.zoneHere() !== "alpha" && this.run.l1?.power.phase === "blackout" : this.run.outageLeft > 0; }
+  isDark() { return this.zoneHere() === "dark" || this.powerOut(); }
   env(): Env {
     const { i, j } = this.run.pos;
-    return { zone: this.zoneHere(), dark: this.isDark(), redK: 1 - sstep(.8, 3.2, this.world.redDist(i, j)), manilaK: this.zoneHere() === "manila" ? 1 : 0, inLevel0: true };
+    if (this.world.level === "level-1") {
+      const z = this.zoneHere(), dark = this.isDark() && !this.hasLight(), rates = this.world.rules.survival;
+      return { zone: z, dark, redK: 0, manilaK: 0, inLevel0: false,
+        sanityRate: dark ? rates.darkSanity : rates.sanity, shelterRecovery: z === "alpha" ? rates.baseSanity : undefined };
+    }
+    return { zone: this.zoneHere(), dark: this.isDark(), redK: 1 - sstep(.8, 3.2, this.level0.redDist(i, j)), manilaK: this.zoneHere() === "manila" ? 1 : 0, inLevel0: true };
   }
   private say(t: Text, kind?: "event" | "warn" | "caption") { this.out.say.push(t); this.run.log.push({ t, kind }); if (this.run.log.length > 60) this.run.log.splice(0, this.run.log.length - 60); }
   private rand(s: Stream = "misc") { return draw(this.run.rng, s); }
@@ -124,7 +151,7 @@ export class Game {
   get packPuzzle() { return this.c.puzzles.find(p => p.id === (this.run.lockedPack?.id ?? "fallen_pack"))!; }
   canReachPack() {
     const p = this.run.lockedPack?.pos, r = this.run.pos;
-    return !!p && ((p.i === r.i && p.j === r.j) || (this.world.inManila(p.i, p.j) && this.zoneHere() === "manila"));
+    return this.run.level === "level-0" && !!p && ((p.i === r.i && p.j === r.j) || (this.world.level === "level-0" && this.world.inManila(p.i, p.j) && this.zoneHere() === "manila"));
   }
   get personQuest() { return this.c.quests.find(q => q.id === "room_person")!; }
   get personDialogue() { return this.c.dialogue.find(d => d.id === this.personQuest.dialogue)!; }
@@ -136,8 +163,10 @@ export class Game {
 
   /** Pass time; may end the run. */
   private pass(minutes: number, act: Activity = "idle") {
-    this.out.minutes += minutes;
+    const before = this.run.time;
+    if (this.run.level === "level-0") this.out.minutes += minutes;
     const death = tick(this.run, minutes, act, this.env());
+    if (this.run.level === "level-1") this.out.minutes += this.run.time - before;
     if (death) this.end(death);
   }
 
@@ -148,7 +177,10 @@ export class Game {
     if (r.ended) return this.out;
     if (r.pendingEvent && cmd.type !== "choose") return this.out;
     const from = { ...r.pos }, hadNotebook = this.has("notebook"), previousSanity = r.stats.sanity, redStage = r.redStage;
-    switch (cmd.type) {
+    const handled = this.world.level === "level-1" && warehouseCommand({ run: r, world: this.world, content: this.c, out: this.out,
+      say: (t, kind) => this.say(t, kind), pass: (m, a) => this.pass(m, a), rand: () => this.rand(),
+      discover: id => this.discover(id), knows: id => this.meta.clues.includes(id), learn: id => this.learn(id), weight: () => this.weight() }, cmd);
+    if (!handled) switch (cmd.type) {
       case "move": this.move(cmd.d); break;
       case "turn": this.turn(cmd.dir); break;
       case "search": this.search(); break;
@@ -194,7 +226,7 @@ export class Game {
       if (recordNotebook(r, this.world, entered)) this.say(T("這裡跟你畫的不一樣。", "This isn't what you drew."));
       if (cmd.type === "door" && this.out.anim.kind === "door") recordNotebookDoor(r, this.world, cmd.edge);
     }
-    if (!r.ended && this.out.minutes > 0) {
+    if (!r.ended && this.out.minutes > 0 && this.world.level === "level-0") {
       const z = this.zoneHere();
       const perception = perceive(r, this.world, {
         action: cmd.type === "move" && this.out.anim.kind === "move" ? "move" : cmd.type === "search" || cmd.type === "rest" ? cmd.type : null,
@@ -206,12 +238,18 @@ export class Game {
       if (perception.sfx) this.out.sfx.push(perception.sfx);
       if (perception.perceivedTime) this.out.perceivedTime = perception.perceivedTime;
     }
+    if (!r.ended && r.level === "level-1" && this.out.minutes > 0) {
+      const p = perceiveWarehouse(r, { action: cmd.type === "move" || cmd.type === "search" || cmd.type === "rest" ? cmd.type : null,
+        minutes: this.out.minutes, previousSanity, important: !!this.out.important || !!this.out.caption }, this.zoneHere() === "alpha", () => this.rand("halluc"));
+      for (const t of p.say) this.say(t);
+      if (p.perceivedTime) this.out.perceivedTime = p.perceivedTime;
+    }
     return this.out;
   }
 
   /* ---------- movement ---------- */
   private move(d: Dir) {
-    const r = this.run, w = this.world, { i, j } = r.pos;
+    const r = this.run, w = this.level0, { i, j } = r.pos;
     if (!passable(w.edgeAt(i, j, d))) return;
     const from = { ...r.pos }, ni = i + DV[d][0], nj = j + DV[d][1], zonePrev = this.zoneHere();
     r.pos = { i: ni, j: nj, d }; r.moves++;
@@ -247,13 +285,13 @@ export class Game {
     this.pass(1);
     // looking back always shifts what was behind you; a side turn sometimes does
     if (dir === 2 || this.rand("shift") < .35) {
-      const n = this.world.shiftUnseen(this.world.visibleFrom([from, r.pos]));
+      const n = this.level0.shiftUnseen(this.level0.visibleFrom([from, r.pos]));
       r.shifted += n; if (n) this.out.rebuild = true;
-      if (dir === 2) this.say(this.world.stable(r.pos.i, r.pos.j) && !n ? T("你回頭看。這裡沒有變，跟剛才一模一樣。", "You look back. Nothing here has changed.") : n ? T("你回頭看。剛才走過的路……不一樣了。", "You look back. The way you came... is not the same.") : T("你回頭看。", "You look back."));
+      if (dir === 2) this.say(this.level0.stable(r.pos.i, r.pos.j) && !n ? T("你回頭看。這裡沒有變，跟剛才一模一樣。", "You look back. Nothing here has changed.") : n ? T("你回頭看。剛才走過的路……不一樣了。", "You look back. The way you came... is not the same.") : T("你回頭看。", "You look back."));
     }
   }
   private afterStep(poses: { i: number; j: number; d: Dir }[]) {
-    const r = this.run, w = this.world;
+    const r = this.run, w = this.level0;
     if (this.rand("shift") < .35) { const n = w.shiftUnseen(w.visibleFrom(poses)); r.shifted += n; if (n) this.out.rebuild = true; }
     // the flickering wall: only after you have lasted long enough, more likely the longer you stay
     const hours = r.time / H;
@@ -271,10 +309,10 @@ export class Game {
       if (k && k !== w.flickerKey) { w.edges.set(k, "fakeflicker"); w.fakeKey = k; this.out.rebuild = true; this.say(T("走廊盡頭的牆在閃。", "The wall at the end of the corridor flickers."), "event"); }
     }
   }
-  private zoneNarration(prev: Zone, z: Zone) {
+  private zoneNarration(prev: AnyZone, z: AnyZone) {
     if (z === prev) return;
     const lit = this.hasLight();
-    const M: Partial<Record<Zone, Text>> = {
+    const M: Partial<Record<AnyZone, Text>> = {
       arch: T("牆變成了淡色，開著一個個拱門。地毯深得會陷進去。這種地方據說不會偏移。", "The walls turn pale, opened by arch after arch. The carpet is deep enough to sink into. Places like this are said not to shift."),
       pillar: T("一大片柱子，整齊得像格子一樣，一直排到看不見的地方。", "A field of pillars in a perfect grid, running out of sight."),
       dark: lit ? T("燈全滅了。地上積著到腳踝的水。你打開了手電筒。", "Every light is out. Ankle-deep water on the floor. You switch on the flashlight.") : T("燈全滅了。地上積著到腳踝的水。你什麼都看不清楚，只能摸著牆走。", "Every light is out. Ankle-deep water on the floor. You can barely see; you feel your way along the wall."),
@@ -288,12 +326,12 @@ export class Game {
     if (z === "manila") this.discover("manila");
   }
   private redSigns() {
-    const r = this.run, rd = this.world.redDist(r.pos.i, r.pos.j);
+    const r = this.run, rd = this.level0.redDist(r.pos.i, r.pos.j);
     if (rd <= 1.01 && r.redStage < 2) { r.redStage = 2; this.say(T("前面那個房間整個是紅色的。牆、地毯、燈光，全都是。你的腳不太想停下來。", "The room ahead is entirely red. Walls, carpet, light. Your feet don't quite want to stop."), "warn"); this.learn("red_room_signs"); this.discover("red_signs"); }
     else if (rd <= 2.3 && r.redStage < 1) { r.redStage = 1; this.say(T("地毯黏黏的，每走一步鞋底都被輕輕扯住。燈光好像偏紅了一點。空氣裡有一點鐵鏽的味道。", "The carpet is tacky; each step it tugs at your soles. The light seems a little redder. A faint smell of rust."), "warn"); }
     else if (rd > 3.5) r.redStage = 0;
   }
-  private outage(z: Zone) {
+  private outage(z: AnyZone) {
     const r = this.run;
     if (r.outageLeft > 0) {
       if (--r.outageLeft === 0) { this.say(T("燈管一根接一根亮了回來，嗡嗡聲也跟著回來了。你發現自己的手在發抖。", "The tubes come back one after another, and the hum with them. You notice your hands are shaking."), "event"); this.out.sfx.push("relight"); }
@@ -305,7 +343,7 @@ export class Game {
   }
 
   /* ---------- events ---------- */
-  private maybeEvent(on: "move" | "rest", z: Zone) {
+  private maybeEvent(on: "move" | "rest", z: AnyZone) {
     const r = this.run; if (r.ended || r.pendingEvent) return;
     for (const e of this.c.events) {
       if (e.trigger.on !== on || (e.trigger.zones && !e.trigger.zones.includes(z))) continue;
@@ -361,7 +399,7 @@ export class Game {
     this.say(sleep ? T(`你${safe ? "靠著牆" : "蜷在地毯上"}睡了一覺。`, `You sleep ${safe ? "against the wall" : "curled up on the carpet"}.`) : T("你坐下來休息。睡不著。", "You sit down to rest. Sleep won't come."));
     this.pass(hours * H, sleep ? "sleep" : "idle"); if (r.ended) return;
     if (!safe) {                                     // everything you were not looking at changed while your eyes were closed
-      const n = this.world.shiftUnseen(new Set([ck(r.pos.i, r.pos.j)]), true); r.shifted += n; this.out.rebuild = true;
+      const n = this.level0.shiftUnseen(new Set([ck(r.pos.i, r.pos.j)]), true); r.shifted += n; this.out.rebuild = true;
       if (n) this.say(T("醒來的時候，四周的走廊跟睡著前不一樣了。", "When you wake, the corridors around you are not the ones you fell asleep in."));
     } else this.say(T("醒來的時候，四周跟睡前一模一樣。", "When you wake, everything is exactly as it was."));
     if (r.outageLeft > 0) { r.outageLeft = 0; this.say(T("燈已經亮回來了。", "The lights are back on.")); }
@@ -385,7 +423,7 @@ export class Game {
   private drink(key: string, sip: boolean) {
     const r = this.run, x = r.inv.find(y => y.key === key); if (!x) return;
     if (x.id === "almond_water") {
-      this.take(key); this.pass(2); this.say(T("你喝完了那瓶杏仁水。微甜，杏仁的味道。身體裡有什麼東西鬆了下來。", "You finish the almond water. Slightly sweet, almonds. Something in you loosens.")); this.apply({ ...this.item("almond_water").effects, wretched: -6 }); return;
+      this.take(key); this.pass(2); if (r.level === "level-1" && r.ended) return; this.say(T("你喝完了那瓶杏仁水。微甜，杏仁的味道。身體裡有什麼東西鬆了下來。", "You finish the almond water. Slightly sweet, almonds. Something in you loosens.")); this.apply({ ...this.item("almond_water").effects, wretched: -6 }); return;
     }
     if (!x.bottle || x.bottle.liquid === "empty") return;
     const b = x.bottle, L = this.liquid(b.liquid);
@@ -399,7 +437,7 @@ export class Game {
       return;
     }
     const name = this.itemName(x); x.bottle = { ...b, liquid: "empty", full: false, sealed: false, spoiled: false, boiled: false };   // the flask stays with you
-    this.pass(2);
+    this.pass(2); if (r.level === "level-1" && r.ended) return;
     this.say(T(`你把${name.zh}整瓶喝光。${L.taste.zh}`, `You drink the whole ${name.en.toLowerCase()}. ${L.taste.en}`));
     if (L.deadly) return this.end(L.deadly);
     const k = b.full ? 1 : .5;
@@ -433,7 +471,7 @@ export class Game {
   }
   private bandage(key: string) { if (!this.take(key)) return; this.pass(5); this.say(T("你把傷口包了起來。", "You bind the wound.")); this.apply(this.item("bandage").effects ?? {}); }
   private door(edge: string) {
-    const r = this.run, w = this.world, t = w.edges.get(edge); if (!t || isOpenDoor(t) || !t.startsWith("door")) return;
+    const r = this.run, w = this.level0, t = w.edges.get(edge); if (!t || isOpenDoor(t) || !t.startsWith("door")) return;
     const [[a, b], [c, d]] = edgeCells(edge);
     if (!((a === r.pos.i && b === r.pos.j) || (c === r.pos.i && d === r.pos.j))) return this.say(T("門在那邊，得先走過去。", "The door is over there. Get closer first."));
     if (t === "door-metal") {
@@ -446,7 +484,7 @@ export class Game {
     this.say(t === "door-manila" && this.zoneHere() !== "manila" ? T("門後是一個小房間，牛皮紙色的壁紙，木頭地板。嗡嗡聲……到門口就停了。", "Behind the door is a small room: manila wallpaper, a wooden floor. The hum... stops at the threshold.") : T("門開了。", "The door opens."));
   }
   private touch(edge: string) {
-    const r = this.run, w = this.world, t = w.edges.get(edge);
+    const r = this.run, w = this.level0, t = w.edges.get(edge);
     const [[a, b], [c, d]] = edgeCells(edge);
     if (!((a === r.pos.i && b === r.pos.j) || (c === r.pos.i && d === r.pos.j))) return;
     this.pass(1);
@@ -455,10 +493,10 @@ export class Game {
     this.say(pick(r.rng, "misc", [T("壁紙摸起來有點潮濕。", "The wallpaper feels slightly damp."), T("牆是溫的，跟體溫差不多。", "The wall is warm, about body temperature."), T("你把耳朵貼上去。牆的另一邊也是嗡嗡聲。", "You press your ear to it. The other side hums too.")]));
   }
   private flicker(edge: string) {
-    const r = this.run, w = this.world, t = w.edges.get(edge);
+    const r = this.run, w = this.level0, t = w.edges.get(edge);
     const near = edgeCells(edge).some(([a, b]) => Math.abs(a - r.pos.i) + Math.abs(b - r.pos.j) <= 3);
     if (!near) return this.say(T("太遠了。得走到牆前面。", "Too far. You need to reach the wall."));
-    if (t === "flicker") { this.learn("flicker_wall"); return this.end("exit_level1"); }
+    if (t === "flicker") { this.learn("flicker_wall"); return this.enterLevel1(); }
     if (t === "fakeflicker") {
       w.edges.set(edge, "wall"); w.fakeKey = null; this.out.rebuild = true;
       this.say(T("你整個人撲過去——撞上了一面普通的牆。牆從來沒有閃過。", "You throw yourself at it and hit an ordinary wall. It never flickered."), "warn");
@@ -493,7 +531,7 @@ export class Game {
     this.say(T("你從牆角刮下一小撮白色結晶。指尖有一點溫溫的。", "You scrape a pinch of white crystals from the corner. Your fingertips feel faintly warm."));
     this.discover("firesalt"); this.out.rebuild = true;
   }
-  canWring() { const z = this.zoneHere(); return z !== "manila" && z !== "red"; }
+  canWring() { const z = this.zoneHere(); return this.run.level === "level-0" && z !== "manila" && z !== "red"; }
   private wring(into?: string) {
     if (!this.canWring()) return;
     const r = this.run; this.pass(15); if (r.ended) return;
@@ -536,7 +574,7 @@ export class Game {
     const r = this.run, w = this.world, cp = this.meta.corpses[this.run.level];
     if (!cp || !w.corpse || w.corpse[0] !== r.pos.i || w.corpse[1] !== r.pos.j) return;
     this.pass(10);
-    this.say(T("你蹲下來。那個人的衣服……跟你身上穿的一模一樣。臉朝著地毯，你沒有把它翻過來。", "You crouch down. Their clothes are exactly the same as yours. The face is pressed into the carpet. You don't turn it over."), "warn");
+    this.say(r.level === "level-1" ? T("水泥柱旁躺著一具遺體。外套的袖口，跟你身上的一樣。", "A body lies beside the concrete pillar. The coat has the same cuffs as yours.") : T("你蹲下來。那個人的衣服……跟你身上穿的一模一樣。臉朝著地毯，你沒有把它翻過來。", "You crouch down. Their clothes are exactly the same as yours. The face is pressed into the carpet. You don't turn it over."), "warn");
     this.say(T(`口袋裡有一張紙條：「${cp.note.zh}」`, `In a pocket, a note: "${cp.note.en}"`));
     let got = 0;
     for (const x of cp.items) if (this.rand("body") < .6 && this.weight() + this.item(x.id).weight <= CARRY) { r.inv.push({ ...x, key: "body" + got + ":" + r.time }); got++; this.say(T(`你拿走了${this.itemName(x).zh}。`, `You take the ${this.itemName(x).en.toLowerCase()}.`)); }
@@ -695,8 +733,15 @@ export class Game {
   }
 
   /* ---------- developer panel (?dev) ---------- */
-  devJump(where: "manila" | "red" | "flicker" | "outage" | "day") {
-    const r = this.run, w = this.world;
+  devJump(where: "manila" | "red" | "flicker" | "outage" | "day" | "level1" | "alpha") {
+    if (where === "level1") {
+      if (this.run.level === "level-0") { this.out = { say: [], anim: { kind: "none" }, sfx: [], minutes: 0 }; this.enterLevel1(); } return;
+    }
+    if (where === "alpha") {
+      if (this.world.level === "level-1") { const [i, j] = this.world.base; this.run.pos = { i, j, d: this.world.rotation }; this.world.ensureAround(i, j); recordNotebook(this.run, this.world, true); } return;
+    }
+    if (this.run.level !== "level-0") return;
+    const r = this.run, w = this.level0;
     if (where === "day") { r.time += 24 * H; return; }
     if (where === "outage") { r.outageLeft = 4; r.lastOutage = r.moves; return; }
     if (where === "flicker") { const k = w.wallAhead(r.pos.i, r.pos.j, r.pos.d); if (k) { w.edges.set(k, "flicker"); w.flickerKey = k; } return; }
@@ -712,6 +757,22 @@ export class Game {
     r.pos = { i, j, d }; w.ensureAround(i, j); recordNotebook(r, w, true);
   }
 
+  private enterLevel1() {
+    const r = this.run, first = !this.meta.discoveries.includes("level1") && !this.meta.endings.includes("exit_level1"), rules = this.c.levels[0];
+    r.mapPages.push({ level: r.level, map: r.map, mapMarks: r.mapMarks }); r.map = {}; r.mapMarks = {};
+    r.level = "level-1";
+    r.l1 = { enteredAt: r.time, power: { phase: "normal", nextAt: 0 }, encounter: null, baseClaimed: false, elder: { met: false, meeting: null } };
+    r.fakePiano = null; r.pendingEvent = null;
+    this.world = new Level1(r.seed, rules); r.pos = { i: 0, j: 0, d: this.world.rotation };
+    this.world.ensureAround(0, 0); this.placeCorpse(); r.world = this.world.toData();
+    const reward = this.c.rewards[0];
+    queueReward(r, "level1:arrival", T("抵達 Level 1", "Reached Level 1"), reward.arrival);
+    if (first) queueReward(r, "level1:first", T("第一次發現：Level 1", "First discovery: Level 1"), reward.firstArrival);
+    if (!this.meta.discoveries.includes("level1")) this.meta.discoveries.push("level1");
+    this.say(first ? rules.arrival : rules.again); this.say(rules.zones.arrival);
+    recordNotebook(r, this.world, true); this.out.levelChanged = true; this.out.rebuild = true; this.out.important = true;
+  }
+
   /* ---------- ending ---------- */
   private end(id: string) {
     const r = this.run, m = this.meta; if (r.ended) return;
@@ -719,20 +780,25 @@ export class Game {
     const days = Math.floor(r.time / (24 * H));
     const breakdown: { label: Text; pts: number }[] = [];
     if (r.roomPerson.rewardPending) breakdown.push({ label: this.personQuest.text.reward, pts: this.personQuest.completionReward });
+    if (r.level === "level-1") breakdown.push(...warehouseSurvival(r, this.c));
+    else {
     if (days) breakdown.push({ label: T(`撐過了 ${days} 天`, `Survived ${days} day${days > 1 ? "s" : ""}`), pts: days * 10 });
     const hours = Math.floor(r.time / H); if (hours >= 6) breakdown.push({ label: T(`在 Level 0 待了 ${hours} 小時`, `${hours} hours in Level 0`), pts: Math.floor(hours / 6) * 2 });
+    }
+    for (const p of r.pendingRewards) breakdown.push({ label: p.label, pts: p.points });
     for (const f of r.found) breakdown.push({ label: T(`第一次發現：${DISC[f]?.zh ?? f}`, `First discovery: ${DISC[f]?.en ?? f}`), pts: 15 });
     const first = !m.endings.includes(id);
     if (e.kind === "death") { if (first) breakdown.push({ label: T("第一次經歷這種死法", "A death you had not known before"), pts: 10 }); }
     else breakdown.push({ label: T(first ? `第一次達成：${e.title.zh}` : e.title.zh, first ? `First time: ${e.title.en}` : e.title.en), pts: e.points * (first ? 2 : 1) });
     const pts = breakdown.reduce((s, x) => s + x.pts, 0);
     r.ended = { ending: id, points: pts, breakdown, days };
+    if (r.level === "level-1") r.ended.level = r.level;
     m.points += pts; if (first) m.endings.push(id);
     for (const f of r.found) if (!m.discoveries.includes(f)) m.discoveries.push(f);
     m.history.push({ run: r.run, ending: id, days, points: pts });
     // the volunteer bottle that was moved into the stranger's pack goes back to the cabinet if nobody took it
     if (r.lockedPack?.story === "room_person") for (const x of r.lockedPack.items) if (x.key.startsWith("vol")) m.cabinet.push(x);
-    // a body stays behind in Level 0 when you die there (not when you leave, fall or are lost to a red room)
+    // Keep only this level's latest recoverable body; other layers are untouched.
     if (e.kind === "death" && id !== "no_one_returned") {
       m.corpses[r.level] = { run: r.run, cause: id, items: r.inv.filter(x => r.carried.includes(x.id) || x.id !== "bottle").slice(0, 6), note: CORPSE_NOTE[id] ?? T("不要停下來。", "Don't stop.") };
     }
@@ -751,6 +817,7 @@ export function swingAway(edge: string, pi: number, pj: number): number {      /
   return 1.65;
 }
 export const DISC: Record<string, Text> = {
+  base_alpha: T("Alpha 基地", "Base Alpha"), supply_crate: T("補給箱", "a supply crate"), level1: T("Level 1", "Level 1"),
   zone_arch: T("拱門區", "the arch zone"), zone_pillar: T("柱林", "the pillar field"), zone_dark: T("斷電區", "the blackout zone"), zone_pit: T("坑洞區", "the pits"),
   manila: T("曼尼拉房間", "the Manila Room"), red_signs: T("紅房間", "a red room"), flicker_wall: T("閃爍的牆", "the flickering wall"),
   ceiling_stash: T("天花板夾層", "the ceiling void"), firesalt: T("火鹽", "firesalt"), liquid_pain: T("Liquid Pain", "Liquid Pain"),

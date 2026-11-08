@@ -1,6 +1,7 @@
+import type { SavedWorld } from "../world/world";
 import type { RngState } from "../core/rng";
 import type { Dir, Lang, Text } from "../core/types";
-import type { Bottle, WorldData, Zone, LevelId } from "../world/level0";
+import type { Bottle, AnyZone, LevelId } from "../world/types";
 
 export const SAVE_VERSION = 1;
 
@@ -50,7 +51,7 @@ export type MapKey = `${number},${number}`;
 export type MapEdge = "open" | "wall" | "arch" | "door" | "door-open" | "flicker" | "unknown";
 export interface MapCell {
   walls: [MapEdge, MapEdge, MapEdge, MapEdge]; // N E S W, copied at the time of drawing
-  zone: Zone | "unknown";
+  zone: AnyZone | "unknown";
   t: number;
   ver: number;
   messy: boolean;
@@ -106,7 +107,7 @@ export interface RunState {
   fakePiano: FakePiano | null;
   halluc: Hallucinations;
   rng: RngState;
-  world: WorldData;
+  world: SavedWorld;
   moves: number;
   shifted: number;
   outageLeft: number;
@@ -122,7 +123,7 @@ export interface RunState {
   roomPerson: RoomPersonRun;
   ended: Ended | null;
 }
-export interface Ended { ending: string; points: number; breakdown: { label: Text; pts: number }[]; days: number }
+export interface Ended { level?: LevelId; ending: string; points: number; breakdown: { label: Text; pts: number }[]; days: number }
 
 export interface Corpse { run: number; items: InvItem[]; cause: string; note: Text }
 export interface Settings { lang: Lang; flash: boolean; sound: boolean; quality: "auto" | "low" | "mid" | "high"; reduceMotion: boolean }

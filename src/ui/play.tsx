@@ -1,11 +1,13 @@
+import { SupplyCratePanel } from "./supply-crate";
+import { reachableCrate } from "../core/level1";
 /* The exploration screen: the 3D stage, status, narration, quick actions, and every in-game panel. */
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { Command } from "../core/game";
+import type { Command, Game } from "../core/game";
 import { CARRY } from "../core/game";
 import { DV, type Dir, type Text } from "../core/types";
 import { View, type Pick } from "../render/view";
 import { feelings, hasStatus, H } from "../systems/survival";
-import { edgeCells, passable } from "../world/level0";
+import { edgeCells, passable } from "../world/types";
 import { ctx, L, U, lang, save } from "./ctx";
 import type { InvItem } from "../state/types";
 import { NotebookMap } from "./notebook-map";
@@ -14,7 +16,7 @@ import { LockedPackPanel } from "./locked-pack";
 import { RoomPersonPanel } from "./room-person";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
-  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" } | { kind: "roomPerson" };
+  | { kind: "crate"; id: string } | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
@@ -67,10 +69,11 @@ export function Play({ onEnd }: { onEnd: () => void }) {
       if (out.ended) { ctx.audio.sfx("end"); setTimeout(onEnd, g.run.ended?.ending === "closed_loop" ? 900 : 500); }
       else if (then) then();
     };
-    if (out.anim.kind === "move" || out.anim.kind === "turn") {
+    if (out.levelChanged) { setSheet(null); v.attach(g); finish(); }
+    else if (out.anim.kind === "move" || out.anim.kind === "turn") {
       v.syncEnv(); v.rebuild(out.anim.kind === "turn" ? 3 : 1);       // build the destination (already shifted) before walking there
       const { i, j } = g.run.pos, z = g.world.zone(i, j);
-      ctx.audio.step(z === "dark" ? "water" : z === "manila" ? "wood" : g.world.redDist(i, j) <= 2.3 ? "sticky" : "carpet", out.anim.kind === "move" ? 3 : 1);
+      ctx.audio.step(g.world.level === "level-1" ? g.world.wet(i, j) ? "water" : "concrete" : z === "dark" ? "water" : z === "manila" ? "wood" : g.world.redDist(i, j) <= 2.3 ? "sticky" : "carpet", out.anim.kind === "move" ? 3 : 1);
       setBusy(true); v.play(out.anim, finish);
     } else if (out.anim.kind === "door") { setBusy(true); v.play(out.anim, () => { v.rebuild(1); finish(); }); }
     else { if (out.rebuild) v.rebuild(cmd.type === "rest" ? 2 : 1); finish(); }
@@ -97,6 +100,15 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (sheet || g.run.pendingEvent) return;
     const { i, j } = g.run.pos;
     switch (p.kind) {
+      case "crate": {
+        if (g.world.level !== "level-1") return;
+        const crate = g.world.crates.get(p.id); if (!crate) return;
+        if (reachableCrate(g.run, g.world, crate)) return setSheet({ kind: "crate", id: p.id });
+        const d = adjacentDir(crate.i, crate.j); return d === null ? say(U("tooFar")) : act({ type: "move", d }, () => setSheet({ kind: "crate", id: p.id }));
+      }
+      case "guide": return act({ type: "readGuide" });
+      case "routeSign": return act({ type: "readSign" });
+      case "baseSupplies": return act({ type: "baseSupplies" });
       case "roomPerson": return g.canTalkToPerson() ? openPerson() : say(U("tooFar"));
       case "lockedPack": {
         if (g.canReachPack()) return openPack();
@@ -127,6 +139,8 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   function labelText(p: Pick): string {
     const { d } = g.run.pos;
     switch (p.kind) {
+      case "crate": return U("supplyCrate"); case "guide": return U("survivalGuide");
+      case "routeSign": return U("routeSign"); case "baseSupplies": return U("baseSupplies");
       case "roomPerson": return L(g.personQuest.text.name);
       case "lockedPack": return L(g.packPuzzle.text.name);
       case "exit": { const t = g.world.edgeAt(g.run.pos.i, g.run.pos.j, p.d); return "→ " + U(p.d === d ? "ahead" : p.d === (d + 3) % 4 ? "toLeft" : "toRight") + (t === "arch" ? U("archS") : t?.endsWith("-open") ? U("doorS") : ""); }
@@ -152,6 +166,12 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   if (c.salt) near.push({ tag: U("here"), label: U("salt"), verb: U("scrape"), run: () => act({ type: "salt" }) });
   if (c.hole) near.push({ tag: U("here"), label: U("hole"), verb: U("reach"), run: () => setSheet({ kind: "ceiling" }) });
   if (c.pits.length) near.push({ tag: U("here"), label: U("pit"), verb: U("look"), run: () => setSheet({ kind: "pit" }) });
+  if (g.world.level === "level-1") {
+    for (const crate of g.world.crates.values()) if (reachableCrate(r, g.world, crate)) near.push({ tag: U("atFeet"), label: U("supplyCrate"), verb: U("open"), run: () => setSheet({ kind: "crate", id: crate.id }) });
+    if (g.zoneHere() === "arrival" || g.zoneHere() === "alpha") near.push({ tag: U("inRoom"), label: U("survivalGuide"), verb: U("read"), run: () => act({ type: "readGuide" }) });
+    if (g.world.routeMark(r.pos.i, r.pos.j) !== null) near.push({ tag: U("inRoom"), label: U("routeSign"), verb: U("read"), run: () => act({ type: "readSign" }) });
+    if (g.zoneHere() === "alpha") near.push({ tag: U("inRoom"), label: U("baseSupplies"), verb: U("collectSupplies"), run: () => act({ type: "baseSupplies" }) });
+  }
   if (inManila()) { near.push({ tag: U("inRoom"), label: U("notesObj"), verb: U("read"), run: openManila }); near.push({ tag: U("inRoom"), label: U("cabinet"), verb: U("open"), run: () => setSheet({ kind: "cabinet" }) }); }
   const ev = r.pendingEvent ? ctx.content.events.find(e => e.id === r.pendingEvent) : null;
   const lock = busy || !!r.pendingEvent;
@@ -180,8 +200,8 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         <div class="top">
           <span class="chip" title={U("time")} onClick={() => setSheet({ kind: "body" })}><b>{timeText}</b>{delta && <span key={delta.id} class="delta">{delta.text}</span>}</span>
           {g.has("flashlight") && <button class="chip" disabled={lock} aria-pressed={r.flashlightOn} onClick={() => act({ type: "toggleFlashlight" })}>{U(r.flashlightOn ? "flashlightOff" : "flashlightOn")}</button>}
-          {DEV && <select class="chip" aria-label="dev" onChange={e => { const v = (e.target as HTMLSelectElement).value as "manila"; (e.target as HTMLSelectElement).value = ""; if (!v) return; g.devJump(v); ctx.view!.attach(g); ctx.audio.ambience(g); save(); rerender(); }}>
-            <option value="">dev ▾</option><option value="manila">曼尼拉房間 Manila</option><option value="red">紅房間 red room</option><option value="flicker">閃爍牆 flicker wall</option><option value="outage">停電 outage</option><option value="day">+24h</option>
+          {DEV && <select class="chip" aria-label="dev" onChange={e => { const v = (e.target as HTMLSelectElement).value as Parameters<Game["devJump"]>[0]; (e.target as HTMLSelectElement).value = ""; if (!v) return; g.devJump(v); ctx.view!.attach(g); ctx.audio.ambience(g); save(); rerender(); }}>
+            <option value="">dev ▾</option><option value="manila">曼尼拉房間 Manila</option><option value="red">紅房間 red room</option><option value="flicker">閃爍牆 flicker wall</option><option value="outage">停電 outage</option><option value="day">+24h</option><option value="level1">Level 1</option><option value="alpha">Base Alpha</option>
           </select>}
           {feel.map((f, k) => <span key={k} class={`chip feel l${f.level}`} title={f[lang()]} onClick={() => setSheet({ kind: "body" })}>{ICON[f.id]}</span>)}
         </div>
@@ -212,6 +232,7 @@ function Panel({ sheet, close, act, setSheet }: { sheet: NonNullable<Sheet>; clo
     <div class="sheet" onClick={e => { if (e.target === e.currentTarget) close(); }}><div class="card" data-panel={sheet.kind} role="dialog" aria-label={title}><h3>{title}<button class="x" onClick={close}>{U("close")}</button></h3>{body}</div></div>);
   const opt = (label: string, note: string, run: () => void, disabled = false) => <button class="opt" disabled={disabled} onClick={run}>{label}<small>{note}</small></button>;
   switch (sheet.kind) {
+    case "crate": return card(U("supplyCrate"), <SupplyCratePanel id={sheet.id} act={cmd => act(cmd, true)} />);
     case "roomPerson": return card(L(g.personQuest.text.name), <RoomPersonPanel act={cmd => act(cmd, true)} close={close} />);
     case "lockedPack": return card(L(g.packPuzzle.text.name), <LockedPackPanel act={cmd => act(cmd, true)} />);
     case "search": {

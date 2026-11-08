@@ -1,14 +1,15 @@
+import type { ActiveWorld } from "../world/world";
 /* Notebook memory is an observation, never a live view of the world. No DOM or random streams. */
 import { DV, type Dir } from "../core/types";
 import { hashWith } from "../core/rng";
 import type { MapCell, MapEdge, MapKey, MapMark, RunState } from "../state/types";
-import { edgeCells, isOpenDoor, passable, type Edge, type Level0World } from "../world/level0";
+import { edgeCells, isOpenDoor, passable, type Edge } from "../world/types";
 import { hasTorch } from "./lighting";
 import { H } from "./survival";
 
 export const mapKey = (i: number, j: number): MapKey => `${i},${j}`;
 export const NOTEBOOK_COOLDOWN = 6 * H;
-const canSee = (r: RunState, w: Level0World) => hasTorch(r) || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
+const canSee = (r: RunState, w: ActiveWorld) => hasTorch(r) || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
 
 export function mapEdge(edge: Edge | undefined): MapEdge {
   if (!edge) return "unknown";
@@ -30,7 +31,7 @@ export function messyWalls(seed: number, i: number, j: number, ver: number, wall
   return copy;
 }
 
-function snapshot(r: RunState, w: Level0World, i: number, j: number, visited: boolean, visible = true): MapCell | null {
+function snapshot(r: RunState, w: ActiveWorld, i: number, j: number, visited: boolean, visible = true): MapCell | null {
   const cell = w.cells.get(mapKey(i, j));
   if (!cell) return null;
   const walls = [0, 1, 2, 3].map(d => visible ? mapEdge(w.edgeAt(i, j, d)) : "unknown") as MapCell["walls"];
@@ -40,7 +41,7 @@ function snapshot(r: RunState, w: Level0World, i: number, j: number, visited: bo
 }
 
 /** Record the current cell on entry; fill only blank pages ahead. Return a noticed discrepancy. */
-export function recordNotebook(r: RunState, w: Level0World, entered = false): boolean {
+export function recordNotebook(r: RunState, w: ActiveWorld, entered = false): boolean {
   if (!r.inv.some(x => x.id === "notebook")) return false;
   const { i, j, d } = r.pos, key = mapKey(i, j), old = r.map[key];
   if (!canSee(r, w)) {
@@ -74,7 +75,7 @@ export function recordNotebook(r: RunState, w: Level0World, entered = false): bo
 }
 
 /** Opening a nearby door changes just that observed edge, not the rest of an old drawing. */
-export function recordNotebookDoor(r: RunState, w: Level0World, edge: string) {
+export function recordNotebookDoor(r: RunState, w: ActiveWorld, edge: string) {
   if (!r.inv.some(x => x.id === "notebook") || !canSee(r, w)) return;
   const cells = edgeCells(edge), dirs: Dir[] = edge[0] === "v" ? [1, 3] : [2, 0];
   cells.forEach(([i, j], n) => { const cell = r.map[mapKey(i, j)]; if (cell) cell.walls[dirs[n]] = mapEdge(w.edges.get(edge)); });
@@ -91,13 +92,13 @@ export function setMapMark(r: RunState, key: MapKey, mark: MapMark | null) {
 
 export function notebookReadBlock(r: RunState): "missing" | "blank" | "calm" | "cooldown" | null {
   if (!r.inv.some(x => x.id === "notebook")) return "missing";
-  if (!Object.keys(r.map).length) return "blank";
+  if (!Object.keys(r.map).length && !r.mapPages.some(p => Object.keys(p.map).length)) return "blank";
   if (r.stats.sanity >= 35) return "calm";
   if (r.lastNotebookRead !== null && r.time - r.lastNotebookRead < NOTEBOOK_COOLDOWN) return "cooldown";
   return null;
 }
 export function notebookReadGain(r: RunState): number {
-  const cells = Object.values(r.map);
+  const cells = [...Object.values(r.map), ...r.mapPages.flatMap(p => Object.values(p.map))];
   return cells.filter(c => c.messy).length > cells.length / 2 ? 4 : 8;
 }
 

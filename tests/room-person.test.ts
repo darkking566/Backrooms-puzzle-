@@ -43,7 +43,7 @@ describe("room person selection and supplies", () => {
     m.cabinet.push({ key: "tool", id: "watch" }); const before = structuredClone(m.cabinet), g = game(m);
     expect(m.cabinet).toEqual(before); expect(g.run.lockedPack!.items.filter(x => x.id === "almond_water")).toHaveLength(count < 2 ? 2 : 1);
     expect(g.run.packPlan).toBe("none"); expect(g.run.lockedPack!.story).toBe("room_person");
-    expect(g.world.inManila(g.run.lockedPack!.pos.i, g.run.lockedPack!.pos.j)).toBe(true);
+    expect(g.level0.inManila(g.run.lockedPack!.pos.i, g.run.lockedPack!.pos.j)).toBe(true);
     enter(g); expect(g.run.log.some(x => x.t.en.includes("still supplies"))).toBe(true);
   });
   it("returns an untaken volunteer bottle to the cabinet when the run ends", () => {

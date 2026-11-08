@@ -161,3 +161,5 @@ textarea { font-size: 13px; resize: vertical; }
 .lock-dials output { font: 2rem monospace; min-width: 52px; text-align: center; padding: 8px; border: 1px solid var(--line); border-radius: 4px; }
 .person-water { display: flex; flex-direction: column; gap: 8px; }
 .card[data-panel="lockedPack"] > h3, .card[data-panel="roomPerson"] > h3 { position: sticky; top: -16px; z-index: 1; background: var(--ink2); padding: 8px 0; flex-shrink: 0; }
+
+.zone-warehouse,.zone-arrival{fill:#b9c0bc}.zone-storage{fill:#969d98}.zone-alpha{fill:#d5d0b5}

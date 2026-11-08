@@ -1,0 +1,4 @@
+- id: warehouse_latch
+  title: { zh: 箱子的側板, en: The Side Panel }
+  text: { zh: 上蓋釘死不代表箱子打不開。沿著側板下緣找滑閂。, en: A nailed lid does not mean the crate cannot be opened. Look for a sliding latch beneath the side panel. }
+  source: level-1

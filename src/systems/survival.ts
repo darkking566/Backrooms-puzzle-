@@ -1,10 +1,10 @@
 /* Survival over time. Rates are per hour and follow DESIGN §5.1: about 72 h without water at rest, walking ×1.5,
    a full stomach lasts about three days of reserve (hunger hurts, but water kills first), trouble after 24 h awake. Everything runs through tick(). */
 import type { RunState } from "../state/types";
-import type { Zone } from "../world/level0";
+import type { AnyZone } from "../world/types";
 
 export type Activity = "idle" | "walk" | "sleep";
-export interface Env { zone: Zone; dark: boolean; redK: number; manilaK: number; inLevel0: boolean }
+export interface Env { zone: AnyZone; dark: boolean; redK: number; manilaK: number; inLevel0: boolean; sanityRate?: number; shelterRecovery?: number }
 const clamp = (x: number) => Math.max(0, Math.min(100, x));
 export const H = 60;
 
@@ -21,13 +21,14 @@ export function tick(r: RunState, minutes: number, act: Activity, env: Env): str
     s.food = clamp(s.food - h * 1.4 * (act === "sleep" ? .8 : 1));
     if (act === "sleep") s.awake = Math.max(0, s.awake - 2); else s.awake += 1;
     // sanity: the hum, isolation and darkness wear you down; the Manila Room and sleep give some back
-    let ds = env.inLevel0 ? -.8 : -.3;
-    if (env.dark) ds *= 3;
+    let ds = env.sanityRate ?? (env.inLevel0 ? -.8 : -.3);
+    if (env.dark && env.sanityRate === undefined) ds *= 3;
     ds -= 1.5 * env.redK;
     if (s.awake > 24 * H) ds -= 1;
     if (hasStatus(r, "hearing_damage")) ds -= .3;
     if (act === "sleep" && !env.dark) ds = 1.5;
     if (env.manilaK > 0) ds = Math.max(ds, 6 * env.manilaK);
+    if (env.shelterRecovery) ds = Math.max(ds, env.shelterRecovery);
     s.sanity = clamp(s.sanity + ds * h);
     // the Wretched Cycle: hunger, thirst and sleeplessness feed it; isolation (Level 0) speeds it up
     let dw = 0;

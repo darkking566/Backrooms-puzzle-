@@ -1,7 +1,7 @@
 /* Perceptions are decided once by the engine and saved. Audio and UI never roll for them. */
 import { sstep, T, type Text } from "../core/types";
 import type { HallucinationRecord, RunState } from "../state/types";
-import type { Level0World, Zone } from "../world/level0";
+import type { Level0World, Zone } from "../world/types";
 import { H } from "./survival";
 
 export const PIANO_CAPTION = T("〔很遠的地方，有人在彈鋼琴〕", "[Far away, someone is playing piano]");
@@ -115,6 +115,28 @@ export function perceive(r: RunState, w: Level0World, action: PerceptionAction, 
       out.perceivedTime = choices[Math.floor(rand() * choices.length)];
       rememberHallucination(r, kind, out.perceivedTime, action.minutes); break;
     }
+  }
+  return out;
+}
+
+/** The warehouse has no piano or invented entities. Important observations remain reliable. */
+export function perceiveWarehouse(r: RunState, action: PerceptionAction, safe: boolean, rand: () => number): PerceptionOutcome {
+  const out: PerceptionOutcome = { say: [] };
+  if (action.minutes <= 0 || action.important || r.ended) return out;
+  if (action.previousSanity < HALLUC_CLEAR && r.stats.sanity >= HALLUC_CLEAR && r.halluc.needsReflection) {
+    r.halluc.needsReflection = false;
+    if (rand() < .5) out.say.push(T("你不確定剛才看到的是不是真的。", "You're not sure what you saw earlier was real."));
+  }
+  if (safe || !action.action || r.stats.sanity >= HALLUC_ONSET || r.time < r.halluc.lieAfter) return out;
+  const memory = action.action === "move", time = !r.inv.some(x => x.id === "watch");
+  if ((!memory && !time) || rand() >= lieChance(r.stats.sanity)) return out;
+  r.halluc.lieAfter = r.time + LIE_COOLDOWN;
+  if (memory && (!time || rand() < .5)) {
+    const text = T("你記得在這排柱子旁等過。但想不起來等的是什麼。", "You remember waiting beside these pillars. You cannot remember what for.");
+    out.say.push(text); rememberHallucination(r, "memory", text);
+  } else {
+    const choices = VAGUE_TIME.filter((_, band) => Math.abs(band - timeBand(action.minutes)) >= 2);
+    out.perceivedTime = choices[Math.floor(rand() * choices.length)]; rememberHallucination(r, "time", out.perceivedTime, action.minutes);
   }
   return out;
 }
