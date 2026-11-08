@@ -12,6 +12,15 @@ import type { InvItem } from "../state/types";
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
   | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
+/* How long something took. With a watch you know exactly; without one you only have a feeling for it. */
+function took(m: number, watch: boolean): Text {
+  if (watch) {
+    const h = Math.floor(m / 60), mm = m % 60;
+    return h ? { zh: `${h} 小時${mm ? ` ${mm} 分鐘` : ""}`, en: `${h} h${mm ? ` ${mm} min` : ""}` } : { zh: `${m} 分鐘`, en: `${m} min` };
+  }
+  return m < 12 ? { zh: "一會兒", en: "a moment" } : m < 40 ? { zh: "一陣子", en: "a while" } : m < 100 ? { zh: "好一陣子", en: "quite a while" }
+    : m < 300 ? { zh: "幾個小時", en: "a few hours" } : { zh: "很久很久", en: "a long, long time" };
+}
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
 export function Play({ onEnd }: { onEnd: () => void }) {
@@ -21,6 +30,9 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const [caption, setCaption] = useState<Text | null>(null);
   const [hints, setHints] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [skip, setSkip] = useState<{ id: number; text: Text; long: boolean } | null>(null);   // the screen dims while time passes
+  const [delta, setDelta] = useState<{ id: number; text: string } | null>(null);              // "+20 min" next to the clock
+  const holdUntil = useRef(0);
   const capTimer = useRef(0);
   const g = ctx.game!;
 
@@ -46,8 +58,9 @@ export function Play({ onEnd }: { onEnd: () => void }) {
 
   /* ---------- running commands ---------- */
   function act(cmd: Command, then?: () => void) {
-    const v = ctx.view!; if (v.busy || g.run.ended || (g.run.pendingEvent && cmd.type !== "choose")) return;
+    const v = ctx.view!; if (v.busy || g.run.ended || performance.now() < holdUntil.current || (g.run.pendingEvent && cmd.type !== "choose")) return;
     const out = g.dispatch(cmd);
+    showTime(cmd, out.minutes, !!out.ended);
     for (const s of out.sfx) ctx.audio.sfx(s);
     if (out.caption) showCaption(out.caption);
     if (out.event === "noise_spike") ctx.audio.sfx("spike");
@@ -65,6 +78,16 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     } else if (out.anim.kind === "door") { setBusy(true); v.play(out.anim, () => { v.rebuild(1); finish(); }); }
     else { if (out.rebuild) v.rebuild(cmd.type === "rest" ? 2 : 1); finish(); }
     rerender();
+  }
+  function showTime(cmd: Command, m: number, ended: boolean) {
+    if (m <= 0) return;
+    const watch = g.has("watch"), id = performance.now();
+    setDelta({ id, text: "+" + L(took(m, watch)) });
+    if (ended || cmd.type === "move" || cmd.type === "turn" || m < 15) return;   // walking already shows time passing; short things don't need a pause
+    const long = m >= 120, t = took(m, watch);
+    setSkip({ id, long, text: cmd.type === "rest" ? { zh: `……你醒了過來。睡了${t.zh}。`, en: `...You wake. You slept ${t.en}.` } : { zh: `……過了${t.zh}。`, en: `...${t.en[0].toUpperCase() + t.en.slice(1)} passes.` } });
+    holdUntil.current = id + (long ? 1500 : 900);
+    setTimeout(() => setSkip(s => (s && s.id === id ? null : s)), long ? 2600 : 1700);
   }
   const moveThen = (d: Dir, cmd: Command) => act({ type: "move", d }, () => act(cmd));
   function adjacentDir(i: number, j: number): Dir | null {
@@ -146,7 +169,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         <canvas ref={canvas} aria-label={L({ zh: "場景。點開口移動，拖曳轉頭。", en: "The scene. Tap an opening to move; drag to look around." })} />
         <div class="labels" ref={labels} />
         <div class="top">
-          <span class="chip" title={U("time")} onClick={() => setSheet({ kind: "body" })}><b>{timeText}</b></span>
+          <span class="chip" title={U("time")} onClick={() => setSheet({ kind: "body" })}><b>{timeText}</b>{delta && <span key={delta.id} class="delta">{delta.text}</span>}</span>
           {DEV && <select class="chip" aria-label="dev" onChange={e => { const v = (e.target as HTMLSelectElement).value as "manila"; (e.target as HTMLSelectElement).value = ""; if (!v) return; g.devJump(v); ctx.view!.attach(g); ctx.audio.ambience(g); save(); rerender(); }}>
             <option value="">dev ▾</option><option value="manila">曼尼拉房間 Manila</option><option value="red">紅房間 red room</option><option value="flicker">閃爍牆 flicker wall</option><option value="outage">停電 outage</option><option value="day">+24h</option>
           </select>}
@@ -154,6 +177,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         </div>
         <button class="turn l" disabled={lock} aria-label={U("left")} onClick={() => act({ type: "turn", dir: -1 })}>‹<small>{U("left")}</small></button>
         <button class="turn r" disabled={lock} aria-label={U("right")} onClick={() => act({ type: "turn", dir: 1 })}>›<small>{U("right")}</small></button>
+        {skip && <div key={skip.id} class={"skip" + (skip.long ? " long" : "")} aria-live="polite"><span>{L(skip.text)}</span></div>}
         <div class="over">
           {!lock && near.length > 0 && <div class="near">{near.map((n, k) => <button key={k} onClick={n.run}><span>{n.tag}</span>{n.label}<b>{n.verb}</b></button>)}</div>}
           {caption && <div class="cap" aria-live="polite">{L(caption)}</div>}
@@ -164,7 +188,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
       <div class="side"><div class="log">{logLines(14)}</div>{actionBar}{menuBar}</div>
       {ev && <div class="sheet"><div class="card" role="dialog">
         <p class="story">{L(ev.text)}</p>
-        {g.availableChoices(ev.id).map(({ ch, ok }, k) => <button class="opt" disabled={!ok} onClick={() => act({ type: "choose", index: k })}>{L(ch.text)}{!ok && ch.requires && <small>{U("needs", { x: L(g.item(ch.requires.item).name) })}</small>}</button>)}
+        {g.availableChoices(ev.id).map(({ ch, ok }, k) => <button class="opt" disabled={!ok} onClick={() => act({ type: "choose", index: k })}>{L(ch.text)}{!ok && ch.requires ? <small>{U("needs", { x: L(g.item(ch.requires.item).name) })}</small> : ch.effects?.time ? <small>{U("minutes", { m: ch.effects.time })}</small> : null}</button>)}
       </div></div>}
       {sheet && <Panel sheet={sheet} close={() => setSheet(null)} act={(cmd, keep) => { if (!keep) setSheet(null); act(cmd); }} setSheet={setSheet} />}
     </div>

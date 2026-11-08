@@ -108,7 +108,9 @@ export class Audio {
     else if (!inM && this.capState.inM) say(T("〔嗡嗡聲又回來了〕", "[The hum is back]"));
     else if (!inM && lv.piano > .1 && !this.capState.piano) say(T("〔很遠的地方，有人在彈鋼琴〕", "[Far away, someone is playing piano]"));
     else if (redK > .4 && !this.capState.red) say(T("〔嗡嗡聲變得又低又悶〕", "[The hum sinks low and dull]"));
-    else if (lv.buzz > .015 && !this.capState.buzz && !this.muffled) say(T("〔細細的電流聲〕", "[A thin electric buzz]"));
+    else if (lv.buzz > .015 && !this.capState.buzz) this.onCaption(this.muffled   // tell them what the ringing cost them
+      ? T("〔你好像聽到了什麼，但耳鳴把它蓋過去了〕", "[You think you hear something, but the ringing drowns it out]")
+      : T("〔細細的電流聲〕", "[A thin electric buzz]"));
     else if (st.crk && !this.capState.crk) say(T("〔燈管劈啪作響〕", "[A tube crackles]"));
     this.capState = st;
     if (!this.ctx) return;
@@ -117,7 +119,7 @@ export class Audio {
     set(n.hum.gain, lv.hum, pw ? .7 : .25);
     set(n.h1.frequency, pw ? 120 - 22 * redK : 70, .5); set(n.h2.frequency, pw ? 60 - 11 * redK : 35, .5);
     set(n.humF.frequency, 650 - 320 * redK, .8);
-    set(n.piano.gain, lv.piano, 1.2); set(n.pianoF.frequency, lv.cut, 1.2); set(n.drone.gain, lv.drone, 1.5); set(n.buzz.gain, lv.buzz, .8);
+    set(n.piano.gain, lv.piano, 1.2); set(n.pianoF.frequency, lv.cut, 1.2); set(n.drone.gain, lv.drone, 1.5); set(n.buzz.gain, this.muffled ? 0 : lv.buzz, .8);
   }
   crackle(v: number) { if (this.on && this.ctx) this.n.crk.gain.setTargetAtTime(this.lv.fl ? v : 0, this.ctx.currentTime, .03); }
 }

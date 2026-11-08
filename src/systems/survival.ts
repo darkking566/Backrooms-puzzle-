@@ -1,5 +1,5 @@
 /* Survival over time. Rates are per hour and follow DESIGN §5.1: about 72 h without water at rest, walking ×1.5,
-   2000 kcal a day, trouble after 24 h awake. Everything runs through tick(). */
+   a full stomach lasts about three days of reserve (hunger hurts, but water kills first), trouble after 24 h awake. Everything runs through tick(). */
 import type { RunState } from "../state/types";
 import type { Zone } from "../world/level0";
 
@@ -18,7 +18,7 @@ export function tick(r: RunState, minutes: number, act: Activity, env: Env): str
   for (let m = 0; m < minutes; m++) {                        // minute steps keep thresholds exact; runs are short
     const h = 1 / H;
     s.water = clamp(s.water - h * (100 / 72) * (act === "walk" ? 1.5 : act === "sleep" ? .8 : 1));
-    s.food = clamp(s.food - h * 3.4 * (act === "sleep" ? .8 : 1));
+    s.food = clamp(s.food - h * 1.4 * (act === "sleep" ? .8 : 1));
     if (act === "sleep") s.awake = Math.max(0, s.awake - 2); else s.awake += 1;
     // sanity: the hum, isolation and darkness wear you down; the Manila Room and sleep give some back
     let ds = env.inLevel0 ? -.8 : -.3;
@@ -31,7 +31,7 @@ export function tick(r: RunState, minutes: number, act: Activity, env: Env): str
     s.sanity = clamp(s.sanity + ds * h);
     // the Wretched Cycle: hunger, thirst and sleeplessness feed it; isolation (Level 0) speeds it up
     let dw = 0;
-    if (s.water < 25) dw += .8; if (s.food < 10) dw += .8; if (s.awake > 30 * H) dw += .8;
+    if (s.water < 25) dw += .8; if (s.food < 10) dw += 1; if (s.awake > 30 * H) dw += .8;
     if (env.inLevel0) dw *= 1.3;
     if (dw === 0 && s.water > 50 && s.food > 40 && s.awake < 20 * H && s.wretched < 65) dw = -.4;
     s.wretched = clamp(s.wretched + dw * h);

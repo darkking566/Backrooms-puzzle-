@@ -47,7 +47,7 @@ export class Game {
     const rng: RngState = { seed, counters: {} };
     const run: RunState = {
       v: SAVE_VERSION, seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
-      stats: { water: 68, food: 55, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
+      stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
       inv: bought.map((id, k) => ({ key: "start" + k, id })), carried: [...bought],
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },
       moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
