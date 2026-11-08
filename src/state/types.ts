@@ -13,6 +13,21 @@ export interface Stats {
   health: number;     // 0..100
 }
 export interface InvItem { key: string; id: string; bottle?: Bottle }
+export type LockSymbol = "circle" | "triangle" | "square";
+export interface LockedPack {
+  id: string;
+  pos: { i: number; j: number };
+  order: LockSymbol[];
+  marksOrder: LockSymbol[];
+  numbers: Record<LockSymbol, number>;
+  seen: boolean;
+  hasRuleNote: boolean;
+  marksSeen: boolean;
+  failures: number;
+  jammed: boolean;
+  openedBy: "code" | "crowbar" | null;
+  items: InvItem[];
+}
 export interface LogLine { t: Text; kind?: "event" | "warn" | "caption" }
 
 export type MapKey = `${number},${number}`;
@@ -72,6 +87,8 @@ export interface RunState {
   found: string[];                  // first-time discoveries made this run
   log: LogLine[];
   manilaTaken: number;              // flasks taken from the cabinet this run
+  packPlan: "none" | "arch" | "manila";
+  lockedPack: LockedPack | null;     // independent of evicted/shifted map cells; dials are UI-only
   ended: Ended | null;
 }
 export interface Ended { ending: string; points: number; breakdown: { label: Text; pts: number }[]; days: number }
@@ -89,10 +106,12 @@ export interface Meta {
   notes: { t: string; run: number }[];   // notes left in the Manila Room
   cabinet: InvItem[];                   // what is in the Manila Room cabinet
   corpse: Corpse | null;
+  symbolLock: { ruleNoteSeen: boolean; lastCode: string | null };
   history: { run: number; ending: string; days: number; points: number }[];
   settings: Settings;
 }
 export const newMeta = (): Meta => ({
   v: SAVE_VERSION, name: null, runs: 0, points: 0, discoveries: [], endings: [], clues: [], notes: [], cabinet: [], corpse: null, history: [],
+  symbolLock: { ruleNoteSeen: false, lastCode: null },
   settings: { lang: "zh", flash: false, sound: false, quality: "auto", reduceMotion: false }
 });

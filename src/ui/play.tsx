@@ -10,9 +10,10 @@ import { ctx, L, U, lang, save } from "./ctx";
 import type { InvItem } from "../state/types";
 import { NotebookMap } from "./notebook-map";
 import { elapsedMessages } from "./time";
+import { LockedPackPanel } from "./locked-pack";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
-  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" };
+  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
@@ -95,6 +96,11 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (sheet || g.run.pendingEvent) return;
     const { i, j } = g.run.pos;
     switch (p.kind) {
+      case "lockedPack": {
+        if (g.canReachPack()) return openPack();
+        const pos = g.run.lockedPack?.pos, d = pos ? adjacentDir(pos.i, pos.j) : null;
+        return d === null ? say(U("tooFar")) : act({ type: "move", d }, () => { if (g.canReachPack() && !g.run.pendingEvent) openPack(); });
+      }
       case "exit": return act({ type: "move", d: p.d });
       case "item": { if (p.i === i && p.j === j) return act({ type: "pickup", key: p.key }); const d = adjacentDir(p.i, p.j); return d === null ? say(U("tooFar")) : moveThen(d, { type: "pickup", key: p.key }); }
       case "corpse": { const [ci, cj] = g.world.corpse!; if (ci === i && cj === j) return act({ type: "corpse" }); const d = adjacentDir(ci, cj); return d === null ? say(U("tooFar")) : moveThen(d, { type: "corpse" }); }
@@ -112,11 +118,13 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const here = (f: (c: ReturnType<typeof g.cellHere>) => boolean) => f(g.cellHere());
   const inManila = () => g.zoneHere() === "manila";
   const openManila = () => { act({ type: "examine", what: "notes" }); ctx.audio.sfx("paper"); setSheet({ kind: "manila" }); };
+  const openPack = () => { act({ type: "packExamine" }); setSheet({ kind: "lockedPack" }); };
   const say = (s: string) => { g.run.log.push({ t: { zh: s, en: s } }); rerender(); };
 
   function labelText(p: Pick): string {
     const { d } = g.run.pos;
     switch (p.kind) {
+      case "lockedPack": return L(g.packPuzzle.text.name);
       case "exit": { const t = g.world.edgeAt(g.run.pos.i, g.run.pos.j, p.d); return "→ " + U(p.d === d ? "ahead" : p.d === (d + 3) % 4 ? "toLeft" : "toRight") + (t === "arch" ? U("archS") : t?.endsWith("-open") ? U("doorS") : ""); }
       case "item": { for (const c of g.world.cells.values()) { const it = c.items.find(x => x.key === p.key); if (it) return L(g.itemName(it)); } return ""; }
       case "door": return U(g.world.edges.get(p.edge) === "door-metal" ? "metalDoor" : "woodDoor");
@@ -134,6 +142,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const log = r.log.slice(-3);
   const near: { label: string; tag: string; verb: string; run: () => void }[] = [];
   for (const it of c.items) near.push({ tag: U("atFeet"), label: L(g.itemName(it)), verb: U("pickUp"), run: () => act({ type: "pickup", key: it.key }) });
+  if (g.canReachPack()) near.push({ tag: inManila() ? U("inRoom") : U("atFeet"), label: L(g.packPuzzle.text.name), verb: U("look"), run: openPack });
   if (g.world.corpse && g.meta.corpse && g.world.corpse[0] === r.pos.i && g.world.corpse[1] === r.pos.j) near.push({ tag: U("atFeet"), label: U("corpseHere"), verb: U("searchBody"), run: () => act({ type: "corpse" }) });
   if (c.salt) near.push({ tag: U("here"), label: U("salt"), verb: U("scrape"), run: () => act({ type: "salt" }) });
   if (c.hole) near.push({ tag: U("here"), label: U("hole"), verb: U("reach"), run: () => setSheet({ kind: "ceiling" }) });
@@ -197,6 +206,7 @@ function Panel({ sheet, close, act, setSheet }: { sheet: NonNullable<Sheet>; clo
     <div class="sheet" onClick={e => { if (e.target === e.currentTarget) close(); }}><div class="card" role="dialog" aria-label={title}><h3>{title}<button class="x" onClick={close}>{U("close")}</button></h3>{body}</div></div>);
   const opt = (label: string, note: string, run: () => void, disabled = false) => <button class="opt" disabled={disabled} onClick={run}>{label}<small>{note}</small></button>;
   switch (sheet.kind) {
+    case "lockedPack": return card(L(g.packPuzzle.text.name), <LockedPackPanel act={cmd => act(cmd, true)} />);
     case "search": {
       const flasks = r.inv.filter(x => x.bottle?.liquid === "empty");
       return card(U("search"), <>

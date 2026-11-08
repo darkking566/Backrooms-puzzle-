@@ -87,6 +87,9 @@ export class Audio {
     } else if (name === "rattle") { for (let k = 0; k < 4; k++) { this.burst(t + k * .11, .05, "bandpass", 2600 + Math.random() * 600, 4, .3); this.thump(t + k * .11, 140, .06, .12); } }
     else if (name === "clunk") { this.thump(t, 70, .5, .55); this.burst(t, .25, "lowpass", 300, .7, .35); }
     else if (name === "relight") { for (let k = 0; k < 5; k++) this.burst(t + k * .2 + Math.random() * .06, .03, "highpass", 2500, .7, .18); }
+    else if (name === "lock_fail") { this.thump(t, 850, .06, .07); }
+    else if (name === "lock_open") { this.thump(t, 1100, .06, .06); this.thump(t + .09, 1600, .05, .04); }
+    else if (name === "lock_break") { this.burst(t, .14, "highpass", 2200, .7, .12); }
     else if (name === "paper") { this.burst(t, .12, "highpass", 3500, .5, .08); this.burst(t + .1, .1, "highpass", 4200, .5, .05); }
     else if (name === "distant_steps") { for (let k = 0; k < 3; k++) this.thump(t + k * .58, 68, .16, .035); }
     else if (name === "distant_knocks") { this.thump(t, 125, .1, .045); this.thump(t + .42, 125, .1, .04); }

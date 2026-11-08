@@ -202,6 +202,19 @@ export class Level0 {
     }
     return vis;
   }
+  /** A reachable, stable site outside both ends of the movement animation. No map/RNG changes. */
+  unseenArchSite(poses: { i: number; j: number; d: Dir }[]): { i: number; j: number } | null {
+    const p = poses[poses.length - 1], visible = this.visibleFrom(poses), reached = new Set([ck(p.i, p.j)]), queue = [{ i: p.i, j: p.j }];
+    for (let q = 0; q < queue.length; q++) {
+      const c = queue[q];
+      for (let d = 0; d < 4; d++) {
+        const i = c.i + DV[d][0], j = c.j + DV[d][1], k = ck(i, j);
+        if (!reached.has(k) && this.cells.has(k) && traversable(this.edgeAt(c.i, c.j, d)) && this.zone(i, j) !== "red" && this.zone(i, j) !== "pit") { reached.add(k); queue.push({ i, j }); }
+      }
+    }
+    return queue.filter(c => this.zone(c.i, c.j) === "arch" && !visible.has(ck(c.i, c.j)))
+      .sort((a, b) => Math.hypot(a.i - p.i, a.j - p.j) - Math.hypot(b.i - p.i, b.j - p.j) || a.i - b.i || a.j - b.j)[0] ?? null;
+  }
   /** Regenerate every cell nobody is looking at. Returns how many changed. */
   shiftUnseen(vis: Set<string>, sleeping = false): number {
     const changed: Cell[] = [];

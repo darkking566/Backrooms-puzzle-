@@ -10,7 +10,7 @@ import { H, litMat, makeGeometry, makeMaterials, shared, type Geometry, type Mat
 export type Pick =
   | { kind: "exit"; d: Dir } | { kind: "item"; key: string; i: number; j: number } | { kind: "door"; edge: string } | { kind: "flicker"; edge: string }
   | { kind: "wall"; edge: string } | { kind: "tally" } | { kind: "peel" } | { kind: "hole" } | { kind: "pit" } | { kind: "salt" } | { kind: "corpse" }
-  | { kind: "notes" } | { kind: "cabinet" };
+  | { kind: "notes" } | { kind: "cabinet" } | { kind: "lockedPack" };
 export type Quality = "low" | "mid" | "high";
 const TIERS: Record<Quality, { scale: number; R: number; res: number; post: number }> = {
   low: { scale: .6, R: 4, res: 1, post: 0 }, mid: { scale: .8, R: 6, res: .5, post: 1 }, high: { scale: 1, R: 7, res: 1 / 3, post: 2 }
@@ -324,6 +324,17 @@ export class View {
   }
   private objects(ci: number, cj: number) {
     const g = this.game!, w = g.world, R = this.R, M = this.MAT, G = this.GEO;
+    const pack = g.run.lockedPack;
+    if (pack && Math.abs(pack.pos.i - ci) <= R && Math.abs(pack.pos.j - cj) <= R) {
+      const grp = new THREE.Group();
+      const body = new THREE.Mesh(G.box, M.furnDark); body.scale.set(.55, .3, .72); body.position.y = .17; grp.add(body);
+      for (const x of [-.17, .17]) { const strap = new THREE.Mesh(G.box, M.body); strap.scale.set(.05, .025, .68); strap.position.set(x, .335, 0); grp.add(strap); }
+      if (!pack.openedBy) { const lock = new THREE.Mesh(G.box, M.cap); lock.scale.set(.07, .09, .04); lock.position.set(0, .23, -.38); grp.add(lock); }
+      const board = new THREE.Mesh(G.box, M.paper); board.scale.set(.46, .015, .28); board.position.set(.47, .02, .1); grp.add(board);
+      const proxy = new THREE.Mesh(G.proxy, M.proxy); proxy.position.y = .15; grp.add(proxy);
+      grp.position.set(pack.pos.i * S + .55, 0, pack.pos.j * S + .35);
+      this.add(grp, { pick: { kind: "lockedPack" }, label: "lockedPack", ly: .55 });
+    }
     for (const c of w.cells.values()) {
       if (Math.abs(c.i - ci) > R || Math.abs(c.j - cj) > R) continue;
       for (const it of c.items) {

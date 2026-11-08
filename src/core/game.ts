@@ -9,6 +9,7 @@ import { newHallucinations, SAVE_VERSION, type MapKey, type MapMark, type Meta, 
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
 import { perceive } from "../systems/hallucinations";
+import { makePack, matchesPack, validCode } from "../systems/symbol-lock";
 
 export const CARRY = 8;                 // weight you can carry
 export const PREP_CARRY = 5;            // weight you can bring into a run
@@ -24,6 +25,8 @@ export type Command =
   | { type: "choose"; index: number }
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
   | { type: "corpse" }
+  | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
+  | { type: "packUnjam" } | { type: "packForce" } | { type: "packTake"; key: string }
   | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
@@ -47,7 +50,7 @@ export class Game {
   /* ---------- new run ---------- */
   static newRun(c: ContentData, meta: Meta, seed: number, bought: string[]): Game {
     meta.runs += 1;
-    const rng: RngState = { seed, counters: { halluc: 0 } };
+    const rng: RngState = { seed, counters: { halluc: 0, puzzles: 0 } };
     const run: RunState = {
       v: SAVE_VERSION, seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
       stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
@@ -55,11 +58,14 @@ export class Game {
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },
       map: {}, mapMarks: {}, lastNotebookRead: null,
       fakePiano: null, halluc: newHallucinations(),
+      packPlan: "none", lockedPack: null,
       moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
     };
     // volunteers keep the Manila Room cabinet stocked a little (Wiki: The Manila Room)
     if (meta.cabinet.filter(x => x.id === "almond_water").length < 2) meta.cabinet.push({ key: "vol" + meta.runs, id: "almond_water" });
     const g = new Game(c, meta, run);
+    const p = g.packPuzzle;
+    if (run.run >= p.spawn.minRun && g.rand("puzzles") < p.spawn.chance) run.packPlan = "arch";
     recordNotebook(run, g.world, true);
     run.log.push({ t: T(`你在嗡嗡聲裡醒來。這是你記得的第 ${meta.runs} 次。`, `You wake up in the hum. This is the ${ordinal(meta.runs)} time you remember.`) });
     return g;
@@ -100,6 +106,11 @@ export class Game {
   private rand(s: Stream = "misc") { return draw(this.run.rng, s); }
   private discover(id: string) { if (!this.meta.discoveries.includes(id) && !this.run.found.includes(id)) this.run.found.push(id); }
   learn(id: string) { if (!this.meta.clues.includes(id)) this.meta.clues.push(id); }
+  get packPuzzle() { return this.c.puzzles.find(p => p.id === (this.run.lockedPack?.id ?? "fallen_pack"))!; }
+  canReachPack() {
+    const p = this.run.lockedPack?.pos, r = this.run.pos;
+    return !!p && ((p.i === r.i && p.j === r.j) || (this.world.inManila(p.i, p.j) && this.zoneHere() === "manila"));
+  }
 
   /** Pass time; may end the run. */
   private pass(minutes: number, act: Activity = "idle") {
@@ -140,6 +151,12 @@ export class Game {
       case "cabinetPut": this.cabinetPut(cmd.key); break;
       case "writeNote": this.writeNote(cmd.text); break;
       case "corpse": this.searchCorpse(); break;
+      case "packExamine": this.packExamine(); break;
+      case "packMarks": this.packMarks(); break;
+      case "packAttempt": this.packAttempt(cmd.code); break;
+      case "packUnjam": this.packUnjam(); break;
+      case "packForce": this.packForce(); break;
+      case "packTake": this.packTake(cmd.key); break;
       case "mapMark": setMapMark(r, cmd.key, cmd.mark); break;
       case "rereadNotebook": this.rereadNotebook(); break;
     }
@@ -187,6 +204,10 @@ export class Game {
     this.outage(z);
     this.afterStep([from, r.pos]);
     this.maybeEvent("move", z);
+    if (r.packPlan === "arch" && !r.lockedPack && r.moves >= this.packPuzzle.spawn.minMoves && z === "arch") {
+      const site = w.unseenArchSite([from, r.pos]);
+      if (site) { r.lockedPack = makePack(this.packPuzzle, r, this.meta, site, () => this.rand("puzzles")); r.packPlan = "none"; this.out.rebuild = true; }
+    }
   }
   private turn(dir: -1 | 1 | 2) {
     const r = this.run, from = { ...r.pos };
@@ -487,6 +508,63 @@ export class Game {
     this.meta.corpse = null; w.corpse = null; this.discover("own_corpse"); this.out.rebuild = true;
   }
 
+  /* ---------- fallen backpack ---------- */
+  private packExamine() {
+    if (!this.canReachPack()) return;
+    const p = this.run.lockedPack!, def = this.packPuzzle;
+    if (!p.seen) {
+      p.hasRuleNote = !this.meta.symbolLock.ruleNoteSeen && !this.meta.clues.includes(def.methodClue);
+      this.meta.symbolLock.ruleNoteSeen = true; p.seen = true;
+    }
+    this.discover("fallen_pack"); this.say(def.text.description);
+    if (!p.openedBy) this.say(p.jammed ? def.text.jammed : def.text.locked);
+  }
+  private packMarks() {
+    if (!this.canReachPack()) return;
+    const p = this.run.lockedPack!; if (p.marksSeen) return;
+    this.pass(this.packPuzzle.minutes.examineMarks); if (this.run.ended) return;
+    p.marksSeen = true; this.out.sfx.push("paper");
+  }
+  private openPack(by: "code" | "crowbar") {
+    const p = this.run.lockedPack!, t = this.packPuzzle.text;
+    p.openedBy = by; p.jammed = false;
+    this.learn(this.packPuzzle.methodClue); this.discover("fallen_pack");
+    this.say(by === "code" ? t.opened : t.forced); this.say(t.inside); this.say(t.paper);
+    this.out.caption = by === "code" ? t.openedCaption : t.forcedCaption;
+    this.out.sfx.push(by === "code" ? "lock_open" : "lock_break"); this.out.rebuild = true;
+  }
+  private packAttempt(code: number[]) {
+    if (!this.canReachPack()) return;
+    const p = this.run.lockedPack!, def = this.packPuzzle;
+    if (p.openedBy) return;
+    if (!validCode(code)) return this.say(def.text.invalid);
+    if (p.jammed) return this.say(def.text.jammed);
+    this.pass(def.minutes.attempt); if (this.run.ended) return;
+    if (matchesPack(p, code)) return this.openPack("code");
+    p.failures++; p.jammed = p.failures >= def.jamAfter;
+    this.say(def.text.failure); if (p.jammed) this.say(def.text.jammed);
+    this.out.caption = def.text.failureCaption; this.out.sfx.push("lock_fail");
+  }
+  private packUnjam() {
+    if (!this.canReachPack()) return;
+    const p = this.run.lockedPack!; if (p.openedBy || !p.jammed) return;
+    this.pass(this.packPuzzle.minutes.unjam); if (this.run.ended) return;
+    p.jammed = false; p.failures = 0; this.say(this.packPuzzle.text.freed); this.out.sfx.push("rattle");
+  }
+  private packForce() {
+    if (!this.canReachPack() || this.run.lockedPack!.openedBy) return;
+    if (!this.has("crowbar")) return this.say(this.packPuzzle.text.needCrowbar);
+    this.pass(this.packPuzzle.minutes.force); if (!this.run.ended) this.openPack("crowbar");
+  }
+  private packTake(key: string) {
+    if (!this.canReachPack()) return;
+    const p = this.run.lockedPack!, x = p.items.find(x => x.key === key); if (!p.openedBy || !x) return;
+    if (this.weight() + this.item(x.id).weight > CARRY) return this.say(this.packPuzzle.text.full);
+    this.pass(1); if (this.run.ended) return;
+    p.items = p.items.filter(y => y !== x); this.run.inv.push(x);
+    this.say(T(`你拿走了${this.itemName(x).zh}。`, `You take the ${this.itemName(x).en.toLowerCase()}.`));
+  }
+
   private rereadNotebook() {
     const r = this.run, block = notebookReadBlock(r);
     if (block) {
@@ -563,7 +641,7 @@ export const DISC: Record<string, Text> = {
   zone_arch: T("拱門區", "the arch zone"), zone_pillar: T("柱林", "the pillar field"), zone_dark: T("斷電區", "the blackout zone"), zone_pit: T("坑洞區", "the pits"),
   manila: T("曼尼拉房間", "the Manila Room"), red_signs: T("紅房間", "a red room"), flicker_wall: T("閃爍的牆", "the flickering wall"),
   ceiling_stash: T("天花板夾層", "the ceiling void"), firesalt: T("火鹽", "firesalt"), liquid_pain: T("Liquid Pain", "Liquid Pain"),
-  own_corpse: T("自己的遺體", "your own body"), tally_marks: T("牆上的記號", "the marks on the wall")
+  own_corpse: T("自己的遺體", "your own body"), tally_marks: T("牆上的記號", "the marks on the wall"), fallen_pack: T("上鎖的舊背包", "the locked backpack")
 };
 const CORPSE_NOTE: Record<string, Text> = {
   death_dehydration: T("水。一定要找到水。不要省著喝，省著喝的人都死了。", "Water. Find water. Don't ration it; the ones who rationed are dead."),

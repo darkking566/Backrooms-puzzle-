@@ -1,0 +1,30 @@
+- id: fallen_pack
+  kind: symbol_lock
+  spawn: { minRun: 2, chance: 0.25, minMoves: 8, zone: arch }
+  symbols: [circle, triangle, square]
+  digits: 3
+  jamAfter: 3
+  minutes: { examineMarks: 2, attempt: 2, unjam: 10, force: 15 }
+  methodClue: symbol_lock_method
+  contents:
+    - { item: almond_water, count: 1, chance: 1 }
+    - { item: bandage, count: 1, chance: 0.25 }
+  text:
+    name: { zh: 上鎖的舊背包, en: Locked Backpack }
+    description: { zh: 一個舊背包倒在地上。兩個拉鍊頭被小鎖扣在一起，名牌上的名字磨掉了。旁邊有一塊刻著符號的薄板。, en: "An old backpack lies on its side. A small lock joins the zipper pulls. The name on its tag has worn away. A thin board marked with symbols lies beside it." }
+    ruleNote: { zh: 「照名牌的順序，數符號下面的刻痕。空框算零。」, en: '"Follow the order on the tag. Count the marks below each symbol. An empty box means zero."' }
+    paper: { zh: 「留一瓶。外面找不到人，不代表沒有人。」, en: '"Leave a bottle. Finding no one out there does not mean there is no one."' }
+    inside: { zh: 水瓶旁墊著摺好的紙。右下角折了兩次，折痕已經發白。, en: "Folded paper cushions the bottle. Its lower-right corner has been folded twice; the crease has turned white." }
+    locked: { zh: 鎖扣拉不開。三個數字輪都還能轉。, en: The lock will not open. All three number wheels still turn. }
+    failure: { zh: 你拉了一下。鎖還扣著。, en: You pull once. The lock holds. }
+    failureCaption: { zh: 〔鎖扣喀地一聲，沒有鬆開〕, en: '[The lock clicks and holds]' }
+    jammed: { zh: 鎖扣卡住了。得花些時間把它鬆開。, en: The lock has jammed. It will take some time to loosen it. }
+    freed: { zh: 你把拉鍊頭推回原位。數字輪又能轉了。, en: You ease the zipper pulls back into place. The wheels turn again. }
+    opened: { zh: 小鎖鬆開了。裡面的瓶口封得好好的。, en: The small lock opens. The bottle inside is still sealed. }
+    openedCaption: { zh: 〔鎖扣彈開〕, en: '[The lock springs open]' }
+    forced: { zh: 金屬圈斷了。你把碎片撥開，拉開背包。, en: The metal loop snaps. You brush the pieces aside and unzip the pack. }
+    forcedCaption: { zh: 〔金屬圈啪地斷開〕, en: '[The metal loop snaps]' }
+    full: { zh: 拿不動了。東西還留在背包裡。, en: You cannot carry any more. The supplies remain in the pack. }
+    empty: { zh: 背包裡只剩摺過的紙。, en: Only the folded paper remains in the pack. }
+    invalid: { zh: 把三個數字輪都轉到一個數字上。, en: Set each of the three wheels to a digit. }
+    needCrowbar: { zh: 你需要撬棍才能扳斷這個鎖扣。, en: You need a crowbar to break this lock. }

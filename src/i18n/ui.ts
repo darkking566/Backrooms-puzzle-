@@ -2,6 +2,11 @@
 import type { Lang, Text } from "../core/types";
 const t = (zh: string, en: string): Text => ({ zh, en });
 export const UI = {
+  packTag: t("名牌", "Tag"), packMarks: t("薄板上的刻痕", "Marks on the board"),
+  packExamineMarks: t("查看附近的刻痕", "Examine the nearby marks"), packAttempt: t("拉開鎖扣", "Pull the lock"),
+  packUnjam: t("鬆開卡住的鎖扣", "Free the jammed lock"), packForce: t("用撬棍扳斷鎖扣", "Break the lock with the crowbar"),
+  packDigit: t("第 {n} 位數字", "Digit {n}"), packIncrease: t("增加第 {n} 位數字", "Increase digit {n}"), packDecrease: t("減少第 {n} 位數字", "Decrease digit {n}"),
+  packCount: t("{n} 道刻痕", "{n} marks"), packZero: t("空框", "Empty box"),
   title: t("Backrooms：回聲", "Backrooms: Echo"),
   tagline: t("你在 Backrooms 一次又一次地醒來。每一次你都會死，但每一次你都會記得多一點。", "You wake in the Backrooms again and again. Every time you die. Every time you remember a little more."),
   warning: t("光敏警告：本遊戲有閃爍的光線效果，預設關閉，可以在設定中開啟。", "Photosensitivity warning: this game has flashing light effects. They are off by default and can be turned on in Settings."),
