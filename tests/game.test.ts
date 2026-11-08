@@ -38,7 +38,7 @@ describe("game", () => {
     g.run.inv.push({ key: "x", id: "bottle", bottle: { liquid: "liquid_pain", color: "reddish", full: true, sealed: true, spoiled: false } });
     const o = g.dispatch({ type: "drink", key: "x" });
     expect(o.ended).toBe(true); expect(g.run.ended?.ending).toBe("death_liquid_pain");
-    expect(meta.corpse?.cause).toBe("death_liquid_pain"); expect(meta.points).toBeGreaterThan(0);
+    expect(meta.corpses["level-0"]?.cause).toBe("death_liquid_pain"); expect(meta.points).toBeGreaterThan(0);
   });
   it("events wait for a choice and respect required items", () => {
     const g = Game.newRun(c, newMeta(), 4, []); g.run.pendingEvent = "noise_spike";

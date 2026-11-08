@@ -3,11 +3,12 @@ import { DV, type Dir } from "../core/types";
 import { hashWith } from "../core/rng";
 import type { MapCell, MapEdge, MapKey, MapMark, RunState } from "../state/types";
 import { edgeCells, isOpenDoor, passable, type Edge, type Level0World } from "../world/level0";
+import { hasTorch } from "./lighting";
 import { H } from "./survival";
 
 export const mapKey = (i: number, j: number): MapKey => `${i},${j}`;
 export const NOTEBOOK_COOLDOWN = 6 * H;
-const canSee = (r: RunState, w: Level0World) => r.inv.some(x => x.id === "flashlight") || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
+const canSee = (r: RunState, w: Level0World) => hasTorch(r) || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
 
 export function mapEdge(edge: Edge | undefined): MapEdge {
   if (!edge) return "unknown";
@@ -65,7 +66,7 @@ export function recordNotebook(r: RunState, w: Level0World, entered = false): bo
   for (let step = 0; step < 3; step++) {
     if (!passable(w.edgeAt(a, b, d))) break;
     a += DV[d][0]; b += DV[d][1];
-    if (w.zone(a, b) === "dark" && !r.inv.some(x => x.id === "flashlight")) break;
+    if (w.zone(a, b) === "dark" && !hasTorch(r)) break;
     const k = mapKey(a, b);
     if (!r.map[k]) { const cell = snapshot(r, w, a, b, false); if (cell) r.map[k] = cell; }
   }

@@ -354,7 +354,7 @@ export class View {
         grp.position.set(sx, 0, sz); this.add(grp, { pick: { kind: "salt" }, label: "salt", ly: .35 });
       }
     }
-    if (w.corpse && g.meta.corpse) {
+    if (w.corpse && g.meta.corpses[g.run.level]) {
       const [i, j] = w.corpse, grp = new THREE.Group();
       const torso = new THREE.Mesh(G.box, M.body); torso.scale.set(.42, .2, .7); torso.position.set(0, .1, 0);
       const head = new THREE.Mesh(G.box, M.body); head.scale.set(.2, .18, .22); head.position.set(0, .09, -.5);

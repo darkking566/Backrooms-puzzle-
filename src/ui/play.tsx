@@ -148,7 +148,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   for (const it of c.items) near.push({ tag: U("atFeet"), label: L(g.itemName(it)), verb: U("pickUp"), run: () => act({ type: "pickup", key: it.key }) });
   if (g.canReachPack()) near.push({ tag: inManila() ? U("inRoom") : U("atFeet"), label: L(g.packPuzzle.text.name), verb: U("look"), run: openPack });
   if (g.canTalkToPerson()) near.push({ tag: U("inRoom"), label: L(g.personQuest.text.name), verb: U("talk"), run: openPerson });
-  if (g.world.corpse && g.meta.corpse && g.world.corpse[0] === r.pos.i && g.world.corpse[1] === r.pos.j) near.push({ tag: U("atFeet"), label: U("corpseHere"), verb: U("searchBody"), run: () => act({ type: "corpse" }) });
+  if (g.world.corpse && g.meta.corpses[g.run.level] && g.world.corpse[0] === r.pos.i && g.world.corpse[1] === r.pos.j) near.push({ tag: U("atFeet"), label: U("corpseHere"), verb: U("searchBody"), run: () => act({ type: "corpse" }) });
   if (c.salt) near.push({ tag: U("here"), label: U("salt"), verb: U("scrape"), run: () => act({ type: "salt" }) });
   if (c.hole) near.push({ tag: U("here"), label: U("hole"), verb: U("reach"), run: () => setSheet({ kind: "ceiling" }) });
   if (c.pits.length) near.push({ tag: U("here"), label: U("pit"), verb: U("look"), run: () => setSheet({ kind: "pit" }) });
@@ -179,6 +179,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         <div class="labels" ref={labels} />
         <div class="top">
           <span class="chip" title={U("time")} onClick={() => setSheet({ kind: "body" })}><b>{timeText}</b>{delta && <span key={delta.id} class="delta">{delta.text}</span>}</span>
+          {g.has("flashlight") && <button class="chip" disabled={lock} aria-pressed={r.flashlightOn} onClick={() => act({ type: "toggleFlashlight" })}>{U(r.flashlightOn ? "flashlightOff" : "flashlightOn")}</button>}
           {DEV && <select class="chip" aria-label="dev" onChange={e => { const v = (e.target as HTMLSelectElement).value as "manila"; (e.target as HTMLSelectElement).value = ""; if (!v) return; g.devJump(v); ctx.view!.attach(g); ctx.audio.ambience(g); save(); rerender(); }}>
             <option value="">dev ▾</option><option value="manila">曼尼拉房間 Manila</option><option value="red">紅房間 red room</option><option value="flicker">閃爍牆 flicker wall</option><option value="outage">停電 outage</option><option value="day">+24h</option>
           </select>}

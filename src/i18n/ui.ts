@@ -2,6 +2,7 @@
 import type { Lang, Text } from "../core/types";
 const t = (zh: string, en: string): Text => ({ zh, en });
 export const UI = {
+  flashlightOn: t("打開手電筒", "Switch flashlight on"), flashlightOff: t("關閉手電筒", "Switch flashlight off"),
   talk: t("交談", "Talk"), personWaterChoice: t("要交出的水", "Water to give"),
   personBack: t("起身，回到房間裡", "Stand up and return to the room"),
   packTag: t("名牌", "Tag"), packMarks: t("薄板上的刻痕", "Marks on the board"),

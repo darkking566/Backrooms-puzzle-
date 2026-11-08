@@ -34,9 +34,14 @@ describe.skipIf(!process.env.BOT)("bot", () => {
         g.dispatch({ type: "move", d: opts[rnd() < .6 ? 0 : Math.floor(rnd() * opts.length)] });
       }
       const e = g.run.ended?.ending ?? "alive"; ends[e] = (ends[e] ?? 0) + 1; hours.push(g.run.time / 60);
-      const state = JSON.parse(JSON.stringify(g.save())); delete state.level;
+      const state = JSON.parse(JSON.stringify(g.save()));
+      for (const key of ["level", "mapPages", "l1", "flashlightOn", "npcSeenThisRun", "pendingRewards"]) delete state[key];
+      const { corpses, ...meta } = g.meta;
+      const legacyMeta = { ...meta, corpse: corpses["level-0"] ?? null };
+      // Preserve legacy key order as well as values for the pre-refactor digest.
+      const orderedMeta = Object.fromEntries(["v", "name", "runs", "points", "discoveries", "endings", "clues", "notes", "cabinet", "corpse", "history", "symbolLock", "roomPerson", "npcMeetings", "settings"].map(k => [k, legacyMeta[k as keyof typeof legacyMeta]]));
       samples.push({ seed: 1000 + s, ending: e, minutes: g.run.time, points: g.run.ended?.points ?? 0,
-        digest: createHash("sha256").update(JSON.stringify({ run: state, meta: g.meta })).digest("hex") });
+        digest: createHash("sha256").update(JSON.stringify({ run: state, meta: orderedMeta })).digest("hex") });
     }
     const path = new URL("./fixtures/level0-bot.json", import.meta.url);
     if (process.env.RECORD_BASELINE) writeFileSync(path, JSON.stringify(samples, null, 2) + "\n");

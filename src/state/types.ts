@@ -74,7 +74,21 @@ export interface Hallucinations {
 }
 export const newHallucinations = (): Hallucinations => ({ pianoAfter: 0, lieAfter: 0, needsReflection: false, serial: 0, history: [] });
 
+export interface MapPage { level: LevelId; map: Record<MapKey, MapCell>; mapMarks: Record<MapKey, MapMark> }
+export interface PendingReward { id: string; label: Text; points: number }
+export interface Level1Run {
+  enteredAt: number;
+  power: { phase: "normal" | "warning" | "blackout"; nextAt: number };
+  encounter: { phase: "noticed" | "approaching"; retreat: { i: number; j: number } } | null;
+  baseClaimed: boolean;
+  elder: { met: boolean; meeting: number | null };
+}
 export interface RunState {
+  mapPages: MapPage[];
+  l1: Level1Run | null;
+  flashlightOn: boolean;
+  npcSeenThisRun: string[];
+  pendingRewards: PendingReward[];
   level: LevelId;
   v: number;
   seed: number;
@@ -122,7 +136,7 @@ export interface Meta {
   clues: string[];
   notes: { t: string; run: number }[];   // notes left in the Manila Room
   cabinet: InvItem[];                   // what is in the Manila Room cabinet
-  corpse: Corpse | null;
+  corpses: Partial<Record<LevelId, Corpse>>;
   symbolLock: { ruleNoteSeen: boolean; lastCode: string | null };
   roomPerson: RoomPersonMeta;
   npcMeetings: Record<string, number>;
@@ -130,7 +144,7 @@ export interface Meta {
   settings: Settings;
 }
 export const newMeta = (): Meta => ({
-  v: SAVE_VERSION, name: null, runs: 0, points: 0, discoveries: [], endings: [], clues: [], notes: [], cabinet: [], corpse: null, history: [],
+  v: SAVE_VERSION, name: null, runs: 0, points: 0, discoveries: [], endings: [], clues: [], notes: [], cabinet: [], corpses: {}, history: [],
   symbolLock: { ruleNoteSeen: false, lastCode: null },
   roomPerson: newRoomPersonMeta(), npcMeetings: {},
   settings: { lang: "zh", flash: false, sound: false, quality: "auto", reduceMotion: false }

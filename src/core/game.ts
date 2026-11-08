@@ -10,6 +10,7 @@ import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../sys
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
 import { HALLUC_ONSET, perceive } from "../systems/hallucinations";
 import { makePack, matchesPack, validCode } from "../systems/symbol-lock";
+import { hasTorch } from "../systems/lighting";
 import { personChoiceVisible, personReady, planRoomPerson, sealedGreyWater } from "../systems/room-person";
 
 export const CARRY = 8;                 // weight you can carry
@@ -25,7 +26,7 @@ export type Command =
   | { type: "examine"; what: "tally" | "peel" | "notes" }
   | { type: "choose"; index: number }
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
-  | { type: "corpse" }
+  | { type: "corpse" } | { type: "toggleFlashlight" }
   | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
   | { type: "packUnjam" } | { type: "packForce" } | { type: "packTake"; key: string }
   | { type: "roomPersonTalk" } | { type: "roomPersonChoice"; id: string; waterKey?: string }
@@ -59,6 +60,7 @@ export class Game {
       inv: bought.map((id, k) => ({ key: "start" + k, id })), carried: [...bought],
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },
       map: {}, mapMarks: {}, lastNotebookRead: null,
+      mapPages: [], l1: null, flashlightOn: true, npcSeenThisRun: [], pendingRewards: [],
       fakePiano: null, halluc: newHallucinations(),
       packPlan: "none", lockedPack: null,
       roomPerson: newRoomPersonRun(),
@@ -84,7 +86,7 @@ export class Game {
     return g;
   }
   private placeCorpse() {
-    if (!this.meta.corpse) return;
+    if (!this.meta.corpses[this.run.level]) return;
     for (let k = 0; k < 60; k++) {
       const a = this.world.hash(k, 71) * Math.PI * 2, r = 4 + this.world.hash(k, 72) * 8, i = Math.round(Math.cos(a) * r), j = Math.round(Math.sin(a) * r);
       if (this.world.zone(i, j) === "hall" && !(i === 0 && j === 0)) { this.world.corpse = [i, j]; return; }
@@ -109,7 +111,7 @@ export class Game {
     const fill = b.full ? (b.sealed ? T("封口完好，裝得滿滿的", "sealed and full") : T("裝滿了，但封口被打開過", "full, but the seal has been broken")) : T("沒有裝滿，搖起來只剩一半", "not full; it sloshes half-empty");
     return T(`液體${l.zh}。${fill.zh}。`, `The liquid is ${l.en.toLowerCase()}; ${fill.en}.`);
   }
-  hasLight() { return this.has("flashlight"); }
+  hasLight() { return hasTorch(this.run); }
   isDark() { return this.zoneHere() === "dark" || this.run.outageLeft > 0; }
   env(): Env {
     const { i, j } = this.run.pos;
@@ -171,6 +173,11 @@ export class Game {
       case "cabinetPut": this.cabinetPut(cmd.key); break;
       case "writeNote": this.writeNote(cmd.text); break;
       case "corpse": this.searchCorpse(); break;
+      case "toggleFlashlight":
+        if (!this.has("flashlight")) break;
+        r.flashlightOn = !r.flashlightOn; this.pass(1);
+        this.say(r.flashlightOn ? T("你打開了手電筒。", "You switch on the flashlight.") : T("你關掉了手電筒。", "You switch off the flashlight."));
+        break;
       case "packExamine": this.packExamine(); break;
       case "packMarks": this.packMarks(); break;
       case "packAttempt": this.packAttempt(cmd.code); break;
@@ -526,14 +533,14 @@ export class Game {
     this.pass(5); this.say(T("你把紙條壓在桌上那疊筆記的最下面。下一次來的時候，它應該還在。", "You slip the note under the pile on the table. Next time, it should still be here."));
   }
   private searchCorpse() {
-    const r = this.run, w = this.world, cp = this.meta.corpse;
+    const r = this.run, w = this.world, cp = this.meta.corpses[this.run.level];
     if (!cp || !w.corpse || w.corpse[0] !== r.pos.i || w.corpse[1] !== r.pos.j) return;
     this.pass(10);
     this.say(T("你蹲下來。那個人的衣服……跟你身上穿的一模一樣。臉朝著地毯，你沒有把它翻過來。", "You crouch down. Their clothes are exactly the same as yours. The face is pressed into the carpet. You don't turn it over."), "warn");
     this.say(T(`口袋裡有一張紙條：「${cp.note.zh}」`, `In a pocket, a note: "${cp.note.en}"`));
     let got = 0;
     for (const x of cp.items) if (this.rand("body") < .6 && this.weight() + this.item(x.id).weight <= CARRY) { r.inv.push({ ...x, key: "body" + got + ":" + r.time }); got++; this.say(T(`你拿走了${this.itemName(x).zh}。`, `You take the ${this.itemName(x).en.toLowerCase()}.`)); }
-    this.meta.corpse = null; w.corpse = null; this.discover("own_corpse"); this.out.rebuild = true;
+    delete this.meta.corpses[this.run.level]; w.corpse = null; this.discover("own_corpse"); this.out.rebuild = true;
   }
 
   /* ---------- fallen backpack ---------- */
@@ -604,7 +611,10 @@ export class Game {
     r.entered = true;
     if (r.eligible) m.misses = r.variant === "none" ? m.misses + 1 : 0;
     if (r.present) {
-      this.meta.npcMeetings[q.npc] = (this.meta.npcMeetings[q.npc] ?? 0) + 1;
+      if (!this.run.npcSeenThisRun.includes(q.npc)) {
+        this.run.npcSeenThisRun.push(q.npc);
+        this.meta.npcMeetings[q.npc] = (this.meta.npcMeetings[q.npc] ?? 0) + 1;
+      }
       this.discover("room_person"); this.say(r.variant === "first" ? q.text.first : q.text.revisit);
       if (r.variant === "first") {
         if (this.run.stats.sanity < 35) this.say(q.text.lowSanity);
@@ -724,7 +734,7 @@ export class Game {
     if (r.lockedPack?.story === "room_person") for (const x of r.lockedPack.items) if (x.key.startsWith("vol")) m.cabinet.push(x);
     // a body stays behind in Level 0 when you die there (not when you leave, fall or are lost to a red room)
     if (e.kind === "death" && id !== "no_one_returned") {
-      m.corpse = { run: r.run, cause: id, items: r.inv.filter(x => r.carried.includes(x.id) || x.id !== "bottle").slice(0, 6), note: CORPSE_NOTE[id] ?? T("不要停下來。", "Don't stop.") };
+      m.corpses[r.level] = { run: r.run, cause: id, items: r.inv.filter(x => r.carried.includes(x.id) || x.id !== "bottle").slice(0, 6), note: CORPSE_NOTE[id] ?? T("不要停下來。", "Don't stop.") };
     }
     this.out.ended = true;
   }

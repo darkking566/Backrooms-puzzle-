@@ -1,6 +1,6 @@
 /* Saving goes through a small Store interface (IndexedDB now, a server later for multiplayer).
    Every action saves; a run can be left and resumed, and a reload never undoes a death. */
-import { newHallucinations, newMeta, newRoomPersonRun, SAVE_VERSION, type Meta, type RunState } from "./types";
+import { newHallucinations, newMeta, newRoomPersonRun, SAVE_VERSION, type Meta, type RunState, type Corpse } from "./types";
 
 export interface Store { get(key: string): Promise<unknown>; set(key: string, v: unknown): Promise<void>; del(key: string): Promise<void> }
 
@@ -29,10 +29,12 @@ export async function openStore(): Promise<Store> {
   return store;
 }
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
-export function migrateMeta(m: Partial<Meta> | undefined): Meta {
+export function migrateMeta(m: (Partial<Meta> & { corpse?: Corpse | null }) | undefined): Meta {
   const base = newMeta();
   if (!m || typeof m !== "object") return base;
-  return { ...base, ...m,
+  const { corpse, ...rest } = m;
+  return { ...base, ...rest,
+    corpses: { ...(m.corpses ?? (corpse ? { "level-0": corpse } : {})) },
     symbolLock: { ...base.symbolLock, ...m.symbolLock },
     roomPerson: { ...base.roomPerson, ...m.roomPerson, flags: { ...base.roomPerson.flags, ...m.roomPerson?.flags } },
     npcMeetings: { ...base.npcMeetings, ...m.npcMeetings },
@@ -41,6 +43,9 @@ export function migrateMeta(m: Partial<Meta> | undefined): Meta {
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
 function runDefaults(r: RunState): RunState {
   r.level ??= "level-0";
+  r.mapPages ??= []; r.l1 ??= null; r.flashlightOn ??= true;
+  r.pendingRewards ??= [];
+  r.npcSeenThisRun ??= r.roomPerson?.entered && (r.roomPerson.variant === "first" || r.roomPerson.variant === "revisit") ? ["manila_stranger"] : [];
   r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
   r.fakePiano ??= null;
   r.halluc = { ...newHallucinations(), ...r.halluc };
