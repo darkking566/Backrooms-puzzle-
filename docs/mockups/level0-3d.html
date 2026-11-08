@@ -129,7 +129,7 @@ const S = 4, H = 2.75, BACK = 1.35, EYE = 1.62, PITCH = -0.09;
 const DV = [[0, -1], [1, 0], [0, 1], [-1, 0]];            // N E S W
 const $ = id => document.getElementById(id);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const TIERS = { low: { name: "低", scale: .6, R: 4, res: 1, post: 0 }, mid: { name: "中", scale: .8, R: 6, res: .5, post: 1 }, high: { name: "高", scale: 1, R: 7, res: .34, post: 2 } };
+const TIERS = { low: { name: "低", scale: .6, R: 4, res: 1, post: 0 }, mid: { name: "中", scale: .8, R: 6, res: .5, post: 1 }, high: { name: "高", scale: 1, R: 7, res: 1 / 3, post: 2 } };   // res: light-grid spacing, an exact fraction of a cell
 let tier = "mid", autoQ = true, R = TIERS.mid.R;
 
 let SEED = (Math.random() * 1e9) | 0;
@@ -175,7 +175,8 @@ try { renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPrefer
 catch (e) { $("wrap").innerHTML = '<div class="err">這個瀏覽器無法使用 WebGL，3D 展示無法執行。</div>'; return; }
 const scene = new THREE.Scene();
 const FOGC = new THREE.Color(0x2b2613);
-scene.background = FOGC; scene.fog = new THREE.FogExp2(FOGC, 0.062);
+scene.background = FOGC; scene.fog = new THREE.FogExp2(FOGC, 0.069);
+function setFog() { scene.fog.density = 1.79 / ((TIERS[tier].R + 1) * S - 2); }   // ~96% fog where the newest ring of cells appears
 const camera = new THREE.PerspectiveCamera(68, 1, 0.05, 70);
 camera.rotation.order = "YXZ";
 
@@ -445,8 +446,8 @@ const GEO = {
 };
 
 /* ================= world model (data only) ================= */
-const cells = new Map();     // key -> { i, j, ver, panel: null|{tint,int}|"dead", hole: bool, pits: [[sx,sz]...], items: [] }
-const edges = new Map();     // "v:i,j" | "h:i,j" -> type: open | wall | arch | flicker | mwall (Manila Room) | door-wood | door-metal | door-manila (+ "-open")
+const cells = new (class extends Map { set(k, v) { super.set(k, v); const [i, j] = k.split(",").map(Number); dirtyAround(i, j); return this; } })();     // key -> { i, j, ver, panel: null|{tint,int}|"dead", hole: bool, pits: [[sx,sz]...], items: [] }
+const edges = new (class extends Map { set(k, v) { if (this.get(k) !== v) { super.set(k, v); for (const [i, j] of edgeCells(k)) dirtyAround(i, j); } return this; } })();     // "v:i,j" | "h:i,j" -> type: open | wall | arch | flicker | mwall (Manila Room) | door-wood | door-metal | door-manila (+ "-open")
 const picked = new Set();
 const FIXED = new Set();      // hand-placed edges near the start that dead-end fixing and shifts must leave alone
 const doorAng = new Map();    // edge key -> swing angle of an opened door
@@ -501,11 +502,12 @@ function fixDeadEnd(i, j, protect) {
   }
 }
 function ensureAround(ci, cj) {
-  for (let i = ci - R - 1; i <= ci + R + 1; i++) for (let j = cj - R - 1; j <= cj + R + 1; j++) if (!cells.has(ck(i, j))) rollCell(i, j);
-  for (let i = ci - R - 1; i <= ci + R + 1; i++) for (let j = cj - R - 1; j <= cj + R + 1; j++) for (const d of [1, 2]) { const k = edgeKey(i, j, d); if (!edges.has(k)) edges.set(k, rollEdge(k)); }
-  for (let i = ci - R; i <= ci + R; i++) for (let j = cj - R; j <= cj + R; j++) fixDeadEnd(i, j);
-  for (const [k, c] of cells) if (Math.abs(c.i - ci) > R + 3 || Math.abs(c.j - cj) > R + 3) cells.delete(k);
-  for (const k of edges.keys()) { const [[a, b]] = edgeCells(k); if (Math.abs(a - ci) > R + 3 || Math.abs(b - cj) > R + 3) edges.delete(k); }
+  const G = RB() + 2;               // generate two rings past the drawing range so edge tiles get their lights
+  for (let i = ci - G; i <= ci + G; i++) for (let j = cj - G; j <= cj + G; j++) if (!cells.has(ck(i, j))) rollCell(i, j);
+  for (let i = ci - G; i <= ci + G; i++) for (let j = cj - G; j <= cj + G; j++) for (const d of [1, 2]) { const k = edgeKey(i, j, d); if (!edges.has(k)) edges.set(k, rollEdge(k)); }
+  for (let i = ci - RB(); i <= ci + RB(); i++) for (let j = cj - RB(); j <= cj + RB(); j++) fixDeadEnd(i, j);
+  for (const [k, c] of cells) if (Math.abs(c.i - ci) > G + 2 || Math.abs(c.j - cj) > G + 2) cells.delete(k);
+  for (const k of edges.keys()) { const [[a, b]] = edgeCells(k); if (Math.abs(a - ci) > G + 2 || Math.abs(b - cj) > G + 2) edges.delete(k); }
 }
 
 /* ================= peripheral shift ================= */
@@ -516,7 +518,7 @@ function visibleSet() {
   for (const [k, c] of cells) {
     const dx = c.i - cur.i, dz = c.j - cur.j;
     if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1) { vis.add(k); continue; }
-    if (Math.hypot(dx, dz) > R) continue;
+    if (Math.hypot(dx, dz) > RB() + .5) continue;
     box3.min.set(c.i * S - S / 2, -1, c.j * S - S / 2); box3.max.set(c.i * S + S / 2, H, c.j * S + S / 2);
     if (frustum.intersectsBox(box3)) vis.add(k);
   }
@@ -551,21 +553,35 @@ function lineOfSight(x0, z0, x1, z1) {
   }
   return f;
 }
-function bakeLight(ci, cj) {
-  const res = TIERS[tier].res, span = (2 * R + 1) * S, n = Math.round(span / res);
-  const ox = (ci - R) * S - S / 2, oz = (cj - R) * S - S / 2;
-  const mk = d => { const t = new THREE.DataTexture(d, n, n, THREE.RGBAFormat); t.magFilter = t.minFilter = THREE.LinearFilter; return t; };
-  if (!LM.tex || LM.n !== n) { LM.data = new Uint8Array(n * n * 4); LM.data2 = new Uint8Array(n * n * 4); LM.tex = mk(LM.data); LM.tex2 = mk(LM.data2); LM.n = n; }
-  LM.origin.set(ox, oz); LM.size = span; shared.uLM.value = LM.tex; shared.uLM2.value = LM.tex2; shared.uLMs.value = span;
-  const lights = new Map();
+/* The light grid is baked per cell ("tiles") and cached. A tile only depends on cells and edges within 2 cells,
+   so a change marks just the tiles around it dirty. Tiles near the camera are baked at once; the rest are filled in
+   a few milliseconds at a time while you walk, so a step never stalls on a full re-bake. */
+const tiles = new Map();          // cell key -> { d: Uint8Array, f: Uint8Array, dirty }
+let lights = null, bakeCenter = null;
+const RB = () => R + 1;            // drawing range: one ring beyond R, hidden in the fog, so new cells never pop in sight
+const pendingDirty = new Set();    // cells that changed since the last bake (deduplicated: a shift touches each cell many times)
+function dirtyAround(i, j) { lights = null; pendingDirty.add(ck(i, j)); }
+function flushDirty() {
+  for (const k of pendingDirty) { const [i, j] = k.split(",").map(Number); for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++) { const t = tiles.get(ck(i + di, j + dj)); if (t) t.dirty = true; } }
+  pendingDirty.clear();
+}
+function buildLights() {
+  lights = new Map();
   for (const c of cells.values()) if (c.panel && c.panel !== "dead") {
     const w = c.panel.warm, tint = c.panel.red ? [1.3, .3, .24] : w < .33 ? [1, .93, .76] : w < .66 ? [1, .97, .86] : [.9, 1, .95];
     lights.set(ck(c.i, c.j), { x: c.i * S, z: c.j * S, r: tint[0] * c.panel.int, g: tint[1] * c.panel.int, b: tint[2] * c.panel.int, flick: !!c.panel.flick });
   }
-  const cores = redCoresNear(ci, cj).map(([a, b]) => [a * S, b * S]);
-  const D = LM.data, D2 = LM.data2;
-  for (let tz = 0; tz < n; tz++) for (let tx = 0; tx < n; tx++) {
-    const x = ox + (tx + .5) * res, z = oz + (tz + .5) * res, ti = Math.round(x / S), tj = Math.round(z / S);
+}
+function bakeTile(ti, tj) {
+  const res = TIERS[tier].res, tp = Math.round(S / res), k = ck(ti, tj);
+  let t = tiles.get(k); if (!t || t.d.length !== tp * tp * 4) { t = { d: new Uint8Array(tp * tp * 4), f: new Uint8Array(tp * tp * 4) }; tiles.set(k, t); }
+  t.dirty = false;
+  if (!lights) buildLights();
+  const cores = redCoresNear(ti, tj).map(([a, b]) => [a * S, b * S]), c = cells.get(k);
+  const wall = d => solid(edges.get(edgeKey(ti, tj, d))), w0 = wall(0), w1 = wall(1), w2 = wall(2), w3 = wall(3), pil = zone(ti, tj) === "pillar";
+  const D = t.d, D2 = t.f;
+  for (let v = 0; v < tp; v++) for (let u = 0; u < tp; u++) {
+    const x = ti * S - S / 2 + (u + .5) * res, z = tj * S - S / 2 + (v + .5) * res;
     let r = 0, g = 0, b = 0, fr = 0, fg = 0, fb = 0;
     for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++) {
       const L = lights.get(ck(ti + di, tj + dj)); if (!L) continue;
@@ -576,20 +592,61 @@ function bakeLight(ci, cj) {
     }
     let rd = 99; for (const [cx, cz] of cores) rd = Math.min(rd, Math.hypot(cx - x, cz - z));
     const red = Math.pow(Math.max(0, Math.min(1, 1 - (rd - 2) / 9)), 1.6);   // red-room tint: full inside, gone ~11 m away
-    const c = cells.get(ck(ti, tj)); let ao = 1;
+    let ao = 1;
     if (c) {                                                      // darken near walls and pillars (cheap ambient occlusion)
       const lx = x - ti * S, lz = z - tj * S; let dmin = 9;
-      const wall = d => solid(edges.get(edgeKey(ti, tj, d)));
-      if (wall(0)) dmin = Math.min(dmin, lz + S / 2); if (wall(2)) dmin = Math.min(dmin, S / 2 - lz);
-      if (wall(3)) dmin = Math.min(dmin, lx + S / 2); if (wall(1)) dmin = Math.min(dmin, S / 2 - lx);
-      if (zone(ti, tj) === "pillar") dmin = Math.min(dmin, Math.hypot(lx + S / 2, lz + S / 2) - .35);
+      if (w0) dmin = Math.min(dmin, lz + S / 2); if (w2) dmin = Math.min(dmin, S / 2 - lz);
+      if (w3) dmin = Math.min(dmin, lx + S / 2); if (w1) dmin = Math.min(dmin, S / 2 - lx);
+      if (pil) dmin = Math.min(dmin, Math.hypot(lx + S / 2, lz + S / 2) - .35);
       ao = .58 + .42 * Math.min(1, Math.max(0, (dmin - .02) / .85));
     }
-    const o = (tz * n + tx) * 4;
+    const o = (v * tp + u) * 4;
     D[o] = Math.min(255, r * ao * 127.5); D[o + 1] = Math.min(255, g * ao * 127.5); D[o + 2] = Math.min(255, b * ao * 127.5); D[o + 3] = red * 255;
     D2[o] = Math.min(255, fr * ao * 127.5); D2[o + 1] = Math.min(255, fg * ao * 127.5); D2[o + 2] = Math.min(255, fb * ao * 127.5); D2[o + 3] = 255;
   }
+  return t;
+}
+function blitTile(ti, tj) {        // copy one cached tile into the light-grid texture
+  const t = tiles.get(ck(ti, tj)), tp = Math.round(S / TIERS[tier].res), n = LM.n, bx = (ti - bakeCenter[0] + RB()) * tp, bz = (tj - bakeCenter[1] + RB()) * tp;
+  if (t && t.d.length !== tp * tp * 4) {         // a tile from the previous quality tier: stretch it until it is re-baked
+    const sp = Math.round(Math.sqrt(t.d.length / 4));
+    for (let v = 0; v < tp; v++) for (let u = 0; u < tp; u++) { const so = (Math.floor(v * sp / tp) * sp + Math.floor(u * sp / tp)) * 4, o = ((bz + v) * n + bx + u) * 4; for (let q = 0; q < 4; q++) { LM.data[o + q] = t.d[so + q]; LM.data2[o + q] = t.f[so + q]; } }
+    return;
+  }
+  for (let v = 0; v < tp; v++) {
+    const o = ((bz + v) * n + bx) * 4, src = v * tp * 4;
+    if (t) { LM.data.set(t.d.subarray(src, src + tp * 4), o); LM.data2.set(t.f.subarray(src, src + tp * 4), o); }
+    else { LM.data.fill(0, o, o + tp * 4); LM.data2.fill(0, o, o + tp * 4); }
+  }
+}
+function bakeLight(ci, cj, near = 1) {   // near: tiles within this many cells are baked right now; Infinity bakes everything
+  const tp = Math.round(S / TIERS[tier].res), cellsW = 2 * RB() + 1, span = cellsW * S, n = cellsW * tp;
+  const mk = d => { const t = new THREE.DataTexture(d, n, n, THREE.RGBAFormat); t.magFilter = t.minFilter = THREE.LinearFilter; return t; };
+  if (!LM.tex || LM.n !== n) { LM.data = new Uint8Array(n * n * 4); LM.data2 = new Uint8Array(n * n * 4); LM.tex = mk(LM.data); LM.tex2 = mk(LM.data2); LM.n = n; }
+  bakeCenter = [ci, cj]; flushDirty();
+  LM.origin.set((ci - RB()) * S - S / 2, (cj - RB()) * S - S / 2); LM.size = span; shared.uLM.value = LM.tex; shared.uLM2.value = LM.tex2; shared.uLMs.value = span;
+  for (let i = ci - RB(); i <= ci + RB(); i++) for (let j = cj - RB(); j <= cj + RB(); j++) {
+    const t = tiles.get(ck(i, j));
+    if ((!t || t.dirty) && Math.max(Math.abs(i - ci), Math.abs(j - cj)) <= near) bakeTile(i, j);
+    blitTile(i, j);
+  }
+  for (const k of tiles.keys()) { const [i, j] = k.split(",").map(Number); if (Math.abs(i - ci) > RB() + 2 || Math.abs(j - cj) > RB() + 2) tiles.delete(k); }
   LM.tex.needsUpdate = true; LM.tex2.needsUpdate = true;
+  pumpBake();
+}
+let pumping = false;
+function pumpBake() { if (!pumping) { pumping = true; setTimeout(bakeSlice, 0); } }
+function bakeSlice() {             // bake leftover tiles, nearest first, ~3 ms at a time
+  pumping = false; if (!bakeCenter) return; flushDirty();
+  const [ci, cj] = bakeCenter, todo = [];
+  for (let i = ci - RB(); i <= ci + RB(); i++) for (let j = cj - RB(); j <= cj + RB(); j++) { const t = tiles.get(ck(i, j)); if (!t || t.dirty) todo.push([i, j, Math.hypot(i - cur.i, j - cur.j)]); }
+  if (!todo.length) return;
+  todo.sort((a, b) => a[2] - b[2]);
+  const t0 = performance.now();
+  for (const [i, j] of todo) { bakeTile(i, j); blitTile(i, j); if (performance.now() - t0 > 3) break; }
+  LM.tex.needsUpdate = true; LM.tex2.needsUpdate = true;
+  if (!busy && !loopOn) render();
+  pumpBake();
 }
 
 /* ================= build instanced meshes from the world model ================= */
@@ -604,12 +661,13 @@ function inst(geo, mat, list, colorFn) {
   m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true;
   scene.add(m); built.push(m); return m;
 }
-function rebuild() {
+function rebuild(near = 1) {
+  lazyPending = false;
   for (const m of built) { scene.remove(m); if (m.isInstancedMesh) m.dispose(); }
   built = []; blockers = [];
   const L = { floor: [], tile: [], ceil: [], water: [], pit: [], hole: [], panel: [], fpanel: [], dead: [], pillar: [], walls: [[], [], []], yel: [[], [], []], pale: [], arch: [], wood: [], red: [], mwall: [] };
   for (const c of cells.values()) {
-    if (Math.abs(c.i - cur.i) > R || Math.abs(c.j - cur.j) > R) continue;
+    if (Math.abs(c.i - cur.i) > RB() || Math.abs(c.j - cur.j) > RB()) continue;
     const x = c.i * S, z = c.j * S, zn = zone(c.i, c.j);
     if (c.pits.length) {
       for (let gx = 0; gx < 8; gx++) for (let gz = 0; gz < 8; gz++) {
@@ -626,7 +684,7 @@ function rebuild() {
   }
   for (const [k, t] of edges) {
     const [[a, b], [c2, d2]] = edgeCells(k);
-    if (Math.abs(a - cur.i) > R || Math.abs(b - cur.j) > R) continue;
+    if (Math.abs(a - cur.i) > RB() || Math.abs(b - cur.j) > RB()) continue;
     const vert = k[0] === "v", x = vert ? (a + .5) * S : a * S, z = vert ? b * S : (b + .5) * S, rot = vert ? Math.PI / 2 : 0;
     if (t === "wall") {
       if (zone(a, b) === "red" || zone(c2, d2) === "red") L.red.push([x, 0, z, rot]);
@@ -666,7 +724,7 @@ function rebuild() {
     if (!forced && hash(a, b, vert ? 7 : 8, 99) > .035) continue;
     decal(GEO.tally, MAT.tally, x, z, vert, forced ? 1 : (hash(a, b, 100) < .5 ? 1 : -1), 1.32, { kind: "tally", label: "牆上的記號", text: "牆上刻著一組一組的記號，像在數日子。刻痕很深，像是用指甲刻的。這個筆跡……很眼熟。" });
   }
-  if (Math.abs(M.i + .5 - cur.i) <= R + .5 && Math.abs(M.j + .5 - cur.j) <= R + .5) buildManila();
+  if (Math.abs(M.i + .5 - cur.i) <= RB() + .5 && Math.abs(M.j + .5 - cur.j) <= RB() + .5) buildManila();
   // items, holes, pits as clickable objects
   for (const c of cells.values()) {
     if (Math.abs(c.i - cur.i) > R || Math.abs(c.j - cur.j) > R) continue;
@@ -683,7 +741,7 @@ function rebuild() {
     if (c.pits.length) { const [px, pz] = c.pits[0]; const m = new THREE.Mesh(GEO.box, MAT.proxy); m.scale.set(1, .4, 1); m.position.set(c.i * S + px, .1, c.j * S + pz); m.userData.hot = { kind: "pit", label: "坑洞", cell: c, text: "地上的坑洞排成整齊的格子。光照不進去，看不到底。（正式版：掉下去，墜落很久之後，可能抵達 Level 72。）" }; scene.add(m); built.push(m); }
   }
   if (figure) { scene.add(figure); built.push(figure); }
-  bakeLight(cur.i, cur.j);
+  bakeLight(cur.i, cur.j, near);
   rebuildExits();
 }
 
@@ -888,7 +946,13 @@ function tween(fromP, ctrlP, toP, fromY, toY, ms, done) {
 }
 function shortest(from, to) { let d = to - from; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return from + d; }
 function clearFigure() { if (figure) { scene.remove(figure); figure = null; } }
+let lazyTimer = 0, lazyPending = false;
+function lazyRebuild() {             // after a shift, rebuild a moment later: if you keep walking, the next step's rebuild covers it
+  clearTimeout(lazyTimer); lazyPending = true;
+  lazyTimer = setTimeout(() => { if (busy || modal) return; rebuild(); render(); kick(); }, 180);
+}
 function move(d, after) {
+  clearTimeout(lazyTimer);
   $("near").innerHTML = ""; clearFigure();
   const ni = cur.i + DV[d][0], nj = cur.j + DV[d][1];
   const from = camera.position.clone(), to = stationPos(ni, nj, d), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
@@ -918,15 +982,16 @@ function move(d, after) {
     if (!reduceMotion && Math.random() < .35) changed = shiftUnseen() > 0;
     changed = maybeFlicker() || changed;
     maybeFigure();
-    if (changed || figure) rebuild(); else rebuildExits();
+    rebuildExits(); if (changed || figure) lazyRebuild();
     $("sh").textContent = shifted; render();
     if (after) after(); else if (itemsHere().length) say("腳邊有一個" + itemsHere()[0].name + "。");
   });
 }
 function turnAround() {
+  clearTimeout(lazyTimer);
   clearFigure();
   const n = shiftUnseen(); $("sh").textContent = shifted;
-  if (n) rebuild();
+  if (n || lazyPending) rebuild(3);                // what is behind you comes into view during the turn
   const nd = (cur.d + 2) % 4;
   const from = camera.position.clone(), to = stationPos(cur.i, cur.j, nd), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
   const fy = camera.rotation.y, ty = fy + Math.PI;
@@ -937,9 +1002,10 @@ function turnAround() {
   });
 }
 function turnSide(dir) {          // dir: -1 left, +1 right — a 90° turn in place
+  clearTimeout(lazyTimer);
   clearFigure(); $("near").innerHTML = "";
   let n = 0;
-  if (!reduceMotion && Math.random() < .35) { n = shiftUnseen(); $("sh").textContent = shifted; if (n) rebuild(); }
+  if (!reduceMotion && Math.random() < .35) { n = shiftUnseen(); $("sh").textContent = shifted; if (n || lazyPending) rebuild(3); }
   const nd = (cur.d + dir + 4) % 4;
   const from = camera.position.clone(), to = stationPos(cur.i, cur.j, nd), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
   const fy = camera.rotation.y, ty = shortest(fy, yawOf(nd));
@@ -1026,7 +1092,8 @@ function setTier(t, auto) {
   const changedR = TIERS[t].R !== R; tier = t; autoQ = auto; R = TIERS[t].R;
   $("q").textContent = TIERS[t].name; $("qa").textContent = auto ? "（自動）" : "";
   if (changedR) ensureAround(cur.i, cur.j);
-  rebuild(); resize();
+  for (const t of tiles.values()) t.dirty = true;    // old tiles are stretched to the new grid and re-baked in the background
+  setFog(); rebuild(1); resize();
 }
 function autoQuality() {
   if (!autoQ || frameTimes.length < 20) { frameTimes = []; return; }
@@ -1248,11 +1315,19 @@ function teleport(v) {
   if (v === "red") { edges.set(edgeKey(0, 2, 2), "open"); edges.set(edgeKey(0, 3, 2), "open"); }
   camera.position.copy(stationPos(i, j, d)); camera.rotation.set(PITCH, yawOf(d), 0, "YXZ"); look.yaw = 0; look.pitch = 0;
   torchTarget = zone(i, j) === "dark" ? 1 : 0; shared.uTorch.value = torchTarget; post.uniforms.uRed.value = redTint(i, j);
-  rebuild(); render(); ambience(); kick(); say(text);
+  rebuild(Infinity); render(); ambience(); kick(); say(text);
+}
+function precompile() {
+  const g = new THREE.Group(); camera.position.set(0, EYE, 0);
+  for (const m of Object.values(MAT).flat()) { const o = new THREE.Mesh(GEO.box, m); o.position.set(0, 1, -3); g.add(o); }
+  const im = new THREE.InstancedMesh(GEO.box, MAT.floor, 1); im.setMatrixAt(0, new THREE.Matrix4().makeTranslation(0, 1, -3)); g.add(im);
+  for (const m of [MAT.walls[0], MAT.pale, MAT.arch, MAT.pillar, MAT.tile, MAT.ceil, MAT.water, MAT.pit, MAT.black, MAT.panel, MAT.fpanel, MAT.dead, MAT.red, MAT.mwall, MAT.wood]) { const o = new THREE.InstancedMesh(GEO.box, m, 1); o.setMatrixAt(0, new THREE.Matrix4()); o.setColorAt(0, new THREE.Color(1, 1, 1)); g.add(o); }
+  g.add(new THREE.Mesh(GEO.bottle, new THREE.MeshStandardMaterial({ color: 0x888888 })));
+  scene.add(g); renderer.compile(scene, camera); scene.remove(g);
 }
 function start() {
   setLoop(false); clearFigure(); closeNotes();
-  cells.clear(); edges.clear(); picked.clear(); FIXED.clear(); coreCache.clear(); doorAng.clear();
+  cells.clear(); edges.clear(); picked.clear(); FIXED.clear(); coreCache.clear(); doorAng.clear(); tiles.clear(); pendingDirty.clear(); lights = null;
   power = 1; powerAnim = null; outageLeft = 0; lastOutage = 0; redStage = 0; cabinetTaken = false; post.uniforms.uRed.value = 0;
   cur = { i: 0, j: 0, d: 0 }; moves = 0; shifted = 0; flickerKey = null; torchTarget = 0; shared.uTorch.value = 0;
   $("mv").textContent = 0; $("sh").textContent = 0; $("sd").textContent = SEED.toString(36).toUpperCase();
@@ -1263,11 +1338,11 @@ function start() {
   for (const k of edges.keys()) FIXED.add(k);
   ensureAround(0, 0);
   camera.position.copy(stationPos(cur.i, cur.j, cur.d)); camera.rotation.set(PITCH, yawOf(cur.d), 0, "YXZ");
-  rebuild(); resize();
+  rebuild(Infinity); resize();
   look.yaw = 0; look.pitch = 0; ambience(); kick();
   say("你在嗡嗡聲裡醒來。點畫面裡的開口就能走過去；按住畫面拖曳可以轉頭看四周，兩側的箭頭可以左轉、右轉。上方的「傳送」可以直接去各個展示點。");
   const h = location.hash.slice(1); if (SPOTS[h]) teleport(h);   // e.g. #manila, #red, #pit (for testing)
 }
-start();
+setFog(); precompile(); start();
 })();
 </script>
