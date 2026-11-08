@@ -62,6 +62,15 @@ export const Level = z.object({
 export type LevelData = z.infer<typeof Level>;
 export const Reward = z.object({ id: z.literal("level1"), arrival: z.number().int().nonnegative(),
   firstArrival: z.number().int().nonnegative(), survivalMultiplier: z.number().min(0).max(1), survivalCap: z.number().int().nonnegative() }).strict();
+const MinutesRange = z.tuple([z.number().int().positive(), z.number().int().positive()]).refine(x => x[0] <= x[1], "inverted minute range");
+export const Hazard = z.object({
+  id: z.literal("smiler"), level: z.literal("level-1"), source: z.string(),
+  power: z.object({ first: MinutesRange, interval: MinutesRange, warning: z.number().int().positive(), duration: MinutesRange }).strict(),
+  encounter: z.object({ chance: Chance, lightChance: Chance, damage: z.number().positive(), bleedingHours: z.number().positive(), vanishChance: Chance }).strict(),
+  text: z.object({ warning: Text, warningCaption: Text, blackout: Text, relight: Text, noticedLit: Text, noticedDark: Text,
+    litCaption: Text, darkCaption: Text, approaching: Text, retreat: Text, hurt: Text, vanished: Text, wait: Text }).strict()
+}).strict();
+export type HazardData = z.infer<typeof Hazard>;
 export const Puzzle = z.object({
   id: z.string(), kind: z.literal("symbol_lock"),
   spawn: z.object({ minRun: z.number().int().min(1), chance: Chance, minMoves: z.number().int().min(0), zone: z.literal("arch") }).strict(),
@@ -102,7 +111,7 @@ export type DialogueChoice = z.infer<typeof Dialogue>["choices"][number];
 export const Content = z.object({
   items: z.array(Item), liquids: z.array(Liquid), events: z.array(Event), endings: z.array(Ending),
   clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle), quests: z.array(Quest), dialogue: z.array(Dialogue),
-  levels: z.array(Level), rewards: z.array(Reward)
+  levels: z.array(Level), rewards: z.array(Reward), hazards: z.array(Hazard)
 });
 export type ContentData = z.infer<typeof Content>;
 
@@ -127,6 +136,7 @@ export function checkRefs(c: ContentData): string[] {
   }
   const src = (s: string | undefined, where: string) => { if (s && !sources.has(s)) errs.push(`${where}: unknown source ${s}`); };
   ids(c.levels, "level"); ids(c.rewards, "reward");
+  ids(c.hazards, "hazard"); for (const h of c.hazards) src(h.source, h.id);
   for (const l of c.levels) {
     src(l.source, l.id);
     for (const x of [...l.supplies.emergency, ...l.supplies.base]) if (!items.has(x.item)) errs.push(`${l.id}: unknown item ${x.item}`);

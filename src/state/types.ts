@@ -79,11 +79,13 @@ export interface MapPage { level: LevelId; map: Record<MapKey, MapCell>; mapMark
 export interface PendingReward { id: string; label: Text; points: number }
 export interface Level1Run {
   enteredAt: number;
-  power: { phase: "normal" | "warning" | "blackout"; nextAt: number };
-  encounter: { phase: "noticed" | "approaching"; retreat: { i: number; j: number } } | null;
+  power: { phase: "normal" | "warning" | "blackout"; nextAt: number; checked?: boolean; lightChecked?: boolean; threatSpawned?: boolean };
+  encounter: { phase: "noticed" | "approaching"; retreat: { i: number; j: number }; direction: Dir } | null;
+  hazards: { outages: number; noticed: number; avoided: number; hits: number };
   baseClaimed: boolean;
   elder: { met: boolean; meeting: number | null };
 }
+export const newLevel1Hazards = () => ({ outages: 0, noticed: 0, avoided: 0, hits: 0 });
 export interface RunState {
   mapPages: MapPage[];
   l1: Level1Run | null;

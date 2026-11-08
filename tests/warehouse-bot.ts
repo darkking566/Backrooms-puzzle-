@@ -8,6 +8,10 @@ export function playWarehouse(g: Game, limit = 500) {
   const w = g.world; if (w.level !== "level-1") throw new Error("warehouse expected");
   let reachedBase = false;
   for (let n = 0; n < limit && !g.run.ended; n++) {
+    if (g.run.l1?.encounter) { g.dispatch({ type: "avoidEntity" }); continue; }
+    if (g.run.l1?.power.phase !== "normal" && g.zoneHere() !== "alpha") {
+      if (g.hasLight()) g.dispatch({ type: "toggleFlashlight" }); else g.dispatch({ type: "wait" }); continue;
+    }
     const r = g.run, zone = g.zoneHere(); reachedBase ||= zone === "alpha";
     const drink = r.inv.find(i => i.id === "almond_water");
     if (drink && r.stats.water < 60) { g.dispatch({ type: "drink", key: drink.key }); continue; }

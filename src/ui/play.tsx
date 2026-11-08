@@ -58,16 +58,17 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   function act(cmd: Command, then?: () => void) {
     const v = ctx.view!; if (v.busy || g.run.ended || performance.now() < holdUntil.current || (g.run.pendingEvent && cmd.type !== "choose")) return;
     const out = g.dispatch(cmd);
+    if (out.interrupted) setSheet(null);
     showTime(cmd, out.minutes, !!out.ended, out.perceivedTime);
     for (const s of out.sfx) ctx.audio.sfx(s);
     if (out.event === "noise_spike") ctx.audio.sfx("spike");
     save();
     const finish = () => {
       setBusy(false); v.syncEnv(); ctx.audio.ambience(g);
-      if (out.caption) ctx.audio.caption(out.caption, g);
+      if (out.caption) { if (out.captionVisual) showCaption(out.caption); else ctx.audio.caption(out.caption, g); }
       v.kick(); rerender();
       if (out.ended) { ctx.audio.sfx("end"); setTimeout(onEnd, g.run.ended?.ending === "closed_loop" ? 900 : 500); }
-      else if (then) then();
+      else if (then && !out.interrupted) then();
     };
     if (out.levelChanged) { setSheet(null); v.attach(g); finish(); }
     else if (out.anim.kind === "move" || out.anim.kind === "turn") {
@@ -175,6 +176,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   if (inManila()) { near.push({ tag: U("inRoom"), label: U("notesObj"), verb: U("read"), run: openManila }); near.push({ tag: U("inRoom"), label: U("cabinet"), verb: U("open"), run: () => setSheet({ kind: "cabinet" }) }); }
   const ev = r.pendingEvent ? ctx.content.events.find(e => e.id === r.pendingEvent) : null;
   const lock = busy || !!r.pendingEvent;
+  if (r.l1?.encounter) near.unshift({ tag: U("danger"), label: U("entityRetreat"), verb: U("retreat"), run: () => act({ type: "avoidEntity" }) });
   const toggleHints = () => { const h = !hints; setHints(h); ctx.view!.setHints(h); };
   const logLines = (n: number) => r.log.slice(-n).map((l, k, a) => <p key={r.log.length - a.length + k} class={(k < a.length - 1 ? "old " : "") + (l.kind ?? "")}>{L(l.t)}</p>);
   const actionBar = (
@@ -182,6 +184,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
       <button disabled={lock} onClick={() => act({ type: "turn", dir: 2 })}>{U("back_")}<small>1′</small></button>
       <button disabled={lock} onClick={() => setSheet({ kind: "search" })}>{U("search")}<small>15–30′</small></button>
       <button disabled={lock} onClick={() => setSheet({ kind: "rest" })}>{U("rest")}<small>2–8h</small></button>
+      {r.level === "level-1" && <button disabled={lock} onClick={() => act({ type: "wait" })}>{U("waitLights")}<small>5′</small></button>}
       <button aria-pressed={hints} onClick={toggleHints}>{U("hints")}<small>{hints ? U("on") : U("off")}</small></button>
     </div>);
   const menuBar = (
@@ -208,6 +211,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
         <button class="turn l" disabled={lock} aria-label={U("left")} onClick={() => act({ type: "turn", dir: -1 })}>‹<small>{U("left")}</small></button>
         <button class="turn r" disabled={lock} aria-label={U("right")} onClick={() => act({ type: "turn", dir: 1 })}>›<small>{U("right")}</small></button>
         {skip && <div key={skip.id} class="skip" style={{ animationDuration: skip.ms + "ms" }} aria-live="polite"><span>{L(skip.text)}</span></div>}
+        {r.l1?.encounter && <div class="threat" role="alert"><p>{L(ctx.content.hazards[0].text[r.l1.encounter.phase === "noticed" ? (g.hasLight() ? "noticedLit" : "noticedDark") : "approaching"])}</p><button onClick={() => { setSheet(null); act({ type: "avoidEntity" }); }}>{U("entityRetreat")}</button></div>}
         <div class="over">
           {!lock && near.length > 0 && <div class="near">{near.map((n, k) => <button key={k} onClick={n.run}><span>{n.tag}</span>{n.label}<b>{n.verb}</b></button>)}</div>}
           {caption && <div class="cap" aria-live="polite">{L(caption)}</div>}

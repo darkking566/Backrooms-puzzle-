@@ -3,6 +3,7 @@
    and returns what happened for the UI and renderer to show. No Three.js, no DOM. */
 import { Level1 } from "../world/level1";
 import type { ActiveWorld } from "../world/world";
+import { advanceWarehouse } from "../systems/encounters";
 import { warehouseCommand } from "./level1";
 import { queueReward, warehouseSurvival } from "../systems/rewards";
 import type { ContentData } from "../../tools/content-schema";
@@ -10,7 +11,7 @@ import { draw, pick, type RngState, type Stream } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
 import { Level0 } from "../world/level0";
 import { edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type AnyZone, type Level0World } from "../world/types";
-import { newHallucinations, newRoomPersonRun, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
+import { newHallucinations, newRoomPersonRun, newLevel1Hazards, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
 import { HALLUC_ONSET, perceive, perceiveWarehouse } from "../systems/hallucinations";
@@ -33,14 +34,14 @@ export type Command =
   | { type: "cabinetTake"; key: string } | { type: "cabinetPut"; key: string } | { type: "writeNote"; text: string }
   | { type: "readGuide" } | { type: "readSign" } | { type: "baseSupplies" }
   | { type: "crateExamine"; id: string } | { type: "crateOpen"; id: string } | { type: "crateTake"; id: string; key: string }
-  | { type: "corpse" } | { type: "toggleFlashlight" }
+  | { type: "corpse" } | { type: "toggleFlashlight" } | { type: "avoidEntity" } | { type: "wait" }
   | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
   | { type: "packUnjam" } | { type: "packForce" } | { type: "packTake"; key: string }
   | { type: "roomPersonTalk" } | { type: "roomPersonChoice"; id: string; waterKey?: string }
   | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
-export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; levelChanged?: boolean; rebuild?: boolean; important?: boolean; sfx: string[]; minutes: number }
+export interface Outcome { say: Text[]; caption?: Text; captionVisual?: boolean; interrupted?: boolean; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; levelChanged?: boolean; rebuild?: boolean; important?: boolean; sfx: string[]; minutes: number }
 
 const COLOR_NAME: Record<string, Text> = { grey: T("灰色", "grey"), green: T("綠色", "green"), blue: T("藍色", "blue"), reddish: T("偏紅的", "reddish") };
 
@@ -162,12 +163,43 @@ export class Game {
   personChoices() { return this.personDialogue.choices.filter(ch => personChoiceVisible(ch, this.run.roomPerson)).map(ch => ({ ch, ok: !ch.requires?.water || this.personWater().length > 0 })); }
 
   /** Pass time; may end the run. */
-  private pass(minutes: number, act: Activity = "idle") {
-    const before = this.run.time;
-    if (this.run.level === "level-0") this.out.minutes += minutes;
-    const death = tick(this.run, minutes, act, this.env());
-    if (this.run.level === "level-1") this.out.minutes += this.run.time - before;
-    if (death) this.end(death);
+  private pass(minutes: number, act: Activity = "idle"): boolean {
+    if (this.world.level === "level-1") {
+      const completed = advanceWarehouse(this.run, this.world, this.c.hazards[0], minutes, act, {
+        rand: () => this.rand("level1"),
+        tick: (m, activity) => { const before = this.run.time, death = tick(this.run, m, activity, this.env());
+          this.out.minutes += this.run.time - before; if (death) this.end(death); return !death; },
+        say: t => this.say(t, "warn"),
+        signal: (t, sound, visual) => { this.out.caption = t; this.out.captionVisual = visual; this.out.important = true; this.out.rebuild = true; if (sound) this.out.sfx.push(sound); }
+      });
+      if (!completed) this.out.interrupted = true;
+      return completed;
+    }
+    this.out.minutes += minutes;
+    const death = tick(this.run, minutes, act, this.env()); if (death) this.end(death);
+    return !death;
+  }
+  private resolveThreat(cmd: Command): boolean {
+    if (this.world.level !== "level-1" || !this.run.l1?.encounter) return cmd.type === "avoidEntity";
+    const r = this.run, l = r.l1!, e = l.encounter!, t = this.c.hazards[0].text;
+    const back = cmd.type === "move" && !this.hasLight() && r.pos.i + DV[cmd.d][0] === e.retreat.i && r.pos.j + DV[cmd.d][1] === e.retreat.j;
+    if (cmd.type === "avoidEntity" || back) {
+      r.flashlightOn = false; l.encounter = null; l.hazards.avoided++;
+      r.pos = { ...e.retreat, d: r.pos.d }; this.world.ensureAround(r.pos.i, r.pos.j);
+      this.pass(5); if (!r.ended) this.say(t.retreat); this.out.rebuild = true; this.out.important = true;
+      recordNotebook(r, this.world, true); return true;
+    }
+    if (["mapMark", "readGuide", "readSign", "drop"].includes(cmd.type) || (cmd.type === "toggleFlashlight" && r.flashlightOn)) return false;
+    this.pass(1); if (r.ended) return true;
+    this.out.important = true; this.out.interrupted = true; this.out.captionVisual = true; this.out.rebuild = true;
+    if (e.phase === "noticed") { e.phase = "approaching"; this.say(t.approaching, "warn"); this.out.caption = this.hasLight() ? t.litCaption : t.darkCaption; }
+    else {
+      l.encounter = null; l.hazards.hits++; r.stats.health = Math.max(0, r.stats.health - this.c.hazards[0].encounter.damage);
+      addStatus(r, "bleeding", this.c.hazards[0].encounter.bleedingHours); this.say(t.hurt, "warn");
+      if (r.stats.health <= 0) this.end("death_smiler");
+      else { r.pos = { ...e.retreat, d: r.pos.d }; this.world.ensureAround(r.pos.i, r.pos.j); recordNotebook(r, this.world, true); }
+    }
+    return true;
   }
 
   /* ---------- dispatch ---------- */
@@ -176,6 +208,7 @@ export class Game {
     const r = this.run;
     if (r.ended) return this.out;
     if (r.pendingEvent && cmd.type !== "choose") return this.out;
+    if (this.resolveThreat(cmd)) return this.out;
     const from = { ...r.pos }, hadNotebook = this.has("notebook"), previousSanity = r.stats.sanity, redStage = r.redStage;
     const handled = this.world.level === "level-1" && warehouseCommand({ run: r, world: this.world, content: this.c, out: this.out,
       say: (t, kind) => this.say(t, kind), pass: (m, a) => this.pass(m, a), rand: () => this.rand(),
@@ -464,7 +497,7 @@ export class Game {
   }
   private boil(saltKey: string, target: string) {
     const r = this.run, b = r.inv.find(y => y.key === target)?.bottle; if (!b || b.liquid === "empty" || !r.inv.some(y => y.key === saltKey)) return;
-    this.take(saltKey); this.pass(15);
+    this.take(saltKey); const completed = this.pass(15); if (r.level === "level-1" && (!completed || r.ended)) return;
     b.boiled = true; b.sealed = false; b.spoiled = false; if (b.liquid === "carpet_water") b.liquid = "carpet_water_boiled";
     this.say(T("你把火鹽丟進瓶子裡。瓶身慢慢燙了起來，水滾了好一陣子。煮沸能殺菌——但去不掉別的東西。", "You drop the firesalt in. The flask grows hot and the water boils for a good while. Boiling kills germs, but it removes nothing else."));
     this.discover("firesalt");
@@ -573,7 +606,7 @@ export class Game {
   private searchCorpse() {
     const r = this.run, w = this.world, cp = this.meta.corpses[this.run.level];
     if (!cp || !w.corpse || w.corpse[0] !== r.pos.i || w.corpse[1] !== r.pos.j) return;
-    this.pass(10);
+    const completed = this.pass(10); if (r.level === "level-1" && (!completed || r.ended)) return;
     this.say(r.level === "level-1" ? T("水泥柱旁躺著一具遺體。外套的袖口，跟你身上的一樣。", "A body lies beside the concrete pillar. The coat has the same cuffs as yours.") : T("你蹲下來。那個人的衣服……跟你身上穿的一模一樣。臉朝著地毯，你沒有把它翻過來。", "You crouch down. Their clothes are exactly the same as yours. The face is pressed into the carpet. You don't turn it over."), "warn");
     this.say(T(`口袋裡有一張紙條：「${cp.note.zh}」`, `In a pocket, a note: "${cp.note.en}"`));
     let got = 0;
@@ -725,7 +758,7 @@ export class Game {
       return this.say(reason[block]);
     }
     const gain = notebookReadGain(r);
-    this.pass(10); if (r.ended) return;
+    if (!this.pass(10) || r.ended) return;
     r.stats.sanity = Math.min(100, r.stats.sanity + gain); r.lastNotebookRead = r.time;
     this.say(gain === 4 ? T("你沿著歪斜的線條讀下去。有些地方認不出來，但握筆的是你。", "You follow the crooked lines. Some places are unreadable, but it was your hand holding the pen.")
       : T("你一頁一頁翻回去。走過的路，還留在紙上。呼吸慢了一點。", "You turn back through the pages. The places you walked are still on the paper. Your breathing slows."));
@@ -761,7 +794,7 @@ export class Game {
     const r = this.run, first = !this.meta.discoveries.includes("level1") && !this.meta.endings.includes("exit_level1"), rules = this.c.levels[0];
     r.mapPages.push({ level: r.level, map: r.map, mapMarks: r.mapMarks }); r.map = {}; r.mapMarks = {};
     r.level = "level-1";
-    r.l1 = { enteredAt: r.time, power: { phase: "normal", nextAt: 0 }, encounter: null, baseClaimed: false, elder: { met: false, meeting: null } };
+    r.l1 = { enteredAt: r.time, power: { phase: "normal", nextAt: 0 }, encounter: null, hazards: newLevel1Hazards(), baseClaimed: false, elder: { met: false, meeting: null } };
     r.fakePiano = null; r.pendingEvent = null;
     this.world = new Level1(r.seed, rules); r.pos = { i: 0, j: 0, d: this.world.rotation };
     this.world.ensureAround(0, 0); this.placeCorpse(); r.world = this.world.toData();
@@ -824,6 +857,7 @@ export const DISC: Record<string, Text> = {
   own_corpse: T("自己的遺體", "your own body"), tally_marks: T("牆上的記號", "the marks on the wall"), fallen_pack: T("上鎖的舊背包", "the locked backpack"), room_person: T("房裡的人", "the person in the room")
 };
 const CORPSE_NOTE: Record<string, Text> = {
+  death_smiler: T("笑臉看的是光。先收起來。", "The smile follows the light. Put it away first."),
   death_dehydration: T("水。一定要找到水。不要省著喝，省著喝的人都死了。", "Water. Find water. Don't ration it; the ones who rationed are dead."),
   death_wretch: T("我想不起來我叫什麼。如果你記得，寫在這張紙背面。", "I can't remember my name. If you do, write it on the back of this."),
   death_liquid_pain: T("顏色淡得像果汁的那種，不是杏仁水。不要喝。", "The kind that looks like watered-down juice is not almond water. Don't drink it."),

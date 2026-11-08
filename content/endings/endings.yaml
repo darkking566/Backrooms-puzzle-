@@ -102,3 +102,8 @@
       zh: 你靠著水泥牆坐下。袖口的水慢慢變深。遠處有人搬動箱子，聲音沒有靠近。
       en: You sit against the concrete wall. The water at your cuff slowly darkens.
         Someone moves a crate far away. The sound comes no closer.
+- id: death_smiler
+  kind: death
+  title: { zh: 光沒有收起來, en: "The Light Stayed On" }
+  text: { zh: 光束落在水面上，還亮著。你已經握不住它了。, en: "The beam lies across the water, still lit. You can no longer hold it." }
+  points: 10

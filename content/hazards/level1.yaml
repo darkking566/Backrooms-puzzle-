@@ -1,0 +1,19 @@
+- id: smiler
+  level: level-1
+  source: level-1
+  power: { first: [120, 240], interval: [240, 480], warning: 10, duration: [20, 40] }
+  encounter: { chance: 0.25, lightChance: 0.5, damage: 20, bleedingHours: 4, vanishChance: 0.12 }
+  text:
+    warning: { zh: 燈從遠處一根根熄下去，又亮起來。這次沒有一起亮。先離開貨架，記住能退回的位置。, en: "The distant tubes go out one by one, then return. This time they do not all come back. Leave the shelving and remember a place to retreat." }
+    warningCaption: { zh: 〔燈管接連劈啪作響〕, en: "[The tubes crackle in sequence]" }
+    blackout: { zh: 最後一根燈管熄了。滴水聲變得很清楚。, en: "The last tube goes out. The dripping becomes very clear." }
+    relight: { zh: 燈亮回來了。你先看柱子之間，再看腳下。, en: "The lights return. You check between the pillars before looking down." }
+    noticedLit: { zh: 柱子之間亮著兩點白色。下面還有一道彎的。光移開了，笑容還在。關掉手電筒，退到遮蔽處。, en: "Two white points hang between the pillars. A curve beneath them. The beam moves aside; the smile remains. Switch off the flashlight and retreat to cover." }
+    noticedDark: { zh: 柱子之間亮著兩點白色。下面還有一道彎的。你沒有開燈。沿牆慢慢退到遮蔽處。, en: "Two white points hang between the pillars. A curve beneath them. Your light is off. Retreat slowly along the wall to cover." }
+    litCaption: { zh: 〔黑暗裡，一張笑臉朝著你的光〕, en: "[A smiling face in the dark, turned toward your light]" }
+    darkCaption: { zh: 〔黑暗裡，有一張笑臉〕, en: "[A smiling face in the dark]" }
+    approaching: { zh: 那道笑容近了。別再翻找。現在還能退到柱子後面。, en: "The smile is closer. Stop searching. There is still time to retreat behind the pillar." }
+    retreat: { zh: 你收起光，沿牆退到遮蔽處。等了一會兒，那兩點白色才移開。, en: "You put away the light and retreat along the wall to cover. After a while, the two white points move away." }
+    hurt: { zh: 你撞進柱子後面的窄縫。手臂在流血。外面安靜了。, en: "You stumble into the narrow space behind the pillar. Your arm is bleeding. Outside it is quiet." }
+    vanished: { zh: 箱子不在原來的位置。地上還留著一塊乾的方形。, en: "The crate is gone. A dry square remains on the floor." }
+    wait: { zh: 你靠著柱子等了一會兒。沒有把光伸進黑暗裡。, en: "You wait beside a pillar for a while, keeping your light out of the darkness." }

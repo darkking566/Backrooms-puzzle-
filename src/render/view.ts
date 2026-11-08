@@ -360,6 +360,13 @@ export class View {
       const paper = new THREE.Mesh(G.box, M.paper); paper.scale.set(.3, .03, .2); paper.position.set(.6, .28, .8);
       this.add(paper, { pick: { kind: "guide" }, label: "guide", ly: .4 });
     }
+    const threat = g.run.l1?.encounter;
+    if (threat && w.zone(ci, cj) !== "alpha") {
+      const face = new THREE.Group(), dist = threat.phase === "noticed" ? 3 : 1.8;
+      for (const x of [-.14, .14]) { const eye = new THREE.Mesh(G.smilerEye, M.smiler); eye.position.set(x, 1.65, 0); face.add(eye); }
+      const smile = new THREE.Mesh(G.smilerSmile, M.smiler); smile.position.y = 1.35; face.add(smile);
+      face.position.set(ci * S + DV[threat.direction][0] * dist, 0, cj * S + DV[threat.direction][1] * dist); face.rotation.y = yawOf(threat.direction); this.add(face);
+    }
     this.objects(ci, cj); this.bakeLight(ci, cj, 2); this.rebuildExits();
   }
   private decals(ci: number, cj: number) {
@@ -502,7 +509,9 @@ export class View {
     if (this.flash && !this.reduceMotion) { if (t - this.flickT > 70) { this.flickT = t; this.flickV = Math.random() < .3 ? .25 + Math.random() * .4 : 1; } }
     else this.flickV = this.reduceMotion ? .9 : .78 + .22 * Math.sin(t / 700);
     this.MAT.flicker.color.setRGB(this.flickV, this.flickV * .97, this.flickV * .82);
-    const pw = this.powerAt(t), fv = this.tubeAt(t); this.tubeValue = fv * pw;
+    let pw = this.powerAt(t);
+    if (this.game.run.level === "level-1" && this.game.run.l1?.power.phase === "warning" && this.game.zoneHere() !== "alpha") pw *= this.reduceMotion ? .75 : .75 + .15 * Math.sin(t / 800);
+    const fv = this.tubeAt(t); this.tubeValue = fv * pw;
     shared.uPower.value = pw; shared.uFlick.value = fv;
     this.MAT.panel.color.setScalar(.22 + .78 * pw); this.MAT.fpanel.color.setScalar(.22 + .78 * pw * fv);
     shared.uTorch.value += (this.torchTarget - shared.uTorch.value) * .2;
@@ -536,6 +545,7 @@ export class View {
   private computeSteady() {
     const g = this.game!, w = g.world, vis = this.visibleCells();
     this.steady = false;
+    if (w.level === "level-1" && g.run.l1?.power.phase === "warning" && !this.reduceMotion) this.steady = true;
     for (const k of (w.level === "level-0" ? [w.flickerKey, w.fakeKey] : [])) if (k && vis.has(ck(...edgeCells(k)[0]))) this.steady = true;
     if (!this.steady && this.power > 0 && !g.run.outageLeft) for (const k of vis) { const c = w.cells.get(k), p = c?.panel; if (p && p !== "dead" && p.flick && Math.hypot(c!.i - g.run.pos.i, c!.j - g.run.pos.j) <= 3) { this.steady = true; break; } }
   }

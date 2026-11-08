@@ -9,7 +9,9 @@ import { H } from "./survival";
 
 export const mapKey = (i: number, j: number): MapKey => `${i},${j}`;
 export const NOTEBOOK_COOLDOWN = 6 * H;
-const canSee = (r: RunState, w: ActiveWorld) => hasTorch(r) || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
+const canSee = (r: RunState, w: ActiveWorld) => hasTorch(r) || (w.level === "level-1"
+  ? r.l1?.power.phase !== "blackout" || w.zone(r.pos.i, r.pos.j) === "alpha"
+  : r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
 
 export function mapEdge(edge: Edge | undefined): MapEdge {
   if (!edge) return "unknown";
@@ -68,6 +70,7 @@ export function recordNotebook(r: RunState, w: ActiveWorld, entered = false): bo
     if (!passable(w.edgeAt(a, b, d))) break;
     a += DV[d][0]; b += DV[d][1];
     if (w.zone(a, b) === "dark" && !hasTorch(r)) break;
+    if (w.level === "level-1" && r.l1?.power.phase === "blackout" && w.zone(a, b) !== "alpha" && !hasTorch(r)) break;
     const k = mapKey(a, b);
     if (!r.map[k]) { const cell = snapshot(r, w, a, b, false); if (cell) r.map[k] = cell; }
   }

@@ -10,7 +10,7 @@ import { edgeKey, passable } from "../world/types";
 export interface WarehouseContext {
   run: RunState; world: Level1; content: ContentData; out: Outcome;
   say(t: Text, kind?: "event" | "warn" | "caption"): void;
-  pass(minutes: number, activity?: Activity): void;
+  pass(minutes: number, activity?: Activity): boolean;
   rand(): number;
   discover(id: string): void;
   knows(id: string): boolean;
@@ -26,6 +26,7 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
   const has = (id: string) => r.inv.some(i => i.id === id);
   if (level0Only.has(cmd.type)) return true;
   switch (cmd.type) {
+    case "wait": x.say(c.hazards[0].text.wait); x.pass(5); return true;
     case "touch": {
       const near = [0, 1, 2, 3].some(d => cmd.edge === edgeKey(r.pos.i, r.pos.j, d));
       if (near) { x.pass(1); if (!r.ended) x.say(T("水泥是冷的。指尖沾了一層灰。", "The concrete is cold. Dust clings to your fingertips.")); }
@@ -36,7 +37,7 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
       const from = { ...r.pos }, previous = w.zone(from.i, from.j);
       r.pos = { i: from.i + DV[cmd.d][0], j: from.j + DV[cmd.d][1], d: cmd.d }; r.moves++;
       w.ensureAround(r.pos.i, r.pos.j); out.anim = { kind: "move", from, d: cmd.d }; out.rebuild = true;
-      x.pass(10 + Math.floor(x.rand() * 7), "walk"); if (r.ended) return true;
+      x.pass(10 + Math.floor(x.rand() * 7) + (r.l1?.power.phase === "blackout" && w.zone(r.pos.i, r.pos.j) !== "alpha" && !(has("flashlight") && r.flashlightOn) ? 8 : 0), "walk"); if (r.ended) return true;
       const zone = w.zone(r.pos.i, r.pos.j);
       if (zone !== previous) { x.say(rules.zones[zone]); if (zone === "alpha") { x.discover("base_alpha"); out.important = true; } }
       if (w.corpse?.[0] === r.pos.i && w.corpse[1] === r.pos.j) x.say(T("水泥柱旁躺著一具遺體。", "A body lies beside the concrete pillar."), "warn");
@@ -57,7 +58,8 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
     }
     case "search": {
       const cell = w.cells.get(ck(r.pos.i, r.pos.j))!;
-      x.pass(30); if (r.ended) return true;
+      if (!x.pass(30) || r.ended) return true;
+      if (r.l1?.power.phase === "blackout" && w.zone(cell.i, cell.j) !== "alpha" && !(has("flashlight") && r.flashlightOn)) { x.say(T("黑暗裡看不清箱子與木板。", "You cannot make out the crates and boards in the dark.")); return true; }
       if (cell.searched) { x.say(T("這一帶你已經翻過了。", "You have already been over this area.")); return true; }
       cell.searched = true;
       if (w.zone(cell.i, cell.j) !== "alpha" && x.rand() < .25) {
@@ -89,12 +91,12 @@ export function warehouseCommand(x: WarehouseContext, cmd: Command): boolean {
       const crate = w.crates.get(cmd.id); if (!crate || !reachableCrate(r, w, crate)) return true;
       if (cmd.type === "crateExamine") {
         x.say(rules.crate.description);
-        if (!crate.examined) { x.pass(rules.crate.examineMinutes); if (r.ended) return true; crate.examined = true; }
+        if (!crate.examined) { if (!x.pass(rules.crate.examineMinutes)) return true; if (r.ended) return true; crate.examined = true; }
         x.say(rules.crate.latch); x.learn("warehouse_latch"); out.important = true;
       } else if (cmd.type === "crateOpen") {
         if (crate.opened) return true;
         if (!crate.examined && !x.knows("warehouse_latch") && !has("crowbar")) { x.say(rules.crate.needLatch); return true; }
-        x.pass(has("crowbar") ? rules.crate.crowbarMinutes : rules.crate.openMinutes); if (r.ended) return true;
+        if (!x.pass(has("crowbar") ? rules.crate.crowbarMinutes : rules.crate.openMinutes)) return true; if (r.ended) return true;
         crate.opened = true; x.say(rules.crate.opened); x.discover("supply_crate"); out.rebuild = true;
       } else {
         const it = crate.items.find(a => a.key === cmd.key); if (!crate.opened || !it) return true;

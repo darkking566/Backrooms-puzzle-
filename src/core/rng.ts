@@ -8,8 +8,8 @@ export function hashWith(seed: number, ...n: number[]): number {
 export function mulberry(a: number): () => number {
   return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
-export type Stream = "shift" | "events" | "loot" | "body" | "misc" | "halluc" | "puzzles" | "quests";
-const STREAM_ID: Record<Stream, number> = { shift: 101, events: 202, loot: 303, body: 404, misc: 505, halluc: 606, puzzles: 707, quests: 808 };
+export type Stream = "shift" | "events" | "loot" | "body" | "misc" | "halluc" | "puzzles" | "quests" | "level1";
+const STREAM_ID: Record<Stream, number> = { shift: 101, events: 202, loot: 303, body: 404, misc: 505, halluc: 606, puzzles: 707, quests: 808, level1: 909 };
 export interface RngState { seed: number; counters: Partial<Record<Stream, number>> }
 export function draw(r: RngState, s: Stream): number {
   const c = r.counters[s] ?? 0; r.counters[s] = c + 1;

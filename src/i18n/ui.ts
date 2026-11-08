@@ -2,6 +2,7 @@
 import type { Lang, Text } from "../core/types";
 const t = (zh: string, en: string): Text => ({ zh, en });
 export const UI = {
+  danger: t("危險", "Danger"), entityRetreat: t("關燈，退到遮蔽處", "Switch off and retreat to cover"), retreat: t("退開", "Retreat"), waitLights: t("等燈恢復", "Wait for the lights"),
   supplyCrate: t("補給箱", "Supply crate"), survivalGuide: t("求生紙條", "Survival note"), routeSign: t("白色標記", "White markings"),
   baseSupplies: t("應急補給", "Emergency supplies"), collectSupplies: t("領取", "Collect"), crateExamine: t("查看側板", "Examine side panel"),
   crateOpen: t("拉開滑閂", "Slide the latch"), crateCrowbar: t("用撬棍打開", "Open with crowbar"),

@@ -1,6 +1,6 @@
 /* Saving goes through a small Store interface (IndexedDB now, a server later for multiplayer).
    Every action saves; a run can be left and resumed, and a reload never undoes a death. */
-import { newHallucinations, newMeta, newRoomPersonRun, SAVE_VERSION, type Meta, type RunState, type Corpse } from "./types";
+import { newHallucinations, newMeta, newRoomPersonRun, newLevel1Hazards, SAVE_VERSION, type Meta, type RunState, type Corpse } from "./types";
 
 export interface Store { get(key: string): Promise<unknown>; set(key: string, v: unknown): Promise<void>; del(key: string): Promise<void> }
 
@@ -47,6 +47,12 @@ export async function loadMeta(): Promise<Meta> { return migrateMeta((await stor
 function runDefaults(r: RunState): RunState {
   r.level ??= "level-0";
   r.mapPages ??= []; r.l1 ??= null; r.flashlightOn ??= true;
+  if (r.l1) {
+    r.l1.hazards = { ...newLevel1Hazards(), ...r.l1.hazards };
+    r.l1.power ??= { phase: "normal", nextAt: 0 };
+    r.l1.power.phase ??= "normal"; r.l1.power.nextAt ??= 0;
+    if (r.l1.encounter) r.l1.encounter.direction ??= r.pos.d;
+  }
   r.pendingRewards ??= [];
   r.npcSeenThisRun ??= r.roomPerson?.entered && (r.roomPerson.variant === "first" || r.roomPerson.variant === "revisit") ? ["manila_stranger"] : [];
   r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
