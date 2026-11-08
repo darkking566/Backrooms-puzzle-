@@ -21,7 +21,7 @@ function setup(zone: Zone = "hall", sanity = 20, dm = 20) {
 afterEach(() => { vi.restoreAllMocks(); });
 
 describe("false piano", () => {
-  it.each([35, 50, 82])("does not generate a source or lies at sanity %s", sanity => {
+  it.each([45, 60, 82])("does not generate a source or lies at sanity %s", sanity => {
     const g = setup("hall", sanity), rand = draws(0);
     expect(perceive(g.run, g.world, action, rand)).toEqual({ say: [] });
     expect(g.run.fakePiano).toBeNull(); expect(g.run.halluc.history).toEqual([]); expect(rand).not.toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe("false piano", () => {
 
   it.each(["expiry", "recovery"])("clears on %s and observes a six-hour cooldown", reason => {
     const g = setup(); g.run.fakePiano = { i: 5, j: 0, until: reason === "expiry" ? 100 : 1000, heard: true };
-    if (reason === "recovery") g.run.stats.sanity = 50;
+    if (reason === "recovery") g.run.stats.sanity = 60;
     perceive(g.run, g.world, action, draws(.99));
     expect(g.run.fakePiano).toBeNull(); expect(g.run.halluc.pianoAfter).toBe(460);
     g.run.stats.sanity = 20;
@@ -91,8 +91,8 @@ describe("false piano", () => {
 
 describe("unreliable narration", () => {
   it("increases from ten to thirty percent as sanity falls", () => {
-    expect(lieChance(35)).toBe(0); expect(lieChance(34.999)).toBeCloseTo(.1, 3);
-    expect(lieChance(20)).toBeCloseTo(.22); expect(lieChance(10)).toBeCloseTo(.3); expect(lieChance(0)).toBeCloseTo(.3);
+    expect(lieChance(45)).toBe(0); expect(lieChance(44.999)).toBeCloseTo(.1, 3);
+    expect(lieChance(30)).toBeCloseTo(.22); expect(lieChance(20)).toBeCloseTo(.3); expect(lieChance(0)).toBeCloseTo(.3);
   });
 
   it("uses ordinary-looking narration for false familiarity and enforces its cooldown", () => {
@@ -132,9 +132,9 @@ describe("unreliable narration", () => {
     expect(g.run.halluc.history[0].id).toBe(6); expect(g.run.halluc.history[49].id).toBe(55);
   });
 
-  it("can reflect once on recovery to fifty after a deception", () => {
-    const g = setup("arch", 50); rememberHallucination(g.run, "memory", T("轉角。", "The corner."));
-    const out = perceive(g.run, g.world, { ...action, previousSanity: 49 }, draws(0));
+  it("can reflect once on recovery to sixty after a deception", () => {
+    const g = setup("arch", 60); rememberHallucination(g.run, "memory", T("轉角。", "The corner."));
+    const out = perceive(g.run, g.world, { ...action, previousSanity: 59 }, draws(0));
     expect(out.say).toContainEqual(T("你不確定剛才看到的是不是真的。", "You're not sure what you saw earlier was real."));
     expect(g.run.halluc.needsReflection).toBe(false);
     expect(perceive(g.run, g.world, action, draws(0)).say).toEqual([]);

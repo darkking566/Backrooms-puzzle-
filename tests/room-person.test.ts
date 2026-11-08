@@ -46,6 +46,13 @@ describe("room person selection and supplies", () => {
     expect(g.world.inManila(g.run.lockedPack!.pos.i, g.run.lockedPack!.pos.j)).toBe(true);
     enter(g); expect(g.run.log.some(x => x.t.en.includes("still supplies"))).toBe(true);
   });
+  it("returns an untaken volunteer bottle to the cabinet when the run ends", () => {
+    const unseen = game(); expect(unseen.meta.cabinet).toHaveLength(0); finish(unseen);
+    expect(unseen.meta.cabinet.map(x => x.key)).toEqual(["vol3"]);
+    const taken = game(); enter(taken); open(taken); const vol = taken.run.lockedPack!.items.find(x => x.key.startsWith("vol"))!;
+    taken.dispatch({ type: "packTake", key: vol.key }); finish(taken);
+    expect(taken.meta.cabinet.some(x => x.key === vol.key)).toBe(false);
+  });
   it("uses the truthful empty-cabinet text and retains ordinary stocking on a miss", () => {
     const g = game(); enter(g); expect(g.meta.cabinet).toHaveLength(0); expect(g.run.log.some(x => x.t.en.includes("No water inside"))).toBe(true);
     const m = newMeta(), plain = game(m); expect(plain.run.roomPerson.variant).toBe("none"); expect(m.cabinet).toHaveLength(1);

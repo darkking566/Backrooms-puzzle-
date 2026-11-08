@@ -8,7 +8,7 @@ import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type Gro
 import { newHallucinations, newRoomPersonRun, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
-import { perceive } from "../systems/hallucinations";
+import { HALLUC_ONSET, perceive } from "../systems/hallucinations";
 import { makePack, matchesPack, validCode } from "../systems/symbol-lock";
 import { personChoiceVisible, personReady, planRoomPerson, sealedGreyWater } from "../systems/room-person";
 
@@ -72,7 +72,8 @@ export class Game {
       const q = g.personQuest, p = c.puzzles.find(p => p.id === q.pack.puzzle)!;
       run.lockedPack = makePack(p, run, meta, { i: g.world.manila[0], j: g.world.manila[1] }, () => g.rand("puzzles"));
       run.lockedPack.story = "room_person";
-      run.lockedPack.items = Array.from({ length: q.pack.extraWater + (topUp ? 1 : 0) }, (_, k) => ({ key: `pack:${run.run}:${k}`, id: "almond_water" }));
+      run.lockedPack.items = Array.from({ length: q.pack.extraWater }, (_, k) => ({ key: `pack:${run.run}:${k}`, id: "almond_water" }));
+      if (topUp) run.lockedPack.items.push({ key: "vol" + meta.runs, id: "almond_water" });   // returned to the cabinet at the end if left in the pack
     } else {
       if (topUp) meta.cabinet.push({ key: "vol" + meta.runs, id: "almond_water" });
       const p = g.packPuzzle;
@@ -258,7 +259,7 @@ export class Game {
       if (k) { w.edges.set(k, "flicker"); w.flickerKey = k; this.out.rebuild = true; this.say(T("走廊盡頭的牆在閃。不是燈在閃，是牆本身。", "The wall at the end of the corridor flickers. Not the lights: the wall itself."), "event"); this.discover("flicker_wall"); }
     }
     // when your mind frays, your eyes invent one
-    if (!w.fakeKey && r.stats.sanity < 35 && this.rand("events") < .08) {
+    if (!w.fakeKey && r.stats.sanity < HALLUC_ONSET && this.rand("events") < .08) {
       const k = w.wallAhead(r.pos.i, r.pos.j, r.pos.d);
       if (k && k !== w.flickerKey) { w.edges.set(k, "fakeflicker"); w.fakeKey = k; this.out.rebuild = true; this.say(T("走廊盡頭的牆在閃。", "The wall at the end of the corridor flickers."), "event"); }
     }
@@ -337,7 +338,7 @@ export class Game {
     if (c.searched) return this.say(T("這一帶你已經翻過了。", "You have already been over this area."));
     c.searched = true;
     if (this.rand("loot") < .08) {
-      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 6], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2], ["notebook", 5]]);
+      const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 6], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2], ["notebook", 12]]);
       this.drop_(c.items, id, c.i, c.j, "s" + r.time);
       this.say(T(`你在牆角的地毯縫裡找到了東西：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Wedged where the carpet meets the wall, you find something: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
       this.out.rebuild = true;
@@ -471,7 +472,7 @@ export class Game {
     c.searched = true;
     if (!bar && this.rand("loot") < .35) { addStatus(r, "bleeding", 4); this.say(T("你徒手把旁邊的板子扳開，邊緣把手掌割開了一道口子。", "You wrench the next panel loose by hand and its edge slices your palm."), "warn"); }
     if (this.rand("loot") < .3) {
-      const id = weighted(this.rand("loot"), [["bottle", 35], ["snack_bar", 25], ["flashlight", 12], ["crowbar", 10], ["bandage", 10], ["watch", 8], ["notebook", 5]]);
+      const id = weighted(this.rand("loot"), [["bottle", 35], ["snack_bar", 25], ["flashlight", 12], ["crowbar", 10], ["bandage", 10], ["watch", 8], ["notebook", 10]]);
       this.drop_(c.items, id, c.i, c.j, "c" + r.time);
       this.say(T(`天花板夾層裡有東西掉了下來：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Something drops out of the ceiling void: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
       this.discover("ceiling_stash"); this.out.rebuild = true;
@@ -719,6 +720,8 @@ export class Game {
     m.points += pts; if (first) m.endings.push(id);
     for (const f of r.found) if (!m.discoveries.includes(f)) m.discoveries.push(f);
     m.history.push({ run: r.run, ending: id, days, points: pts });
+    // the volunteer bottle that was moved into the stranger's pack goes back to the cabinet if nobody took it
+    if (r.lockedPack?.story === "room_person") for (const x of r.lockedPack.items) if (x.key.startsWith("vol")) m.cabinet.push(x);
     // a body stays behind in Level 0 when you die there (not when you leave, fall or are lost to a red room)
     if (e.kind === "death" && id !== "no_one_returned") {
       m.corpse = { run: r.run, cause: id, items: r.inv.filter(x => r.carried.includes(x.id) || x.id !== "bottle").slice(0, 6), note: CORPSE_NOTE[id] ?? T("不要停下來。", "Don't stop.") };

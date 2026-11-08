@@ -9,10 +9,13 @@ export const PIANO_AUDIBLE = .1;
 export const PIANO_LIFETIME = 3 * H;
 export const PIANO_COOLDOWN = 6 * H;
 export const LIE_COOLDOWN = H;
+/** Hallucinations begin below ONSET and clear once sanity climbs back to CLEAR. */
+export const HALLUC_ONSET = 45;
+export const HALLUC_CLEAR = 60;
 const VAGUE_TIME = [T("一會兒", "a moment"), T("一陣子", "a while"), T("好一陣子", "quite a while"), T("幾個小時", "a few hours"), T("很久很久", "a long, long time")];
 const timeBand = (m: number) => m < 12 ? 0 : m < 40 ? 1 : m < 100 ? 2 : m < 300 ? 3 : 4;
 export const vagueDuration = (minutes: number): Text => VAGUE_TIME[timeBand(minutes)];
-export const lieChance = (sanity: number) => sanity >= 35 ? 0 : .1 + .2 * Math.min(1, Math.max(0, (35 - sanity) / 25));
+export const lieChance = (sanity: number) => sanity >= HALLUC_ONSET ? 0 : .1 + .2 * Math.min(1, Math.max(0, (HALLUC_ONSET - sanity) / 25));
 const reliable = (z: Zone) => z === "arch" || z === "manila";
 
 /** Both sources share gain, timbre and the audibility threshold. Only the false source fades on approach. */
@@ -20,7 +23,7 @@ export function pianoLevels(r: RunState, w: Level0) {
   const { i, j } = r.pos, z = w.zone(i, j), dm = w.manilaDist(i, j);
   const realNear = 1 - sstep(1.5, 7, dm), f = r.fakePiano;
   let fakeNear = 0;
-  if (f && r.time < f.until && r.stats.sanity < 50 && !reliable(z) && dm >= 8) {
+  if (f && r.time < f.until && r.stats.sanity < HALLUC_CLEAR && !reliable(z) && dm >= 8) {
     const distance = Math.hypot(f.i - i, f.j - j);
     fakeNear = (1 - sstep(1.5, 7, distance)) * sstep(1.5, 2.5, distance);
   }
@@ -56,18 +59,18 @@ export function perceive(r: RunState, w: Level0, action: PerceptionAction, rand:
   const f = r.fakePiano;
   if (f) {
     const close = Math.hypot(f.i - i, f.j - j) <= 1.5;
-    if (close || r.time >= f.until || r.stats.sanity >= 50 || safe || nearReal) {
+    if (close || r.time >= f.until || r.stats.sanity >= HALLUC_CLEAR || safe || nearReal) {
       r.fakePiano = null; r.halluc.pianoAfter = r.time + PIANO_COOLDOWN;
       if (!nearReal && !safe && (f.heard || close)) out.say.push(close
         ? T("琴聲停了。這裡什麼都沒有。", "The piano stops. There is nothing here.")
         : T("琴聲慢慢淡了。再也聽不到。", "The piano fades. You can't hear it any more."));
     } else hearFakePiano(r, w);
   }
-  if (action.previousSanity < 50 && r.stats.sanity >= 50 && r.halluc.needsReflection) {
+  if (action.previousSanity < HALLUC_CLEAR && r.stats.sanity >= HALLUC_CLEAR && r.halluc.needsReflection) {
     r.halluc.needsReflection = false;
     if (rand() < .5) out.say.push(T("你不確定剛才看到的是不是真的。", "You're not sure what you saw earlier was real."));
   }
-  if (action.minutes <= 0 || action.important || r.ended || r.pendingEvent || r.stats.sanity >= 35 || safe || out.say.length) return out;
+  if (action.minutes <= 0 || action.important || r.ended || r.pendingEvent || r.stats.sanity >= HALLUC_ONSET || safe || out.say.length) return out;
 
   if (action.action === "move" && !r.fakePiano && !nearReal && r.time >= r.halluc.pianoAfter && rand() < .08) {
     const candidates: [number, number][] = [];
