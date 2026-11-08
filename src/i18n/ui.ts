@@ -1,0 +1,43 @@
+/* Interface text, by key, in both languages. Game content (items, events...) carries its own { zh, en }. */
+import type { Lang, Text } from "../core/types";
+const t = (zh: string, en: string): Text => ({ zh, en });
+export const UI = {
+  title: t("Backrooms：回聲", "Backrooms: Echo"),
+  tagline: t("你在 Backrooms 一次又一次地醒來。每一次你都會死，但每一次你都會記得多一點。", "You wake in the Backrooms again and again. Every time you die. Every time you remember a little more."),
+  warning: t("光敏警告：本遊戲有閃爍的光線效果，預設關閉，可以在設定中開啟。", "Photosensitivity warning: this game has flashing light effects. They are off by default and can be turned on in Settings."),
+  continue: t("繼續", "Continue"), newRun: t("醒來", "Wake up"), codex: t("記憶", "Memories"), sources: t("資料來源", "Sources"), settings: t("設定", "Settings"), back: t("返回", "Back"), close: t("關閉", "Close"),
+  namePrompt: t("你叫什麼名字？", "What is your name?"), nameHint: t("這是最初的你的名字。之後不能更改。", "This is the name of the first you. It cannot be changed later."), nameOk: t("就是這個名字", "That is my name"),
+  wakeN: t("第 {n} 次醒來", "Awakening {n}"), memoryPts: t("記憶點數", "Memory"), prepHint: t("你記得自己帶了什麼？用記憶點數換。用掉就沒了，死的時候會留在遺體上。", "What do you remember carrying? Spend memory on it. It is used up, and stays on your body if you die."),
+  carry: t("負重", "Load"), wake: t("醒來", "Wake up"), nothing: t("什麼都不帶", "Bring nothing"),
+  back_: t("回頭", "Look back"), search: t("搜索", "Search"), rest: t("休息", "Rest"), hints: t("互動點", "Hotspots"),
+  bag: t("背包", "Bag"), notes: t("筆記", "Notes"), body: t("身體", "Body"),
+  left: t("左轉", "Left"), right: t("右轉", "Right"),
+  ahead: t("往前", "ahead"), toLeft: t("左邊", "left"), toRight: t("右邊", "right"), archS: t("（拱門）", " (arch)"), doorS: t("（門）", " (door)"),
+  atFeet: t("腳邊", "At your feet"), inRoom: t("房間裡", "In the room"), here: t("這裡", "Here"),
+  pickUp: t("撿起", "Pick up"), read: t("翻看", "Read"), open: t("打開", "Open"), searchBody: t("翻找", "Search"), reach: t("伸手摸", "Reach in"), scrape: t("刮下來", "Scrape"), look: t("看看", "Look"),
+  searchArea: t("仔細搜索這一帶", "Search this area"), wring: t("擠地毯裡的水", "Wring water from the carpet"), wringHands: t("直接用手接著喝", "Drink it from your hands"), wringInto: t("擠進{x}", "Into the {x}"),
+  restFor: t("休息 {h} 小時", "Rest {h} hours"), restHint: t("睡著的時候，沒在看的地方都會改變。拱門區和曼尼拉房間例外。", "While you sleep, everything you are not looking at changes. Except in the arch zone and the Manila Room."),
+  minutes: t("約 {m} 分鐘", "about {m} min"), hours: t("{h} 小時", "{h} h"),
+  drink: t("喝光", "Drink it all"), sip: t("抿一口", "Take a sip"), inspect: t("仔細看", "Look closely"), drop: t("放下", "Put down"), eat: t("吃", "Eat"), boil: t("煮沸一瓶", "Boil a flask"), bandageUp: t("包紮", "Bandage up"), putCabinet: t("放進櫃子", "Leave in cabinet"),
+  chooseFlask: t("選一個保溫瓶", "Choose a flask"), weight: t("重量", "Weight"), empty: t("背包是空的。", "Your bag is empty."),
+  clues: t("線索", "Clues"), log: t("這一次", "This run"), manilaNotes: t("曼尼拉房間的紙條", "Notes in the Manila Room"), noClues: t("還沒有線索。", "No clues yet."),
+  feelFine: t("你覺得還好。至少現在是。", "You feel all right. For now."), time: t("時間", "Time"), unknownTime: t("??:??", "??:??"), day: t("第 {d} 天", "Day {d}"),
+  writeNote: t("留一張紙條給下一局的自己", "Leave a note for your next self"), leaveNote: t("留下紙條", "Leave the note"),
+  cabinet: t("桌下的櫃子", "The cabinet under the table"), cabinetEmpty: t("櫃子是空的。", "The cabinet is empty."), take: t("拿走", "Take"), yourBag: t("你的背包", "Your bag"),
+  pitLook: t("趴在坑邊往下看", "Lie down and look in"), pitJump: t("跳下去", "Jump in"), pitWarn: t("沒有人知道下面是什麼。", "No one knows what is down there."),
+  ceilingCrowbar: t("用撬棍撬開旁邊的板子（10 分鐘）", "Pry the panels open with the crowbar (10 min)"), ceilingHand: t("伸手進去摸（40 分鐘，可能受傷）", "Reach in by hand (40 min, you may get hurt)"),
+  needs: t("需要：{x}", "Needs: {x}"),
+  endMemories: t("你留下了什麼記憶", "What you leave behind"), total: t("合計", "Total"), againWake: t("再醒來一次", "Wake again"), toTitle: t("回到標題", "Back to title"), nowHave: t("現在的記憶點數：{n}", "Memory now: {n}"),
+  endings: t("結局與死法", "Endings and deaths"), discoveries: t("發現", "Discoveries"), unknown: t("？？？", "???"), history: t("之前的你", "Your past selves"),
+  lang: t("語言", "Language"), flash: t("閃爍效果", "Flashing effects"), sound: t("聲音", "Sound"), quality: t("畫質", "Quality"), motion: t("減少動態效果", "Reduce motion"),
+  auto: t("自動", "Auto"), low: t("低", "Low"), mid: t("中", "Medium"), high: t("高", "High"), on: t("開", "On"), off: t("關", "Off"),
+  exportSave: t("匯出存檔", "Export save"), importSave: t("匯入存檔", "Import save"), exportHint: t("瀏覽器可能會清掉網站資料（特別是 iPhone）。定期把這串文字存起來。", "Browsers may clear site data (iPhones especially). Keep a copy of this text now and then."),
+  importOk: t("讀取存檔", "Load save"), importBad: t("這不是有效的存檔。", "That is not a valid save."), wipe: t("刪除所有記憶", "Erase all memories"), wipeConfirm: t("真的要全部刪掉嗎？這不能復原。", "Erase everything? This cannot be undone."),
+  license: t("Backrooms Wiki 的內容採用 CC BY-SA 3.0 授權。本遊戲的層級、物品、實體設定以 Wiki 為基礎；故事與任務為原創。遊戲文字以 CC BY-SA 3.0 釋出，程式碼以 MIT 釋出。", "Backrooms Wiki content is licensed CC BY-SA 3.0. This game's levels, objects and entities are based on the Wiki; the story and quests are original. Game text is released under CC BY-SA 3.0, code under MIT."),
+  tooFar: t("太遠了，得先走近一點。", "Too far. Get closer first."), corpseHere: t("遺體", "The body"), salt: t("牆角的白色結晶", "White crystals in the corner"), hole: t("缺一塊的天花板", "A missing ceiling tile"), pit: t("坑洞", "A pit"),
+  tally: t("牆上的記號", "Marks on the wall"), peel: t("剝落的壁紙", "Peeling wallpaper"), flickerWall: t("閃爍的牆", "The flickering wall"), woodDoor: t("木門", "Wooden door"), metalDoor: t("金屬門", "Metal door"),
+  notesObj: t("桌上的筆記", "Notes on the table"), soundOff: t("這個瀏覽器沒辦法播放聲音。字幕還是會照常顯示。", "This browser cannot play sound. Captions still appear."),
+  carried: t("帶著", "Carrying"), emptyFlask: t("空的", "empty")
+};
+export type UIKey = keyof typeof UI;
+export function tr(t: Text, lang: Lang, params: Record<string, string | number> = {}) { return t[lang].replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? "")); }

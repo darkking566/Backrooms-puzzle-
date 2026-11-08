@@ -75,10 +75,11 @@ export class Game {
   has(id: string) { return this.run.inv.some(x => x.id === id); }
   weight() { return this.run.inv.reduce((s, x) => s + this.item(x.id).weight, 0); }
   itemName(x: { id: string; bottle?: Bottle }): Text {
-    if (x.bottle) { const b = x.bottle, cn = COLOR_NAME[b.color]; return T(`${cn.zh}保溫瓶${b.boiled ? "（煮過）" : ""}`, `${cap(cn.en)} flask${b.boiled ? " (boiled)" : ""}`); }
+    if (x.bottle) { const b = x.bottle, cn = COLOR_NAME[b.color]; if (b.liquid === "empty") return T(`空的${cn.zh}保溫瓶`, `Empty ${cn.en} flask`); return T(`${cn.zh}保溫瓶${b.boiled ? "（煮過）" : ""}`, `${cap(cn.en)} flask${b.boiled ? " (boiled)" : ""}`); }
     return this.item(x.id).name;
   }
   bottleLook(b: Bottle): Text {
+    if (b.liquid === "empty") return T("裡面是空的。", "It is empty.");
     const l = this.liquid(b.liquid).look;
     const fill = b.full ? (b.sealed ? T("封口完好，裝得滿滿的", "sealed and full") : T("裝滿了，但封口被打開過", "full, but the seal has been broken")) : T("沒有裝滿，搖起來只剩一半", "not full; it sloshes half-empty");
     return T(`液體${l.zh}。${fill.zh}。`, `The liquid is ${l.en.toLowerCase()}; ${fill.en}.`);
@@ -180,9 +181,9 @@ export class Game {
     const hours = r.time / H;
     if (w.flickerKey) {
       const [[a, b]] = edgeCells(w.flickerKey);
-      if (Math.hypot(a - r.pos.i, b - r.pos.j) > 12) { w.edges.set(w.flickerKey, "wall"); w.flickerKey = null; }
+      if (Math.hypot(a - r.pos.i, b - r.pos.j) > 6) { w.edges.set(w.flickerKey, "wall"); w.flickerKey = null; }   // walk away and it is gone
     }
-    if (!w.flickerKey && hours >= 16 && this.rand("events") < Math.min(.25, .04 + (hours - 16) * .01)) {
+    if (!w.flickerKey && hours >= 30 && this.rand("events") < Math.min(.05, .008 + (hours - 30) * .0015)) {
       const k = w.wallAhead(r.pos.i, r.pos.j, r.pos.d);
       if (k) { w.edges.set(k, "flicker"); w.flickerKey = k; this.out.rebuild = true; this.say(T("走廊盡頭的牆在閃。不是燈在閃，是牆本身。", "The wall at the end of the corridor flickers. Not the lights: the wall itself."), "event"); this.discover("flicker_wall"); }
     }
@@ -265,7 +266,7 @@ export class Game {
     if (this.isDark() && !this.hasLight()) return this.say(T("你在黑暗裡摸了很久，只摸到濕透的地毯。", "You grope around in the dark for a long time and find only soaked carpet."));
     if (c.searched) return this.say(T("這一帶你已經翻過了。", "You have already been over this area."));
     c.searched = true;
-    if (this.rand("loot") < .14) {
+    if (this.rand("loot") < .08) {
       const id = weighted(this.rand("loot"), [["snack_bar", 30], ["bottle", 30], ["bandage", 15], ["firesalt", 13], ["earplugs", 6], ["flashlight", 4], ["crowbar", 2]]);
       this.drop_(c.items, id, c.i, c.j, "s" + r.time);
       this.say(T(`你在牆角的地毯縫裡找到了東西：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Wedged where the carpet meets the wall, you find something: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
@@ -308,7 +309,7 @@ export class Game {
     if (x.id === "almond_water") {
       this.take(key); this.pass(2); this.say(T("你喝完了那瓶杏仁水。微甜，杏仁的味道。身體裡有什麼東西鬆了下來。", "You finish the almond water. Slightly sweet, almonds. Something in you loosens.")); this.apply({ ...this.item("almond_water").effects, wretched: -6 }); return;
     }
-    if (!x.bottle) return;
+    if (!x.bottle || x.bottle.liquid === "empty") return;
     const b = x.bottle, L = this.liquid(b.liquid);
     if (sip) {
       this.pass(2);
@@ -319,8 +320,9 @@ export class Game {
       if (b.liquid === "liquid_pain") { this.learn("reddish_rule"); this.discover("liquid_pain"); }
       return;
     }
-    this.take(key); this.pass(2);
-    this.say(T(`你把${this.itemName(x).zh}整瓶喝光。${L.taste.zh}`, `You drink the whole ${this.itemName(x).en.toLowerCase()}. ${L.taste.en}`));
+    const name = this.itemName(x); x.bottle = { ...b, liquid: "empty", full: false, sealed: false, spoiled: false, boiled: false };   // the flask stays with you
+    this.pass(2);
+    this.say(T(`你把${name.zh}整瓶喝光。${L.taste.zh}`, `You drink the whole ${name.en.toLowerCase()}. ${L.taste.en}`));
     if (L.deadly) return this.end(L.deadly);
     const k = b.full ? 1 : .5;
     const fx = L.effects;
@@ -335,6 +337,7 @@ export class Game {
   private inspect(key: string) {
     const x = this.run.inv.find(y => y.key === key); if (!x) return;
     this.pass(5);
+    if (x.bottle?.liquid === "empty") return this.say(T("空的保溫瓶。可以裝水。", "An empty flask. It could hold water."));
     if (x.bottle) {
       const b = x.bottle, L = this.liquid(b.liquid);
       this.say(T(`你把${this.itemName(x).zh}舉到燈下仔細看。${this.bottleLook(b).zh}${b.sealed ? "" : L.inspect.zh}`, `You hold the ${this.itemName(x).en.toLowerCase()} up to the light. ${this.bottleLook(b).en} ${b.sealed ? "" : L.inspect.en}`));
@@ -344,7 +347,7 @@ export class Game {
     } else this.say(this.item(x.id).desc);
   }
   private boil(saltKey: string, target: string) {
-    const r = this.run, b = r.inv.find(y => y.key === target)?.bottle; if (!b || !r.inv.some(y => y.key === saltKey)) return;
+    const r = this.run, b = r.inv.find(y => y.key === target)?.bottle; if (!b || b.liquid === "empty" || !r.inv.some(y => y.key === saltKey)) return;
     this.take(saltKey); this.pass(15);
     b.boiled = true; b.sealed = false; b.spoiled = false; if (b.liquid === "carpet_water") b.liquid = "carpet_water_boiled";
     this.say(T("你把火鹽丟進瓶子裡。瓶身慢慢燙了起來，水滾了好一陣子。煮沸能殺菌——但去不掉別的東西。", "You drop the firesalt in. The flask grows hot and the water boils for a good while. Boiling kills germs, but it removes nothing else."));
@@ -397,7 +400,7 @@ export class Game {
     this.pass(bar ? 10 : 40); if (r.ended) return;
     c.searched = true;
     if (!bar && this.rand("loot") < .35) { addStatus(r, "bleeding", 4); this.say(T("你徒手把旁邊的板子扳開，邊緣把手掌割開了一道口子。", "You wrench the next panel loose by hand and its edge slices your palm."), "warn"); }
-    if (this.rand("loot") < .45) {
+    if (this.rand("loot") < .3) {
       const id = weighted(this.rand("loot"), [["bottle", 35], ["snack_bar", 25], ["flashlight", 12], ["crowbar", 10], ["bandage", 10], ["watch", 8]]);
       this.drop_(c.items, id, c.i, c.j, "c" + r.time);
       this.say(T(`天花板夾層裡有東西掉了下來：${this.itemName(c.items[c.items.length - 1]).zh}。`, `Something drops out of the ceiling void: ${this.itemName(c.items[c.items.length - 1]).en.toLowerCase()}.`));
@@ -416,7 +419,7 @@ export class Game {
   private wring(into?: string) {
     if (!this.canWring()) return;
     const r = this.run; this.pass(15); if (r.ended) return;
-    const empty = into ? r.inv.find(y => y.key === into && y.id === "bottle") : undefined;
+    const empty = into ? r.inv.find(y => y.key === into && y.bottle?.liquid === "empty") : undefined;
     if (empty?.bottle) {
       empty.bottle = { liquid: "carpet_water", color: "grey", full: true, sealed: false, spoiled: true };
       this.say(T("你跪下來把地毯裡的水一點一點擠進瓶子裡。水是混濁的黃褐色，有霉味。", "You kneel and wring the carpet into the flask bit by bit. The water is murky yellow-brown and smells of mould."));

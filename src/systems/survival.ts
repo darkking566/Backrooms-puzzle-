@@ -31,7 +31,7 @@ export function tick(r: RunState, minutes: number, act: Activity, env: Env): str
     s.sanity = clamp(s.sanity + ds * h);
     // the Wretched Cycle: hunger, thirst and sleeplessness feed it; isolation (Level 0) speeds it up
     let dw = 0;
-    if (s.water < 25) dw += 1.2; if (s.food < 20) dw += 1.2; if (s.awake > 30 * H) dw += .8;
+    if (s.water < 25) dw += .8; if (s.food < 10) dw += .8; if (s.awake > 30 * H) dw += .8;
     if (env.inLevel0) dw *= 1.3;
     if (dw === 0 && s.water > 50 && s.food > 40 && s.awake < 20 * H && s.wretched < 65) dw = -.4;
     s.wretched = clamp(s.wretched + dw * h);

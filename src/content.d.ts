@@ -1,5 +1,4 @@
 declare module "virtual:content" {
-  import type { ContentData } from "../tools/content-schema";
-  const content: ContentData;
+  const content: import("../tools/content-schema").ContentData;
   export default content;
 }

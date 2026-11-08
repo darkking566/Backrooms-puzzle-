@@ -149,7 +149,7 @@ export class Level0 {
     if (z === "hall" && !start && h(13) < .1) c.hole = true;
     if (z === "pit") for (const px of [-1, 1]) for (const pz of [-1, 1]) if (this.hash(i, j, px, pz, 14) < .85) c.pits.push([px, pz]);
     if ((z === "hall" || z === "pillar") && h(16) < .05) c.salt = true;
-    if (!start && z !== "pit" && h(21) < .035) {               // a flask somebody dropped
+    if (!start && z !== "pit" && h(21) < .012) {               // rare: Level 0 has almost no food or water               // a flask somebody dropped
       const key = ck(i, j) + ":" + ver;
       if (!this.picked.has(key)) c.items.push({ key, id: "bottle", bottle: this.rollBottle(i, j, ver), x: (this.hash(i, j, 24) - .5) * 2, z: (this.hash(i, j, 25) - .5) * 2 });
     }
