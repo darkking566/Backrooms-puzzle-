@@ -1,7 +1,7 @@
 /* Perceptions are decided once by the engine and saved. Audio and UI never roll for them. */
 import { sstep, T, type Text } from "../core/types";
 import type { HallucinationRecord, RunState } from "../state/types";
-import type { Level0, Zone } from "../world/level0";
+import type { Level0World, Zone } from "../world/level0";
 import { H } from "./survival";
 
 export const PIANO_CAPTION = T("〔很遠的地方，有人在彈鋼琴〕", "[Far away, someone is playing piano]");
@@ -19,7 +19,7 @@ export const lieChance = (sanity: number) => sanity >= HALLUC_ONSET ? 0 : .1 + .
 const reliable = (z: Zone) => z === "arch" || z === "manila";
 
 /** Both sources share gain, timbre and the audibility threshold. Only the false source fades on approach. */
-export function pianoLevels(r: RunState, w: Level0) {
+export function pianoLevels(r: RunState, w: Level0World) {
   const { i, j } = r.pos, z = w.zone(i, j), dm = w.manilaDist(i, j);
   const realNear = 1 - sstep(1.5, 7, dm), f = r.fakePiano;
   let fakeNear = 0;
@@ -46,14 +46,14 @@ export function rememberHallucination(r: RunState, kind: HallucinationRecord["ki
   r.halluc.needsReflection = true;
 }
 
-function hearFakePiano(r: RunState, w: Level0) {
+function hearFakePiano(r: RunState, w: Level0World) {
   if (r.fakePiano && !r.fakePiano.heard && pianoLevels(r, w).fake > PIANO_AUDIBLE) {
     r.fakePiano.heard = true; rememberHallucination(r, "piano", PIANO_CAPTION);
   }
 }
 
 /** Called only after an action has advanced game time; all draws use the supplied halluc stream. */
-export function perceive(r: RunState, w: Level0, action: PerceptionAction, rand: () => number): PerceptionOutcome {
+export function perceive(r: RunState, w: Level0World, action: PerceptionAction, rand: () => number): PerceptionOutcome {
   const out: PerceptionOutcome = { say: [] };
   const { i, j } = r.pos, z = w.zone(i, j), safe = reliable(z), nearReal = w.manilaDist(i, j) < 8;
   const f = r.fakePiano;

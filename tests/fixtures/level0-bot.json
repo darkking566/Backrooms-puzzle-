@@ -1,0 +1,2102 @@
+[
+  {
+    "seed": 1000,
+    "ending": "exit_level1",
+    "minutes": 3103,
+    "points": 681,
+    "digest": "bc4a18474a69e98fcfb5acb2ba239311ee17d553fc5d779440a1030305d881ff"
+  },
+  {
+    "seed": 1001,
+    "ending": "exit_level1",
+    "minutes": 3512,
+    "points": 713,
+    "digest": "9f4199d9d9b7e6e216f4146eef24c09a4c25da9d3c71481bf0a5c5a407e907b2"
+  },
+  {
+    "seed": 1002,
+    "ending": "death_dehydration",
+    "minutes": 3305,
+    "points": 108,
+    "digest": "3054dd199f08846b4b6225806448240bc40ce34abe492c0745ab5de0dde5455f"
+  },
+  {
+    "seed": 1003,
+    "ending": "death_dehydration",
+    "minutes": 4598,
+    "points": 109,
+    "digest": "c310b402b659447ca4dbd2ae3026d3762f147bf94923cb2cda0a65e0a57a8e5d"
+  },
+  {
+    "seed": 1004,
+    "ending": "death_dehydration",
+    "minutes": 3564,
+    "points": 93,
+    "digest": "fbd99a931b64df551c2a295958ab1500a4f5dba272490887eb41b3091fbe14f9"
+  },
+  {
+    "seed": 1005,
+    "ending": "death_dehydration",
+    "minutes": 4766,
+    "points": 126,
+    "digest": "086744d48f9793435b103d9843d02e5811aa41a10d5920dbd9c216aef32d4fcd"
+  },
+  {
+    "seed": 1006,
+    "ending": "exit_level1",
+    "minutes": 3695,
+    "points": 715,
+    "digest": "45dc09ec98a80003ef747d0467bb9d376e0ec946cc9c78fffe3b67eeb74cb81c"
+  },
+  {
+    "seed": 1007,
+    "ending": "death_dehydration",
+    "minutes": 4728,
+    "points": 126,
+    "digest": "95462643373aa1b7dfd97ff35c61a8b16d4c276746ac2f7100cc03cc56c9dd15"
+  },
+  {
+    "seed": 1008,
+    "ending": "death_dehydration",
+    "minutes": 3492,
+    "points": 93,
+    "digest": "04a0674b907888ded7138ab9e99d2eef1ecba1bfcb709eed5e14ca3f3bebe235"
+  },
+  {
+    "seed": 1009,
+    "ending": "exit_level1",
+    "minutes": 3531,
+    "points": 713,
+    "digest": "39cb670e22298c251f5c0847ff6f726536ec36a8633e95d508a4baa11f9e88a7"
+  },
+  {
+    "seed": 1010,
+    "ending": "exit_level1",
+    "minutes": 3243,
+    "points": 713,
+    "digest": "5f052e1ef1407b052054c77e9882c04d373d3e3871849314af3de2b1eef93c52"
+  },
+  {
+    "seed": 1011,
+    "ending": "exit_level1",
+    "minutes": 3804,
+    "points": 730,
+    "digest": "b2f47befb0dd7b6e652a039aa331160fc9ea1b047ec8ee770d7d744b39dc2fe8"
+  },
+  {
+    "seed": 1012,
+    "ending": "exit_level1",
+    "minutes": 3834,
+    "points": 715,
+    "digest": "5cedeb7d5b492ccf993d4fabb76fad2e1f8efc0842a84f8b22f8c0e81e8d094a"
+  },
+  {
+    "seed": 1013,
+    "ending": "exit_level1",
+    "minutes": 3540,
+    "points": 713,
+    "digest": "0b57f1650aa88cfcab29de85358cd40a46f7fdb95e3727b42b56cdfea35164e0"
+  },
+  {
+    "seed": 1014,
+    "ending": "exit_level72",
+    "minutes": 1979,
+    "points": 450,
+    "digest": "efacea999a5b3e3bf67a9c010b0efbcb753b2f9d28955c62a3165f17e5b8e060"
+  },
+  {
+    "seed": 1015,
+    "ending": "exit_level1",
+    "minutes": 2325,
+    "points": 667,
+    "digest": "3a3e6bbd7c82daa181feb0035346fde2138be5137ef88fbdbdbd9fbecb7d590c"
+  },
+  {
+    "seed": 1016,
+    "ending": "exit_level72",
+    "minutes": 2314,
+    "points": 482,
+    "digest": "79739c1b603c26c7d1c0f7a7f442ee04d407832f22533fa9764409f907e251dd"
+  },
+  {
+    "seed": 1017,
+    "ending": "exit_level1",
+    "minutes": 2079,
+    "points": 650,
+    "digest": "8741a96608cfa587044ca99c0b9324328a8e29e1a03f69f9532001907d9a4caa"
+  },
+  {
+    "seed": 1018,
+    "ending": "exit_level1",
+    "minutes": 1879,
+    "points": 650,
+    "digest": "2d612bd47a7a7547f5580ce0e458f78dc1dc26c3af98ac455d00b1674319ca05"
+  },
+  {
+    "seed": 1019,
+    "ending": "exit_level1",
+    "minutes": 3401,
+    "points": 713,
+    "digest": "0d26a6240bd72d1d7feb211ee4a18b3f37d938a61c0760d93b8287cf36c9ea2d"
+  },
+  {
+    "seed": 1020,
+    "ending": "exit_level1",
+    "minutes": 3588,
+    "points": 728,
+    "digest": "be53a2a3edf80c8fb3d2383a14d2d519b04e857f575bcf8bfcb20fad2686b68f"
+  },
+  {
+    "seed": 1021,
+    "ending": "exit_level1",
+    "minutes": 5972,
+    "points": 747,
+    "digest": "4dd2acb7bf60d618bdbf07117a1feae5dc0a15115c3210093699730a429c6c91"
+  },
+  {
+    "seed": 1022,
+    "ending": "exit_level72",
+    "minutes": 2093,
+    "points": 480,
+    "digest": "9023d3480836960f296b9a23e94d336ec87f500c50550953c6961833441f25e1"
+  },
+  {
+    "seed": 1023,
+    "ending": "exit_level72",
+    "minutes": 3347,
+    "points": 513,
+    "digest": "693fd05ace074d9b3b9359a97f70a902596b717d8a4676bb65422e23758b3795"
+  },
+  {
+    "seed": 1024,
+    "ending": "exit_level1",
+    "minutes": 2214,
+    "points": 682,
+    "digest": "eb9e1baf7b004971f7e2d3bb2c638efda0a9f0b6e9e997bf13349b72940387f5"
+  },
+  {
+    "seed": 1025,
+    "ending": "death_dehydration",
+    "minutes": 4672,
+    "points": 124,
+    "digest": "036f24e2b7e24f97905503204b4270f90b683bbebb45aae8eebe10febd3dddbe"
+  },
+  {
+    "seed": 1026,
+    "ending": "exit_level1",
+    "minutes": 4644,
+    "points": 744,
+    "digest": "70eb810d58d636a118cb01c1048fde3314263cbc44284b0562b3f75879f7b233"
+  },
+  {
+    "seed": 1027,
+    "ending": "exit_level1",
+    "minutes": 3428,
+    "points": 713,
+    "digest": "e39d04511fcb86da2c5236644906801f762c0cc10824a2833cc5576f7343e55c"
+  },
+  {
+    "seed": 1028,
+    "ending": "no_one_returned",
+    "minutes": 2073,
+    "points": 60,
+    "digest": "49773a296f73ed19963d25686eb904d1f97bad139b6c0419ceeb5a0808db38ba"
+  },
+  {
+    "seed": 1029,
+    "ending": "exit_level1",
+    "minutes": 2969,
+    "points": 711,
+    "digest": "553fdae937254fa6c4e8c64bbada47ef9576a8ae875d006893a764ac419a999e"
+  },
+  {
+    "seed": 1030,
+    "ending": "no_one_returned",
+    "minutes": 3170,
+    "points": 91,
+    "digest": "2d0454ffd54ee8aa00f7b926662dff14128dc3344fee883121985afb7e823f94"
+  },
+  {
+    "seed": 1031,
+    "ending": "exit_level1",
+    "minutes": 3378,
+    "points": 728,
+    "digest": "2c579af4056987750c5cfe6c8e0185c461ca48fddb38a2eb9e586dc5d721631c"
+  },
+  {
+    "seed": 1032,
+    "ending": "exit_level1",
+    "minutes": 3353,
+    "points": 683,
+    "digest": "56c2c90a9b573ae4c36b10d96230053ab4a7a6c5523d62a9fa80637bca270468"
+  },
+  {
+    "seed": 1033,
+    "ending": "exit_level1",
+    "minutes": 1978,
+    "points": 680,
+    "digest": "fffcd01f29b342b08438d9c340df98fb01fae5fd176e3b7bffb109a95da39969"
+  },
+  {
+    "seed": 1034,
+    "ending": "no_one_returned",
+    "minutes": 3192,
+    "points": 106,
+    "digest": "a8874494ffa6778d6526d0de52636c02c924fea27e75c3f5b71f6bfe7bc153fb"
+  },
+  {
+    "seed": 1035,
+    "ending": "exit_level1",
+    "minutes": 3191,
+    "points": 711,
+    "digest": "6c4297187ddd5f4ca16b862dc7daf55a17ecd576e88e0b9cd8f7b0c85f032ab3"
+  },
+  {
+    "seed": 1036,
+    "ending": "exit_level1",
+    "minutes": 2055,
+    "points": 680,
+    "digest": "c3faf72f19a250bd62a70bd06499b843973131af82f2bc85a97e9d192dc53f55"
+  },
+  {
+    "seed": 1037,
+    "ending": "death_dehydration",
+    "minutes": 4775,
+    "points": 126,
+    "digest": "5b3e15b885704548f882cf27906274d5d84b257478e421f5761574cbb229eb73"
+  },
+  {
+    "seed": 1038,
+    "ending": "death_dehydration",
+    "minutes": 4476,
+    "points": 124,
+    "digest": "0a64616d223805674818182ec32a80e0447160f4dfc3aaae7305ece5b8b96dba"
+  },
+  {
+    "seed": 1039,
+    "ending": "death_dehydration",
+    "minutes": 3557,
+    "points": 93,
+    "digest": "df2594bd342df3ef6829ba1b37fef843ac7f045a4a26405ef6840a8c6e2659de"
+  },
+  {
+    "seed": 1040,
+    "ending": "exit_level1",
+    "minutes": 2007,
+    "points": 680,
+    "digest": "cf24abc387fb4003da73eeffe34af792b67eb3020b72c0ae110aaa16a0452796"
+  },
+  {
+    "seed": 1041,
+    "ending": "death_dehydration",
+    "minutes": 4762,
+    "points": 126,
+    "digest": "33be7963dc8bfb40f3be617f3ba10437e8363fe8876f6299302c0853420a318d"
+  },
+  {
+    "seed": 1042,
+    "ending": "death_dehydration",
+    "minutes": 3489,
+    "points": 108,
+    "digest": "663baaf15ccc5b18a09b563ba626a0f1bf10f157e758ae57c702bdc7737294a6"
+  },
+  {
+    "seed": 1043,
+    "ending": "death_dehydration",
+    "minutes": 3508,
+    "points": 93,
+    "digest": "45f36dc5d8ac4c4b4aecdadc576d41ccb73d60a8ef6277ee1a5a62a2d7c5a90f"
+  },
+  {
+    "seed": 1044,
+    "ending": "exit_level1",
+    "minutes": 3560,
+    "points": 698,
+    "digest": "898f7e34a4c138ae4417c3a323f2264e8c7965cbc237d8f645f724b975ac6afd"
+  },
+  {
+    "seed": 1045,
+    "ending": "death_dehydration",
+    "minutes": 3461,
+    "points": 108,
+    "digest": "7e3a123edeae9906e0a7f9f2c85c88316e9808e80e924b1acb6d4f78119091c9"
+  },
+  {
+    "seed": 1046,
+    "ending": "exit_level1",
+    "minutes": 3274,
+    "points": 713,
+    "digest": "412f0af36f86282f4fb57444b989866c708a984a4b4e7368236eed66597a1b7f"
+  },
+  {
+    "seed": 1047,
+    "ending": "exit_level1",
+    "minutes": 3393,
+    "points": 713,
+    "digest": "e7a52a6227117f28817098e59f40770705da73c08ed7f93f5414709c83b20295"
+  },
+  {
+    "seed": 1048,
+    "ending": "death_dehydration",
+    "minutes": 4460,
+    "points": 139,
+    "digest": "9f30e3291d296dd5336dfd368dc0d61c281d76023809a4650082e71915d59932"
+  },
+  {
+    "seed": 1049,
+    "ending": "exit_level1",
+    "minutes": 3199,
+    "points": 711,
+    "digest": "06cf270828d9deb922d102f529087c238f15ecb61d5c2d943fc7f4b79511d4b4"
+  },
+  {
+    "seed": 1050,
+    "ending": "death_dehydration",
+    "minutes": 3456,
+    "points": 93,
+    "digest": "526a15065305bed23b4320dd736673a6cd53b10d2c84efa45251dcc2a2abe0a4"
+  },
+  {
+    "seed": 1051,
+    "ending": "exit_level1",
+    "minutes": 3270,
+    "points": 698,
+    "digest": "97a422d2f24ecf9a3d7ef4c20da5b1ef78483a17655ad11ca86b442b8977d199"
+  },
+  {
+    "seed": 1052,
+    "ending": "exit_level1",
+    "minutes": 3229,
+    "points": 711,
+    "digest": "9b4be1e985eb909be1a9b4c9e39db039eb705fbe5583d6cb886c6fa3f8f71b24"
+  },
+  {
+    "seed": 1053,
+    "ending": "death_dehydration",
+    "minutes": 4283,
+    "points": 127,
+    "digest": "1d4fab3ff431455d37f5b856ef96e559e3e06bf7ad90da3334bf6c0d19309c9c"
+  },
+  {
+    "seed": 1054,
+    "ending": "exit_level1",
+    "minutes": 3376,
+    "points": 698,
+    "digest": "2e9e546d9478606fda87810b1db3014f054ee0a79ef2c5390e5d04f1a67905c2"
+  },
+  {
+    "seed": 1055,
+    "ending": "exit_level1",
+    "minutes": 4505,
+    "points": 744,
+    "digest": "fb7c84180f2ddd2dc3f649eb254408cdc64c87c8e345db9795dbd07f63e23757"
+  },
+  {
+    "seed": 1056,
+    "ending": "exit_level1",
+    "minutes": 2368,
+    "points": 682,
+    "digest": "95a62ba88edc647bb8be21c20340191108fabe687447b40f8584da263539772f"
+  },
+  {
+    "seed": 1057,
+    "ending": "exit_level1",
+    "minutes": 3470,
+    "points": 698,
+    "digest": "33658fcdfe49415be2e7f3efd77ca640836b76bd403d6062f562befa5b9d1035"
+  },
+  {
+    "seed": 1058,
+    "ending": "exit_level1",
+    "minutes": 2441,
+    "points": 682,
+    "digest": "e0888a56a3a878a9faf0f9f8be28fcd99a588ba1b65e2d4832bfcacd8a0dfb9c"
+  },
+  {
+    "seed": 1059,
+    "ending": "death_dehydration",
+    "minutes": 4808,
+    "points": 126,
+    "digest": "c62cdc346931cb9b2db89ff6d74f491b9cac61332c6828dd9cd61811afd48965"
+  },
+  {
+    "seed": 1060,
+    "ending": "death_dehydration",
+    "minutes": 3583,
+    "points": 93,
+    "digest": "bad24c0060ab6f138a45ff7bd41e4f01c3aba01edbcab31503ca0c7f4119777d"
+  },
+  {
+    "seed": 1061,
+    "ending": "exit_level1",
+    "minutes": 2404,
+    "points": 697,
+    "digest": "f8e2db1eb9ad66d283b357a150b12615ba33144e1d3c6320dba1a075c37846f7"
+  },
+  {
+    "seed": 1062,
+    "ending": "exit_level1",
+    "minutes": 2429,
+    "points": 682,
+    "digest": "7347043b99b61cc81ccab9264e02d2c7d1af126606ec86defa2ee7c889500a70"
+  },
+  {
+    "seed": 1063,
+    "ending": "exit_level1",
+    "minutes": 3231,
+    "points": 711,
+    "digest": "d7346a9aa72d2613b14ae9a6baf4905bf36d86cec1ad3320b1f69a08ee29aaa1"
+  },
+  {
+    "seed": 1064,
+    "ending": "death_dehydration",
+    "minutes": 3466,
+    "points": 108,
+    "digest": "2a2ae3ee11ea5908b65d2804325285a7b2d48e7d16346e7a8d3cebd1fcd487d7"
+  },
+  {
+    "seed": 1065,
+    "ending": "death_dehydration",
+    "minutes": 4674,
+    "points": 109,
+    "digest": "14898d360be54e708bfe9a02150c250de2ffc54a56a4e4f1008e137907966e71"
+  },
+  {
+    "seed": 1066,
+    "ending": "alive",
+    "minutes": 3726,
+    "points": 0,
+    "digest": "3f1a93c0424e9f4ffea0e082a58c61d9c672a8486a4221f430c526cf39cc27d6"
+  },
+  {
+    "seed": 1067,
+    "ending": "exit_level1",
+    "minutes": 2186,
+    "points": 682,
+    "digest": "d24362f96f0f5d8e5e599787289ff3cd00863fa8234948d198323c0cf25b569e"
+  },
+  {
+    "seed": 1068,
+    "ending": "death_dehydration",
+    "minutes": 5276,
+    "points": 143,
+    "digest": "044145b60c26c9b0163e6509b858a073237216869fbf8d215479d5c414b7e44d"
+  },
+  {
+    "seed": 1069,
+    "ending": "exit_level1",
+    "minutes": 2373,
+    "points": 667,
+    "digest": "34e2f94c0067d6cee217118b216a71eaf71996f61fd924bce590d769bc9a448b"
+  },
+  {
+    "seed": 1070,
+    "ending": "no_one_returned",
+    "minutes": 3408,
+    "points": 108,
+    "digest": "5d669acc171d290881c6346beb06a48416b33d3a540f9a153d9a0602f35ebb97"
+  },
+  {
+    "seed": 1071,
+    "ending": "exit_level1",
+    "minutes": 2397,
+    "points": 682,
+    "digest": "27e7d3a66c26744af3f77ffce60ed13d810fb6579d9fecc59db3b124f4e5961f"
+  },
+  {
+    "seed": 1072,
+    "ending": "exit_level1",
+    "minutes": 3122,
+    "points": 681,
+    "digest": "37ad7ae0af479ea33d1702575ad1f2703de19b4f506fdae45c58baebf15839b2"
+  },
+  {
+    "seed": 1073,
+    "ending": "death_dehydration",
+    "minutes": 3406,
+    "points": 93,
+    "digest": "698c8c815f992526eeef9c42e64f3786be5da4328d89f1ab4cc90cb57cce81ea"
+  },
+  {
+    "seed": 1074,
+    "ending": "alive",
+    "minutes": 2047,
+    "points": 0,
+    "digest": "ca920ff29f309bc6df870d3b78d34bf83c5b2dc14eb7eed885f17ba2cb70da29"
+  },
+  {
+    "seed": 1075,
+    "ending": "death_dehydration",
+    "minutes": 3468,
+    "points": 108,
+    "digest": "320ee02bc0c303f842e9926bccfae55ad8491d4c7eb9a58992582235d53be7e4"
+  },
+  {
+    "seed": 1076,
+    "ending": "death_dehydration",
+    "minutes": 4467,
+    "points": 124,
+    "digest": "7bc5c7cc40a05859d275ada6b51e4db680efa14bda5c971840ae9be7b4ce1586"
+  },
+  {
+    "seed": 1077,
+    "ending": "death_dehydration",
+    "minutes": 3438,
+    "points": 93,
+    "digest": "2462f719ac5fd6ea34c71447b8a8a5ad4c1258e15e1979e6da122163468390f9"
+  },
+  {
+    "seed": 1078,
+    "ending": "exit_level1",
+    "minutes": 3516,
+    "points": 728,
+    "digest": "4a9c436aa7ffc7b4dc5d5a2d768f669d700710640b47188e5e27bda32f9f82e1"
+  },
+  {
+    "seed": 1079,
+    "ending": "exit_level1",
+    "minutes": 2189,
+    "points": 667,
+    "digest": "29838bb8695f7bfd44ad1f66ba4afe5ac19320270a73ca70339493466fb8d9c4"
+  },
+  {
+    "seed": 1080,
+    "ending": "exit_level1",
+    "minutes": 3691,
+    "points": 700,
+    "digest": "6357e39c7057cc4d869ef1096c9dcf813f3538756249807339a4967f62585f4e"
+  },
+  {
+    "seed": 1081,
+    "ending": "death_dehydration",
+    "minutes": 3634,
+    "points": 95,
+    "digest": "3fc72a919766f0ed50a538f689c26f1f31f11d9018200d1a454593f7bcbd5e7a"
+  },
+  {
+    "seed": 1082,
+    "ending": "exit_level1",
+    "minutes": 3365,
+    "points": 713,
+    "digest": "b8c2fc117b92e466b45f839e6b7413082d8a2b1ca52ee6d24036ce96e928842a"
+  },
+  {
+    "seed": 1083,
+    "ending": "exit_level72",
+    "minutes": 2010,
+    "points": 480,
+    "digest": "efb1fc8ab501761b3139e63beb86d5c46561f10a4bf41018bacc40be1f151a55"
+  },
+  {
+    "seed": 1084,
+    "ending": "death_dehydration",
+    "minutes": 4516,
+    "points": 139,
+    "digest": "69f1758ba3223ec051889738989bc81582825f00dff43f29d90b74f581ae3103"
+  },
+  {
+    "seed": 1085,
+    "ending": "death_dehydration",
+    "minutes": 4499,
+    "points": 124,
+    "digest": "0471c779134dc776daf44d965f0b106a27a64b2f903093e5bc66fd0745bca3e9"
+  },
+  {
+    "seed": 1086,
+    "ending": "no_one_returned",
+    "minutes": 1932,
+    "points": 105,
+    "digest": "b41d7544038bbdbddbd25e3e1f691c95ad5c0dbd43aa3c54bd460ee74caf67c5"
+  },
+  {
+    "seed": 1087,
+    "ending": "exit_level72",
+    "minutes": 2109,
+    "points": 495,
+    "digest": "357af4d4d42e4b94d6b2db734861292adf04d168c3894d141d397fced64f6abe"
+  },
+  {
+    "seed": 1088,
+    "ending": "exit_level1",
+    "minutes": 3784,
+    "points": 685,
+    "digest": "875a8679c0f73f46607bdc0e5741bbccff3626d72afb97c35ce4719bde87ce5c"
+  },
+  {
+    "seed": 1089,
+    "ending": "alive",
+    "minutes": 1604,
+    "points": 0,
+    "digest": "726fc0608e3b3c11649b9430ecd6f96330f57f8bebdff4351f9dc6e15b29ca79"
+  },
+  {
+    "seed": 1090,
+    "ending": "death_dehydration",
+    "minutes": 4622,
+    "points": 109,
+    "digest": "393f601d0f383ff08b8396a316c1e67d397c95305685cbfc8fde062adf714ba7"
+  },
+  {
+    "seed": 1091,
+    "ending": "death_dehydration",
+    "minutes": 6262,
+    "points": 129,
+    "digest": "f9bb899cdccaa4949395ad933303c62f40128f2f8da94088d7840aa51addee03"
+  },
+  {
+    "seed": 1092,
+    "ending": "death_injury",
+    "minutes": 4988,
+    "points": 111,
+    "digest": "e58a1129df892b5e37edd4bc2c78110392a8fcc5b1da8e30bf2123efe16b7a37"
+  },
+  {
+    "seed": 1093,
+    "ending": "exit_level1",
+    "minutes": 3044,
+    "points": 726,
+    "digest": "598b8b08a2212ac94d0b3113efe09131d7f6c797ffd326ebdf312e199de08437"
+  },
+  {
+    "seed": 1094,
+    "ending": "death_dehydration",
+    "minutes": 4762,
+    "points": 126,
+    "digest": "92d4b4abb4a12eac241b4750ba1540ed8a4f74da0bc4ccf65ef2657235310a57"
+  },
+  {
+    "seed": 1095,
+    "ending": "exit_level1",
+    "minutes": 3859,
+    "points": 700,
+    "digest": "cd7cf01098fdae331b79d0557eba14c96884c6ae2c368924e113db982bd71670"
+  },
+  {
+    "seed": 1096,
+    "ending": "exit_level1",
+    "minutes": 4872,
+    "points": 731,
+    "digest": "eabffb5dd19497453984c01d9a0b9a3796b55f4c97aa5e878083af21b02a7007"
+  },
+  {
+    "seed": 1097,
+    "ending": "exit_level72",
+    "minutes": 2987,
+    "points": 496,
+    "digest": "cfb65117015922838fa67ca6f035b82d97d8dca0d37e5722521bef7101ff7c37"
+  },
+  {
+    "seed": 1098,
+    "ending": "death_injury",
+    "minutes": 3764,
+    "points": 125,
+    "digest": "655ed5a1a839c18a6a37e8af219979ae74e19b7cc413a8c97b28128b8c3a6bfb"
+  },
+  {
+    "seed": 1099,
+    "ending": "no_one_returned",
+    "minutes": 3755,
+    "points": 125,
+    "digest": "3fb521d09d4bc7e9009dc7f936655a768de94c35a0558937a261bbea5877bc30"
+  },
+  {
+    "seed": 1100,
+    "ending": "exit_level1",
+    "minutes": 4948,
+    "points": 731,
+    "digest": "b506ab5284929846a8fc6ca14108162472ef6e7d9d610b1a92829b8774b29d59"
+  },
+  {
+    "seed": 1101,
+    "ending": "alive",
+    "minutes": 6267,
+    "points": 0,
+    "digest": "9fc302f78ddadbd9060af5730335d93941a0c76c6d0061b1e1637d76cb58020d"
+  },
+  {
+    "seed": 1102,
+    "ending": "exit_level1",
+    "minutes": 3079,
+    "points": 696,
+    "digest": "67461d0c48889902638c8ec92102ca86c43aeb7d7868a50577c9cde527119d20"
+  },
+  {
+    "seed": 1103,
+    "ending": "death_dehydration",
+    "minutes": 4951,
+    "points": 111,
+    "digest": "1fe91e25749537bd247b604f2e89f378f008b26c014e110d14bc0600d44bf3e8"
+  },
+  {
+    "seed": 1104,
+    "ending": "no_one_returned",
+    "minutes": 3624,
+    "points": 110,
+    "digest": "55e2c0f69a8595c330dab0501a3f33cafbe8be461d3327e8d39bc3d23f8a9310"
+  },
+  {
+    "seed": 1105,
+    "ending": "no_one_returned",
+    "minutes": 3110,
+    "points": 76,
+    "digest": "5b7b0e6d2942c30e7d2306f6f2137cfad8b497e9d3b2180ba4dbd1c9bafc260d"
+  },
+  {
+    "seed": 1106,
+    "ending": "exit_level1",
+    "minutes": 2329,
+    "points": 667,
+    "digest": "d4c4d81582fd4d274e3df9ed1bd1b16308b10cae812e4bbcbb3cb15013c22a72"
+  },
+  {
+    "seed": 1107,
+    "ending": "exit_level72",
+    "minutes": 3766,
+    "points": 500,
+    "digest": "baeeeac18c2e0c000e7f1c9414073cf4f3aa2345fb9464841b4cc9cd64ebfc47"
+  },
+  {
+    "seed": 1108,
+    "ending": "exit_level1",
+    "minutes": 4760,
+    "points": 716,
+    "digest": "5e81be399563ea2640dc66a1c12d390b7ca2ffa77d7c2287f4ad0750d08919c7"
+  },
+  {
+    "seed": 1109,
+    "ending": "death_dehydration",
+    "minutes": 6398,
+    "points": 129,
+    "digest": "35f7b1eddbfb2b2503172568b06d8954bf64393746b6757f2253b5c5a9ac186f"
+  },
+  {
+    "seed": 1110,
+    "ending": "death_dehydration",
+    "minutes": 4209,
+    "points": 127,
+    "digest": "24240bf77d20a8e889b868080db257480a7f7b195826ade475297b8a948e316b"
+  },
+  {
+    "seed": 1111,
+    "ending": "no_one_returned",
+    "minutes": 3159,
+    "points": 106,
+    "digest": "4d44bf5c192ecf797776959ff124736ac60a1a78bbaee315d7b0261a3a17c828"
+  },
+  {
+    "seed": 1112,
+    "ending": "exit_level1",
+    "minutes": 2323,
+    "points": 667,
+    "digest": "7f90058208c2ce4e16d38b455e4ccd884cd3766d9ff82f31529251e7174f073d"
+  },
+  {
+    "seed": 1113,
+    "ending": "death_dehydration",
+    "minutes": 3444,
+    "points": 108,
+    "digest": "3beacf43be4e53fd88d67a5afbf47fccb1e2dd5cf8532b491f845911ddf69185"
+  },
+  {
+    "seed": 1114,
+    "ending": "exit_level1",
+    "minutes": 2348,
+    "points": 682,
+    "digest": "66957c4b6434ea9c71c63ecedffa77d3c91d698330357425356e5d3bdf9c4b38"
+  },
+  {
+    "seed": 1115,
+    "ending": "exit_level1",
+    "minutes": 6223,
+    "points": 749,
+    "digest": "93d33accbaf8c680335cab45ccbe8b8bf4b5a42641ec1127d59b88fbc5f5cbf1"
+  },
+  {
+    "seed": 1116,
+    "ending": "exit_level1",
+    "minutes": 2357,
+    "points": 682,
+    "digest": "a2a6af5507065beee660fb61dad7f5ac99660bdf37dc77280b2bec0f6d3410af"
+  },
+  {
+    "seed": 1117,
+    "ending": "death_dehydration",
+    "minutes": 4777,
+    "points": 126,
+    "digest": "51f56d8289f468921177af8f1e37421d078029db1c18f8f41b6017b240ea1fc1"
+  },
+  {
+    "seed": 1118,
+    "ending": "death_dehydration",
+    "minutes": 3517,
+    "points": 93,
+    "digest": "8f53a040953b9a7b7f5450e50924f089125a2a05d4c0b7a8bdc6594bbd690441"
+  },
+  {
+    "seed": 1119,
+    "ending": "exit_level1",
+    "minutes": 3613,
+    "points": 700,
+    "digest": "f5e6d8eebb7ebbd868ff9e14c4e6c994e9e6cc53da15f1556016b3ea8f16d936"
+  },
+  {
+    "seed": 1120,
+    "ending": "death_dehydration",
+    "minutes": 4886,
+    "points": 126,
+    "digest": "c2f157a68acaef3541522133d82148d0d80923a41754548a1ecd31b94cfb1a0c"
+  },
+  {
+    "seed": 1121,
+    "ending": "death_dehydration",
+    "minutes": 4443,
+    "points": 124,
+    "digest": "f8b9898c2bc15466f0ee594a841681f5154b053fe224069acf62eee59932b9bc"
+  },
+  {
+    "seed": 1122,
+    "ending": "exit_level1",
+    "minutes": 1808,
+    "points": 650,
+    "digest": "b0fc5773f305c9f78600795caa3af98eee088b6fce2547c0d3f22b713c093481"
+  },
+  {
+    "seed": 1123,
+    "ending": "exit_level1",
+    "minutes": 2949,
+    "points": 696,
+    "digest": "3792ba829583baf3703b21ddf9de55da01b537552f63f8fa70ffc163f9abe104"
+  },
+  {
+    "seed": 1124,
+    "ending": "death_dehydration",
+    "minutes": 3276,
+    "points": 93,
+    "digest": "69d9f6b313f7e34089fee196d3ab9a6d139ffe097fadac1a27f1b25fa70e995f"
+  },
+  {
+    "seed": 1125,
+    "ending": "exit_level1",
+    "minutes": 4431,
+    "points": 744,
+    "digest": "15640b1196aa986f93b15ea1f54cbd5b17c7bac1aa9225ff3e9149cd47affdf9"
+  },
+  {
+    "seed": 1126,
+    "ending": "no_one_returned",
+    "minutes": 2138,
+    "points": 75,
+    "digest": "53d49d018c9ca2ae0e991f76fada55f7c5100a0d0ae63e41d3094aef653378ee"
+  },
+  {
+    "seed": 1127,
+    "ending": "no_one_returned",
+    "minutes": 4951,
+    "points": 141,
+    "digest": "ad6f21cbbf76453168f04d073be9f323bb50bba27976d879582390ab7bd033f3"
+  },
+  {
+    "seed": 1128,
+    "ending": "exit_level1",
+    "minutes": 3450,
+    "points": 713,
+    "digest": "b1439beb074e21e6aca83f47452183cd1cb01f7db550bc85729386c5eeeb72a1"
+  },
+  {
+    "seed": 1129,
+    "ending": "death_dehydration",
+    "minutes": 3751,
+    "points": 95,
+    "digest": "a13b1c7f7e95c1450a9bb8a17a9c608a5d81469ee14edeff50bcce25e701761a"
+  },
+  {
+    "seed": 1130,
+    "ending": "no_one_returned",
+    "minutes": 3956,
+    "points": 110,
+    "digest": "6033736ee7ec78d98ac23eca0bf0b53968398620825edb38a470dcf648549fe4"
+  },
+  {
+    "seed": 1131,
+    "ending": "no_one_returned",
+    "minutes": 2253,
+    "points": 92,
+    "digest": "d553fcca4d36cff7cea40f4efd7c827a2ce1ad7aaf33816227aa4c79917eaf0c"
+  },
+  {
+    "seed": 1132,
+    "ending": "death_dehydration",
+    "minutes": 5937,
+    "points": 142,
+    "digest": "c7ad9c8c2252efe755d654ddeb222f82308fbb3beb00ef41a1c506dec3b4dccf"
+  },
+  {
+    "seed": 1133,
+    "ending": "exit_level1",
+    "minutes": 1933,
+    "points": 665,
+    "digest": "94b1712d8a65d51d72617eb352bb427f474594810181d2918519eb56682f183f"
+  },
+  {
+    "seed": 1134,
+    "ending": "death_dehydration",
+    "minutes": 4699,
+    "points": 126,
+    "digest": "6153479598037d941111e0029cfd0b0a6e0209d28800abe4ad6b0a8fa9bef84d"
+  },
+  {
+    "seed": 1135,
+    "ending": "exit_level1",
+    "minutes": 5765,
+    "points": 747,
+    "digest": "dbf0f23dcce4c9fc26021268e097b5d5575d00de840d0a1d76f0d0e2fac23be3"
+  },
+  {
+    "seed": 1136,
+    "ending": "exit_level1",
+    "minutes": 4867,
+    "points": 746,
+    "digest": "acbde81fb662483a68b2dc4ba81dd5f316881e52c25805e7ee457267bb4bcadf"
+  },
+  {
+    "seed": 1137,
+    "ending": "alive",
+    "minutes": 5850,
+    "points": 0,
+    "digest": "7f9558c976d84a5c164933ba0770de0bcd493a7e3f3339f1b62882f0f416b80d"
+  },
+  {
+    "seed": 1138,
+    "ending": "death_dehydration",
+    "minutes": 3499,
+    "points": 93,
+    "digest": "75a49796ae5a65b4815700b13953355fcc870e42b5ab7df4e06845cd4007cd8c"
+  },
+  {
+    "seed": 1139,
+    "ending": "exit_level1",
+    "minutes": 3467,
+    "points": 728,
+    "digest": "5ccc3152a8613542e3a837027456f8644a59737975bd8509695c318bea9b2fa8"
+  },
+  {
+    "seed": 1140,
+    "ending": "exit_level1",
+    "minutes": 6374,
+    "points": 749,
+    "digest": "8aa4e78d3f2adb3451df4b59eddd207290d9ab6ad64119f41e8befd6e5ff8fe2"
+  },
+  {
+    "seed": 1141,
+    "ending": "exit_level1",
+    "minutes": 2212,
+    "points": 697,
+    "digest": "0448da94d6a536fc3fa3c98318e563cbd7ec6d697c7303c74407c4f64202539f"
+  },
+  {
+    "seed": 1142,
+    "ending": "no_one_returned",
+    "minutes": 2116,
+    "points": 75,
+    "digest": "aa810f92ffae2dd2379e1c675a517909c527175de0c456a241600115eee06d6c"
+  },
+  {
+    "seed": 1143,
+    "ending": "exit_level1",
+    "minutes": 3025,
+    "points": 696,
+    "digest": "03ea30a5e0bc1afbfd8b1d10f74e15a5bc3e134d26a325c8c15c6bf9635748d7"
+  },
+  {
+    "seed": 1144,
+    "ending": "exit_level1",
+    "minutes": 4797,
+    "points": 731,
+    "digest": "c5c5c2876d5341d0c4c9a7993b7b8e475d71531eae1f6f171aa3fb75dcaf5c8d"
+  },
+  {
+    "seed": 1145,
+    "ending": "exit_level1",
+    "minutes": 3434,
+    "points": 683,
+    "digest": "33de255a59e3c3a4bbeb3cb39a64937cdaf8bf09c3081645678ec96f8eb1ecdd"
+  },
+  {
+    "seed": 1146,
+    "ending": "death_dehydration",
+    "minutes": 4384,
+    "points": 139,
+    "digest": "65c9cbc6b7c624b6fd98593f45df40b46898d825add656c4f4d637bab92ddb1b"
+  },
+  {
+    "seed": 1147,
+    "ending": "exit_level1",
+    "minutes": 3237,
+    "points": 726,
+    "digest": "89938dce27a141c0d56ae3e17f6950f94335825f85fa6b5249fe3b852c8cd674"
+  },
+  {
+    "seed": 1148,
+    "ending": "death_dehydration",
+    "minutes": 4757,
+    "points": 126,
+    "digest": "e18e6d427667f342c041dc80859f310a4f1e127e27f837d919333419e3dd3113"
+  },
+  {
+    "seed": 1149,
+    "ending": "death_dehydration",
+    "minutes": 3732,
+    "points": 125,
+    "digest": "6975caaf7ac5c0a7351bf6b25465b15b0b07bcf6a89a2ce24eb9e67843b39d5f"
+  },
+  {
+    "seed": 1150,
+    "ending": "alive",
+    "minutes": 3587,
+    "points": 0,
+    "digest": "e54e42ea3b0d0a8304fc0bffeac9b59b69931c3755cd8a75d81453d1100e3941"
+  },
+  {
+    "seed": 1151,
+    "ending": "exit_level72",
+    "minutes": 3623,
+    "points": 500,
+    "digest": "5afe43239b2ad805245cd3fc43214629f9ec2505b169e234d6ab748a821385ea"
+  },
+  {
+    "seed": 1152,
+    "ending": "exit_level1",
+    "minutes": 3185,
+    "points": 681,
+    "digest": "765b2aebc247e03ebaa6d054d3774dc7eae3df9a3328f4df8393d19d5d4522aa"
+  },
+  {
+    "seed": 1153,
+    "ending": "exit_level1",
+    "minutes": 3080,
+    "points": 681,
+    "digest": "ce432e88336fb48fcf47753046e0a4f9859fe8c8e236babb7bcf2be090437160"
+  },
+  {
+    "seed": 1154,
+    "ending": "exit_level1",
+    "minutes": 6747,
+    "points": 766,
+    "digest": "6afec96311a93aa82f69f2b317cb114551acdf7011681a4e8becf9153000676f"
+  },
+  {
+    "seed": 1155,
+    "ending": "exit_level1",
+    "minutes": 3662,
+    "points": 730,
+    "digest": "fc6741301e8d940b72485d8ca8fced68995afc268c7767bd7cbed8c4de0d1cbc"
+  },
+  {
+    "seed": 1156,
+    "ending": "death_dehydration",
+    "minutes": 4533,
+    "points": 109,
+    "digest": "da99c130ada0d3267db1e06c98e04cce84aa0e1efe5c1010106373090f5b02f5"
+  },
+  {
+    "seed": 1157,
+    "ending": "exit_level1",
+    "minutes": 2223,
+    "points": 697,
+    "digest": "d2ab8017098fd3997e8049e668a2b023f4a4c42a6902d17de8cb7126dbff689b"
+  },
+  {
+    "seed": 1158,
+    "ending": "exit_level1",
+    "minutes": 3532,
+    "points": 698,
+    "digest": "ff0db40ab3c9c8ab9df90faa9379254b4e1f956eb856ff76bdb6877bc5a95d6d"
+  },
+  {
+    "seed": 1159,
+    "ending": "death_dehydration",
+    "minutes": 4480,
+    "points": 139,
+    "digest": "2841fb34cc61f6c197453c39cf61849a418df19419713ce68a6312dfc753ad0d"
+  },
+  {
+    "seed": 1160,
+    "ending": "exit_level1",
+    "minutes": 3454,
+    "points": 698,
+    "digest": "21ec86bd25a9d643808f389501a0148c86772817383a5c84e23291e59820ccdc"
+  },
+  {
+    "seed": 1161,
+    "ending": "alive",
+    "minutes": 4511,
+    "points": 0,
+    "digest": "ddd6f14b09e3bd4e0ddfe84fa340f3aef29d436140ebb747d3bc49a6ca6f068f"
+  },
+  {
+    "seed": 1162,
+    "ending": "exit_level1",
+    "minutes": 3621,
+    "points": 700,
+    "digest": "855f6a0632f40e20b99a67484b8367cbea0524ca79f4765fc95268192426483c"
+  },
+  {
+    "seed": 1163,
+    "ending": "exit_level1",
+    "minutes": 5418,
+    "points": 720,
+    "digest": "93021ed6ffdab7779de74e2f966a8d4c41dc87373c3f774ab69dd7eab4c653c7"
+  },
+  {
+    "seed": 1164,
+    "ending": "exit_level1",
+    "minutes": 5348,
+    "points": 718,
+    "digest": "c78767c42e1dce1cdfc0f734709b8b39bace5708352f11ecb503b95365fe5be8"
+  },
+  {
+    "seed": 1165,
+    "ending": "exit_level1",
+    "minutes": 2344,
+    "points": 667,
+    "digest": "6a2a3a1c219c0c71941db3da020c815ba7318f19b820dd068b808daf2a3371ec"
+  },
+  {
+    "seed": 1166,
+    "ending": "death_dehydration",
+    "minutes": 3290,
+    "points": 93,
+    "digest": "045f9d81d040a488066b8a29019733eafd9fdaa318947c6ea86b7f628b264961"
+  },
+  {
+    "seed": 1167,
+    "ending": "death_dehydration",
+    "minutes": 4841,
+    "points": 141,
+    "digest": "49c91c5dd552885ac5fbc6afa6f9fd5ac74203fb38f439dae88256f18dba23ef"
+  },
+  {
+    "seed": 1168,
+    "ending": "alive",
+    "minutes": 4567,
+    "points": 0,
+    "digest": "9bdab4ecb6e191caa89dedaefa6d53110482f54afa3af96387d892fb1c1a1fce"
+  },
+  {
+    "seed": 1169,
+    "ending": "death_dehydration",
+    "minutes": 3434,
+    "points": 108,
+    "digest": "7b31aadaf6fd3c7e7c6da60f1ebde9fdd1d3a6acb00daec8cd60ac4d02880c3b"
+  },
+  {
+    "seed": 1170,
+    "ending": "exit_level1",
+    "minutes": 3736,
+    "points": 730,
+    "digest": "532c732fce7432834952e0d3c6fe848f856052afe6492e63f9c70e3fa5980a1a"
+  },
+  {
+    "seed": 1171,
+    "ending": "exit_level1",
+    "minutes": 2076,
+    "points": 680,
+    "digest": "c1cd56530ea3c28b1bc088332e71e00314795d04a455133d193b9f48a1380bbe"
+  },
+  {
+    "seed": 1172,
+    "ending": "death_dehydration",
+    "minutes": 4623,
+    "points": 109,
+    "digest": "2a1c434a9aac33954c89d7ee94c21be452f85fb54ef920c34dd0121df6fc81b8"
+  },
+  {
+    "seed": 1173,
+    "ending": "death_dehydration",
+    "minutes": 4695,
+    "points": 126,
+    "digest": "e94098673b17c2d0969130b85728807171081701edbd5c95a732bef0dd8fe0c2"
+  },
+  {
+    "seed": 1174,
+    "ending": "exit_level1",
+    "minutes": 3734,
+    "points": 700,
+    "digest": "6aa8c119933a8dca271299629dd8ab034cb6c12634c5e7176b1a0d9af30f5846"
+  },
+  {
+    "seed": 1175,
+    "ending": "exit_level1",
+    "minutes": 3258,
+    "points": 698,
+    "digest": "1d2a91daba623a7ce0ff2420f23fd0a62cd387c7d92c68f9e48a297ac40e1ced"
+  },
+  {
+    "seed": 1176,
+    "ending": "alive",
+    "minutes": 3656,
+    "points": 0,
+    "digest": "d421083fbc10a6a4696bdc0f4e53bc7fc108998d006ee804098b595aa32861c7"
+  },
+  {
+    "seed": 1177,
+    "ending": "exit_level1",
+    "minutes": 4868,
+    "points": 746,
+    "digest": "f89ecffa30021bd931b735db454fd0e9ca50a8182c2d3915bd954373525a7919"
+  },
+  {
+    "seed": 1178,
+    "ending": "no_one_returned",
+    "minutes": 4787,
+    "points": 141,
+    "digest": "37086115c5b08828f4376312ea7554e68f68fba1671e4f78a7f57005841880b4"
+  },
+  {
+    "seed": 1179,
+    "ending": "exit_level1",
+    "minutes": 3050,
+    "points": 711,
+    "digest": "c57cab665c829df21423b1138eed43039975548676402c0f638e4aa19cd0b1f2"
+  },
+  {
+    "seed": 1180,
+    "ending": "death_injury",
+    "minutes": 3603,
+    "points": 95,
+    "digest": "009bcde9a114235249e763a70ac4e4bad915a3b591300af980670ba77eb896ee"
+  },
+  {
+    "seed": 1181,
+    "ending": "exit_level1",
+    "minutes": 3716,
+    "points": 715,
+    "digest": "2c17312c92284337efc3ceb1928cd73341315935d67ec286b2e5ca99a5ea4b37"
+  },
+  {
+    "seed": 1182,
+    "ending": "exit_level1",
+    "minutes": 3241,
+    "points": 728,
+    "digest": "4b44af8a36f1f3fb66a0e9f9f330861c958674266c1029cc09fd18fb2cdb7ba0"
+  },
+  {
+    "seed": 1183,
+    "ending": "exit_level1",
+    "minutes": 2221,
+    "points": 682,
+    "digest": "0bd07b234100f5c89c4b5d956ec7e120ef0c9c9f887721c13375567b2d344c8f"
+  },
+  {
+    "seed": 1184,
+    "ending": "death_dehydration",
+    "minutes": 3463,
+    "points": 93,
+    "digest": "ed7df4885b7f7e760a4692fa0b698b47a8dde309033587ee2f55a151a91ead84"
+  },
+  {
+    "seed": 1185,
+    "ending": "exit_level1",
+    "minutes": 3812,
+    "points": 685,
+    "digest": "5d7d9e22493a6e9966623ca8f8a58a3ad840a466deea3fdbba8b70a5854ec0c1"
+  },
+  {
+    "seed": 1186,
+    "ending": "exit_level1",
+    "minutes": 2341,
+    "points": 682,
+    "digest": "1f582bda11b8527ab81ed96ceac4afbf969c4d4f0410628172d166ff9ef9079a"
+  },
+  {
+    "seed": 1187,
+    "ending": "death_dehydration",
+    "minutes": 3569,
+    "points": 108,
+    "digest": "2b97cad5ecb3371d008cf76026066d259b365ac964d64d0b5f0b986d0169e31a"
+  },
+  {
+    "seed": 1188,
+    "ending": "alive",
+    "minutes": 5403,
+    "points": 0,
+    "digest": "e47b957fc516bc1e699d9121c8796fa6db235034d9f6ba824305af37764883a0"
+  },
+  {
+    "seed": 1189,
+    "ending": "exit_level1",
+    "minutes": 2319,
+    "points": 682,
+    "digest": "f7321d709d7f4b894097e101ebab49c245fcd168d521087238122153acfb57f8"
+  },
+  {
+    "seed": 1190,
+    "ending": "death_dehydration",
+    "minutes": 3788,
+    "points": 95,
+    "digest": "030f0b8c60e0d970c90c77a16eab570af41c90dce0fcc78e08118156882926d6"
+  },
+  {
+    "seed": 1191,
+    "ending": "exit_level1",
+    "minutes": 3202,
+    "points": 696,
+    "digest": "72e66c3ceff2c6b52eb726ee5a1e77f8d7901c2f7a3c7cfa661d80b3125628f9"
+  },
+  {
+    "seed": 1192,
+    "ending": "death_dehydration",
+    "minutes": 3602,
+    "points": 95,
+    "digest": "d62955c7104a88198a041e0728f06b2b0f45b39ec64721a21d10616476570822"
+  },
+  {
+    "seed": 1193,
+    "ending": "exit_level1",
+    "minutes": 2065,
+    "points": 635,
+    "digest": "0f70d8c69b8553499264b1d08ea03e5f43eaf156864a177f1b985b99a8e7710f"
+  },
+  {
+    "seed": 1194,
+    "ending": "death_dehydration",
+    "minutes": 4927,
+    "points": 111,
+    "digest": "369df3996d6c500b8901de400031bd5a8c87d6b703e3016f39f416dad4f571ef"
+  },
+  {
+    "seed": 1195,
+    "ending": "exit_level1",
+    "minutes": 1882,
+    "points": 650,
+    "digest": "25d47c370a9c08a89c16f6bfa0fd33d1954d8ffbcb6dee079e59821dad3f5153"
+  },
+  {
+    "seed": 1196,
+    "ending": "exit_level1",
+    "minutes": 5079,
+    "points": 733,
+    "digest": "86bcb5078f48bdf1f56c8e2aabb5fe340bfcd448dcff3a2e1f5393b1a473cb4c"
+  },
+  {
+    "seed": 1197,
+    "ending": "death_dehydration",
+    "minutes": 3462,
+    "points": 93,
+    "digest": "e7feac24cb209a47ffc17cdd52dd1d59789c9c629f2a692253988382c2dc1ee1"
+  },
+  {
+    "seed": 1198,
+    "ending": "exit_level1",
+    "minutes": 3608,
+    "points": 715,
+    "digest": "658f652eb26253056a00b758058e72b9f13299d947be2753621db1e150b742bc"
+  },
+  {
+    "seed": 1199,
+    "ending": "death_dehydration",
+    "minutes": 3435,
+    "points": 123,
+    "digest": "80996fc9f7ffb114dd219df36cc610f99e3b73415399083ce9718dc1b2a59bf6"
+  },
+  {
+    "seed": 1200,
+    "ending": "exit_level1",
+    "minutes": 2376,
+    "points": 682,
+    "digest": "02d203ef4b8780087c104c2f43537d0bae7d4dfe7bc2b3183f6b6cb8453b774a"
+  },
+  {
+    "seed": 1201,
+    "ending": "exit_level1",
+    "minutes": 4676,
+    "points": 714,
+    "digest": "52f85b99d872b07c827defc7984c6bd05af67dc76b76bcb129827d81038cb9d7"
+  },
+  {
+    "seed": 1202,
+    "ending": "exit_level1",
+    "minutes": 3381,
+    "points": 713,
+    "digest": "3c2e0e1f3312b571027c2c131a513396e7e8f20486389975af7d58ca4019c9e6"
+  },
+  {
+    "seed": 1203,
+    "ending": "no_one_returned",
+    "minutes": 1943,
+    "points": 60,
+    "digest": "e2a94e2e4df89f983102ba70eb9b20b6e83fc59755b8564c552ced196e538a64"
+  },
+  {
+    "seed": 1204,
+    "ending": "exit_level1",
+    "minutes": 5101,
+    "points": 733,
+    "digest": "1c8e4ceb69a27dc55bab297497631a656d250c678e7abf36d3fa546f6eb29d78"
+  },
+  {
+    "seed": 1205,
+    "ending": "exit_level1",
+    "minutes": 2207,
+    "points": 682,
+    "digest": "25be45e7bdfabf6a09e82bc3c445d90a123d41da28e7bc451f733db2c174b8e1"
+  },
+  {
+    "seed": 1206,
+    "ending": "exit_level1",
+    "minutes": 4755,
+    "points": 746,
+    "digest": "29242c02ced94797ea8430f798dfcafa6ec7e8f48441f7cd62817bc2f107ff4b"
+  },
+  {
+    "seed": 1207,
+    "ending": "exit_level1",
+    "minutes": 3671,
+    "points": 730,
+    "digest": "b0f4ce83fba331dae0d7b3d74325b80edad78f390893781faba2add045e6bb00"
+  },
+  {
+    "seed": 1208,
+    "ending": "alive",
+    "minutes": 3622,
+    "points": 0,
+    "digest": "2ba16ca0e95b548bf4813918a4ebd9fe102b1782c223152f4fc821854abe5696"
+  },
+  {
+    "seed": 1209,
+    "ending": "exit_level1",
+    "minutes": 3514,
+    "points": 728,
+    "digest": "bdca64932d0d5642d103b9aef15683be2e711b6384c0e5ea820d71d3ff50db17"
+  },
+  {
+    "seed": 1210,
+    "ending": "death_dehydration",
+    "minutes": 3613,
+    "points": 95,
+    "digest": "122b839130f52807abf0a3e83511ca25cffbd4c63c2fc4402fc4f7a3e9c8f8b8"
+  },
+  {
+    "seed": 1211,
+    "ending": "death_dehydration",
+    "minutes": 6358,
+    "points": 144,
+    "digest": "453effcfa42aa2c7ab738c8204eecf32bfd80f329d9793a0055d728035dabfcc"
+  },
+  {
+    "seed": 1212,
+    "ending": "exit_level1",
+    "minutes": 4423,
+    "points": 699,
+    "digest": "e9ed433d8cd48040ea44d5e315f12e176d525a07a475a7dd80ed9b2e4173acac"
+  },
+  {
+    "seed": 1213,
+    "ending": "death_dehydration",
+    "minutes": 3747,
+    "points": 95,
+    "digest": "bf3976a47d1f6a07c745aa9f1d34f019628acfd7d455a34dc44064271920529c"
+  },
+  {
+    "seed": 1214,
+    "ending": "exit_level1",
+    "minutes": 3130,
+    "points": 696,
+    "digest": "8527fac3ec166752a148e789d7cf9665a3c1e9357933bf6c47aa644a545639fd"
+  },
+  {
+    "seed": 1215,
+    "ending": "death_dehydration",
+    "minutes": 3189,
+    "points": 91,
+    "digest": "ba65140dd28ac594423709d25b5e28c07258832337c8a2f6d6e86c42f8e83748"
+  },
+  {
+    "seed": 1216,
+    "ending": "exit_level1",
+    "minutes": 3303,
+    "points": 713,
+    "digest": "f5d4e6cd2db5b77bf9a8f8a49fa0e83234477fe56106530d2e9790cfb0121b54"
+  },
+  {
+    "seed": 1217,
+    "ending": "death_dehydration",
+    "minutes": 3379,
+    "points": 108,
+    "digest": "f24a774092d15e967cd2363b225f0c2ecbb441645c5aeab150c75b4157b080b4"
+  },
+  {
+    "seed": 1218,
+    "ending": "exit_level1",
+    "minutes": 2422,
+    "points": 682,
+    "digest": "d0b1bcbffc6a4949a8cae921e146d233dd12360e8a196801bfa0a623f7bc0e06"
+  },
+  {
+    "seed": 1219,
+    "ending": "exit_level1",
+    "minutes": 3648,
+    "points": 685,
+    "digest": "62f20bb5600fec17fb8763a470d8870c3effd25d79213b5b63195cdc4f66a007"
+  },
+  {
+    "seed": 1220,
+    "ending": "exit_level1",
+    "minutes": 3106,
+    "points": 681,
+    "digest": "3c0fb4e5a552ddb7b6a3a62d1545fc8620f519c57172e0164392150a89116a62"
+  },
+  {
+    "seed": 1221,
+    "ending": "exit_level1",
+    "minutes": 3701,
+    "points": 700,
+    "digest": "a7e03e10214596276c3a8d5e35545efcbc69eb156721b90e4956f99d1c7d99ca"
+  },
+  {
+    "seed": 1222,
+    "ending": "death_dehydration",
+    "minutes": 3606,
+    "points": 110,
+    "digest": "183b57841f8c6ea15c65f7fbd127454eeaa00b17b145905f0fdbcced09299ed1"
+  },
+  {
+    "seed": 1223,
+    "ending": "exit_level1",
+    "minutes": 3522,
+    "points": 698,
+    "digest": "4d7044484d832711cbff0e64d6f78dc1ebb52be696e4e25a9e50afde4cb56f4c"
+  },
+  {
+    "seed": 1224,
+    "ending": "no_one_returned",
+    "minutes": 1859,
+    "points": 60,
+    "digest": "0047243f925cddf9063bef6a349da5e44ac626ae83d9035ee7c1eba75c0fcff8"
+  },
+  {
+    "seed": 1225,
+    "ending": "exit_level1",
+    "minutes": 3519,
+    "points": 698,
+    "digest": "f67fcfba943cf39bd5fabc7228e459a56ec1a8e4935256fa4f20db0b587ad2e7"
+  },
+  {
+    "seed": 1226,
+    "ending": "alive",
+    "minutes": 3536,
+    "points": 0,
+    "digest": "421931086891b8f06179721ce7f62476f32f7b9cc47a4650c14f07512ef5dc40"
+  },
+  {
+    "seed": 1227,
+    "ending": "exit_level1",
+    "minutes": 3005,
+    "points": 696,
+    "digest": "e5fc0bc0ebb001d8551f6a66478521d9f6aca5cbfaeb17a796d3437a17851166"
+  },
+  {
+    "seed": 1228,
+    "ending": "death_dehydration",
+    "minutes": 3451,
+    "points": 63,
+    "digest": "fec116d2b17705cf85faad44fb7d2ef2b9ccb29011d04fb4e0d06c9a4660637d"
+  },
+  {
+    "seed": 1229,
+    "ending": "death_dehydration",
+    "minutes": 3290,
+    "points": 93,
+    "digest": "fd205523ae9dbac72cf48f4649cc0a22b45e6e47b5decc01730c8ea7b0051ffb"
+  },
+  {
+    "seed": 1230,
+    "ending": "death_dehydration",
+    "minutes": 3420,
+    "points": 78,
+    "digest": "7dad8ac4637508fefb2a53e16dc9d7d8f67c80b64804f8690087137463129ed5"
+  },
+  {
+    "seed": 1231,
+    "ending": "exit_level1",
+    "minutes": 5024,
+    "points": 731,
+    "digest": "c0e2e456dc4a215e0b63478708f45e657153dfac86288ff34a0f61050059a32f"
+  },
+  {
+    "seed": 1232,
+    "ending": "death_dehydration",
+    "minutes": 3725,
+    "points": 110,
+    "digest": "467b893167d78620e116146faa405fe2a9df103dc435911546d6ac7c2a85d121"
+  },
+  {
+    "seed": 1233,
+    "ending": "death_dehydration",
+    "minutes": 3374,
+    "points": 108,
+    "digest": "ec8511d5577993406ad260e672f4f7f5d897aebc5a21d67efa5e750e1913ab00"
+  },
+  {
+    "seed": 1234,
+    "ending": "exit_level1",
+    "minutes": 3293,
+    "points": 713,
+    "digest": "22ca563c50cd4c1bfdfbea068d1c6fc7d4a8aa38e7c5e6ca5a9ea0511e4acc76"
+  },
+  {
+    "seed": 1235,
+    "ending": "exit_level72",
+    "minutes": 2071,
+    "points": 495,
+    "digest": "1238e4bd6fe01a2157b86d166acc1129ae31be48794cabc6688a50514bd6ce13"
+  },
+  {
+    "seed": 1236,
+    "ending": "exit_level1",
+    "minutes": 3733,
+    "points": 700,
+    "digest": "dcda02cbe633f6a6b4ef2e95b67029b3086f1b35c5a58bdc7422f714f82ad922"
+  },
+  {
+    "seed": 1237,
+    "ending": "exit_level72",
+    "minutes": 4932,
+    "points": 531,
+    "digest": "e14955d340c40bc34a8b23e8569acdbfd8c9a536abd9ad3a8aab98dd40f6191a"
+  },
+  {
+    "seed": 1238,
+    "ending": "exit_level1",
+    "minutes": 3260,
+    "points": 728,
+    "digest": "b43bf40d9ca991eecd5005aad565f3d0d2a9a3fd117d3ccbfa03da240485dcff"
+  },
+  {
+    "seed": 1239,
+    "ending": "death_dehydration",
+    "minutes": 3155,
+    "points": 91,
+    "digest": "e834881b7f74a5a2d60810ef31584ef370cc757fa20f9d87a67a01a26ea6d0fd"
+  },
+  {
+    "seed": 1240,
+    "ending": "no_one_returned",
+    "minutes": 2293,
+    "points": 92,
+    "digest": "af587a46ad7a08448dd260234ba66dac1af8d9af815690e3ae08dbefeb586f02"
+  },
+  {
+    "seed": 1241,
+    "ending": "exit_level1",
+    "minutes": 3488,
+    "points": 713,
+    "digest": "b2c4dbfcc0e488c8c82e70406ba14f19fb2a6b8e0e9c91bdaf6c520b0a9a39f7"
+  },
+  {
+    "seed": 1242,
+    "ending": "death_dehydration",
+    "minutes": 5828,
+    "points": 142,
+    "digest": "1a7dfd9999f16007c81267b600e3c4a8a30b7842fa05242c9cd7dc14a1ad0ca9"
+  },
+  {
+    "seed": 1243,
+    "ending": "death_dehydration",
+    "minutes": 3512,
+    "points": 93,
+    "digest": "8cc547cbe1c6d3d540286cb69932f41d592af08b6c9cae9189dfe03f57571ea2"
+  },
+  {
+    "seed": 1244,
+    "ending": "exit_level1",
+    "minutes": 3144,
+    "points": 696,
+    "digest": "f24194608f587a5578b54ce2af04c2cb9966ad60c659dbb98d86c37a810b89b6"
+  },
+  {
+    "seed": 1245,
+    "ending": "alive",
+    "minutes": 6731,
+    "points": 0,
+    "digest": "dfaea531fcf5101cf70dd62ddb6ac66df7c7df59882ef95e60a11a483312fc33"
+  },
+  {
+    "seed": 1246,
+    "ending": "exit_level1",
+    "minutes": 3042,
+    "points": 696,
+    "digest": "ed90e7e9846b8eeb2f6bb5bc8c5961533befafb274bed7df60d7a49a9d1b14f9"
+  },
+  {
+    "seed": 1247,
+    "ending": "death_dehydration",
+    "minutes": 4735,
+    "points": 126,
+    "digest": "78e9bb244a03f6794a831884431d4d5d838c42edda7a68b23f7c789d1559972d"
+  },
+  {
+    "seed": 1248,
+    "ending": "exit_level1",
+    "minutes": 2374,
+    "points": 682,
+    "digest": "9476b6c8cac99b910e0ad4393145a046e6748bf314f53d4aed5c6a444c99115f"
+  },
+  {
+    "seed": 1249,
+    "ending": "exit_level1",
+    "minutes": 3688,
+    "points": 715,
+    "digest": "74fa2dec66487b66fd6d7239bd02b571c9b23527f228f860bbfbc0ff043daa27"
+  },
+  {
+    "seed": 1250,
+    "ending": "exit_level1",
+    "minutes": 4554,
+    "points": 744,
+    "digest": "df96090fe776d4e045dc1610c94a303de9b066c8449fe2b3f69e57f1ff49d7a8"
+  },
+  {
+    "seed": 1251,
+    "ending": "exit_level1",
+    "minutes": 2207,
+    "points": 697,
+    "digest": "903e8c2893e6974d640183d76214b87486a8bbd3a20ea6f781ae578f02118b2f"
+  },
+  {
+    "seed": 1252,
+    "ending": "exit_level1",
+    "minutes": 3873,
+    "points": 730,
+    "digest": "7c0a09a6180a027df91af320e8d55c3e75909edebc93fc95974fa1919c308111"
+  },
+  {
+    "seed": 1253,
+    "ending": "death_dehydration",
+    "minutes": 3758,
+    "points": 110,
+    "digest": "45cb0e9c1840ad2c40cbaf14656ab61cc64f4509da28cc2954bb6d1951357c5e"
+  },
+  {
+    "seed": 1254,
+    "ending": "exit_level1",
+    "minutes": 2382,
+    "points": 697,
+    "digest": "1582abf34528d8cc78a8c5dcbe72a6a7453dad8b5ef268cc6d07f86f5ab7efcc"
+  },
+  {
+    "seed": 1255,
+    "ending": "alive",
+    "minutes": 2645,
+    "points": 0,
+    "digest": "0ddf7accd68077836f54d209342871bb65843c0116c391894361293580671446"
+  },
+  {
+    "seed": 1256,
+    "ending": "death_dehydration",
+    "minutes": 3459,
+    "points": 123,
+    "digest": "4805d783c90ced8a791874b26cf7994a4bf64226865a905e9654c2f931517353"
+  },
+  {
+    "seed": 1257,
+    "ending": "exit_level1",
+    "minutes": 3297,
+    "points": 728,
+    "digest": "f48fd744ca9438d41f37fb2b9375055e537303f1d8216646917187cdbe1d01e2"
+  },
+  {
+    "seed": 1258,
+    "ending": "death_dehydration",
+    "minutes": 4744,
+    "points": 126,
+    "digest": "67d10be0b0cc98fb094d9db03d186754efac1e785ca53ae048ef9e7eda314957"
+  },
+  {
+    "seed": 1259,
+    "ending": "exit_level1",
+    "minutes": 3468,
+    "points": 683,
+    "digest": "50d9c4da335f08ff053b40d8923411914aa7d5b69a4c151de1750af3e0f880c6"
+  },
+  {
+    "seed": 1260,
+    "ending": "exit_level1",
+    "minutes": 3124,
+    "points": 726,
+    "digest": "ac7bec4b1329772ea753aaf671c2463a1327e0727c44db1cd6d14dce2f942f93"
+  },
+  {
+    "seed": 1261,
+    "ending": "exit_level1",
+    "minutes": 3091,
+    "points": 726,
+    "digest": "df1e018c71fe55d6592059b093711de9fd40e7e634c99b537f37e3773f5f1d89"
+  },
+  {
+    "seed": 1262,
+    "ending": "death_dehydration",
+    "minutes": 3423,
+    "points": 123,
+    "digest": "6e2c07188aaa320e95aa44350159492a0517a3ee6e39deba95027f52a800d2ed"
+  },
+  {
+    "seed": 1263,
+    "ending": "exit_level1",
+    "minutes": 1965,
+    "points": 695,
+    "digest": "8c56b3508066219289d7b6ae88d037fe96b226e53d7731a1a0cfd11cb05da75d"
+  },
+  {
+    "seed": 1264,
+    "ending": "death_dehydration",
+    "minutes": 5287,
+    "points": 128,
+    "digest": "400bf87a3664e7372a890edc79f5d3313372bce186535b3479dda7acd23647e2"
+  },
+  {
+    "seed": 1265,
+    "ending": "exit_level1",
+    "minutes": 2150,
+    "points": 680,
+    "digest": "bf34583f5e40d3ec783331e44cc510758beda9e49b789f94dbf2b8523893697a"
+  },
+  {
+    "seed": 1266,
+    "ending": "exit_level1",
+    "minutes": 2216,
+    "points": 652,
+    "digest": "0b6511f9686f3c3653adfa4dd20e1002f86e4fdd88d5bc9d511e735c2f8abd93"
+  },
+  {
+    "seed": 1267,
+    "ending": "death_dehydration",
+    "minutes": 3687,
+    "points": 80,
+    "digest": "fb540a3852658502c6a72e1320aa49610d845386729606a70325348758fa5b58"
+  },
+  {
+    "seed": 1268,
+    "ending": "death_dehydration",
+    "minutes": 5483,
+    "points": 130,
+    "digest": "ee62370a49ab628e1d41a9e8ebf26a6727caf73b3abe968c2da2aa70e996907a"
+  },
+  {
+    "seed": 1269,
+    "ending": "death_dehydration",
+    "minutes": 3638,
+    "points": 80,
+    "digest": "be3a3d9eb27bd51839d36d33e04db42ae8b6c3293c54474c09ff735c6f6f7c70"
+  },
+  {
+    "seed": 1270,
+    "ending": "death_dehydration",
+    "minutes": 4822,
+    "points": 111,
+    "digest": "76b6c9f86b665bf2736caf91fc54d6a69db41d40ab7fa5e01f71579b648a29c0"
+  },
+  {
+    "seed": 1271,
+    "ending": "exit_level1",
+    "minutes": 3866,
+    "points": 700,
+    "digest": "94f601a35b234742f6f37d271afae888e3fec5d036f61755c967e3439bb3b5ac"
+  },
+  {
+    "seed": 1272,
+    "ending": "exit_level1",
+    "minutes": 3027,
+    "points": 681,
+    "digest": "051e94be37c23de05d5e95df9f0877674a69f725693a8ca12dd165e3104f2f25"
+  },
+  {
+    "seed": 1273,
+    "ending": "death_dehydration",
+    "minutes": 3515,
+    "points": 93,
+    "digest": "6442f00873a08aa53757a1c283ff613798a5d5b86cee1021287fa6e34c0fe40c"
+  },
+  {
+    "seed": 1274,
+    "ending": "death_dehydration",
+    "minutes": 3803,
+    "points": 110,
+    "digest": "3760265f85d9ff7b692823eb560bdc042c52f7835c75605969b75633baeda43f"
+  },
+  {
+    "seed": 1275,
+    "ending": "exit_level1",
+    "minutes": 3045,
+    "points": 681,
+    "digest": "2f7dc675a2da13f57a820127a1ace7352c691c7bb805a9ae21be4e12b5ab122d"
+  },
+  {
+    "seed": 1276,
+    "ending": "exit_level1",
+    "minutes": 3344,
+    "points": 713,
+    "digest": "0f76dc6de765e254c1a5db32ff8c51a911f9d88be62897b0e31783983fdb7c24"
+  },
+  {
+    "seed": 1277,
+    "ending": "death_dehydration",
+    "minutes": 3665,
+    "points": 125,
+    "digest": "5ca910c7e258c19aa675e37bc40e587854327bcfc0033db3117f182e0d32c6b5"
+  },
+  {
+    "seed": 1278,
+    "ending": "alive",
+    "minutes": 3604,
+    "points": 0,
+    "digest": "048c4d6c9c63fecb36608769c57618e3df58c2d5dc6f2482d49751791b5f677a"
+  },
+  {
+    "seed": 1279,
+    "ending": "death_dehydration",
+    "minutes": 3365,
+    "points": 108,
+    "digest": "6cdfa14e1156848310fd8fc7510f200c5cefd8c7e63136c894823ab976119128"
+  },
+  {
+    "seed": 1280,
+    "ending": "exit_level1",
+    "minutes": 3863,
+    "points": 730,
+    "digest": "518d6237f36d625d8c6c3c34fff4aa7f3347f374fb0a7f6e627842da1aeb73f0"
+  },
+  {
+    "seed": 1281,
+    "ending": "exit_level1",
+    "minutes": 2349,
+    "points": 667,
+    "digest": "912ea5ec52156285c6d990e068cb3a0f3b13cfe4de0a66e76ad3609dc001f512"
+  },
+  {
+    "seed": 1282,
+    "ending": "exit_level1",
+    "minutes": 3642,
+    "points": 730,
+    "digest": "a469043c3a8a86d931fc1a93d67d67bc2f7e4dbd18791134cb9f3969af4c9ad4"
+  },
+  {
+    "seed": 1283,
+    "ending": "exit_level1",
+    "minutes": 2211,
+    "points": 697,
+    "digest": "0216b7acbe1fa63b488dae88f1c5ab9be957bcf3103bf4c5e41b51b92d4fcdf4"
+  },
+  {
+    "seed": 1284,
+    "ending": "exit_level1",
+    "minutes": 3919,
+    "points": 715,
+    "digest": "df2aa3908ec327b7b45ea284ca2d20957a584ae30419a2af6ae5c8698060d30e"
+  },
+  {
+    "seed": 1285,
+    "ending": "exit_level1",
+    "minutes": 3456,
+    "points": 728,
+    "digest": "326ba7dd4a8e4bec9c1b81bcb65f91b5695685d18fd92e7324571456280d1b4a"
+  },
+  {
+    "seed": 1286,
+    "ending": "death_dehydration",
+    "minutes": 3606,
+    "points": 110,
+    "digest": "a1cf4e1e25d28fa0239d887d513e8f80456350b108b2b48632a0d1d5e79fcf43"
+  },
+  {
+    "seed": 1287,
+    "ending": "death_dehydration",
+    "minutes": 3299,
+    "points": 108,
+    "digest": "3a3b8098a67f84be4ab9e637516cbc36fb9de520568fa3f28fdb33132eb4c64e"
+  },
+  {
+    "seed": 1288,
+    "ending": "exit_level1",
+    "minutes": 4671,
+    "points": 714,
+    "digest": "b478eb4034f16cabc52aa17cbbfde45135fd1f0d3a0f9f11a8a8126e8ff2aa5c"
+  },
+  {
+    "seed": 1289,
+    "ending": "exit_level1",
+    "minutes": 5032,
+    "points": 716,
+    "digest": "f584214dfe27491975519a2df4dc1867e88aa4d7e140fce72f7a2ac4c3a2fd52"
+  },
+  {
+    "seed": 1290,
+    "ending": "alive",
+    "minutes": 3000,
+    "points": 0,
+    "digest": "e719607aa4679017275d574f268b13d6cefa2fc0e7764005f87abab6a32b7b36"
+  },
+  {
+    "seed": 1291,
+    "ending": "exit_level1",
+    "minutes": 4118,
+    "points": 717,
+    "digest": "25967b39de47f9b12993b73a64476540fa7c1486019d8d6462da654efc8d7934"
+  },
+  {
+    "seed": 1292,
+    "ending": "death_dehydration",
+    "minutes": 4469,
+    "points": 139,
+    "digest": "2c76385ed5d811f614d518050d86017f235540d7fb7b9827f1cfec6203874b2e"
+  },
+  {
+    "seed": 1293,
+    "ending": "exit_level1",
+    "minutes": 2985,
+    "points": 696,
+    "digest": "a43b82da798059003a73ae9c04e31c4cc8f5c6cad47c78cb492c3ebc21def79c"
+  },
+  {
+    "seed": 1294,
+    "ending": "death_dehydration",
+    "minutes": 4656,
+    "points": 124,
+    "digest": "1a9c90ea566b16d19519cf9596e28d452828bf34250029bb42d3bef3ab57cc7c"
+  },
+  {
+    "seed": 1295,
+    "ending": "death_dehydration",
+    "minutes": 4832,
+    "points": 126,
+    "digest": "8468bda9add1c00e63fa2eb71db677e15649b0c24083b0bd88d315f23cff4c62"
+  },
+  {
+    "seed": 1296,
+    "ending": "exit_level1",
+    "minutes": 2438,
+    "points": 697,
+    "digest": "d08bebefc8a18aa55fdca6d2ec27d1cba3ab466bcf0e572768e99d924c1753c2"
+  },
+  {
+    "seed": 1297,
+    "ending": "exit_level1",
+    "minutes": 3134,
+    "points": 696,
+    "digest": "1d25d27f7b78cdde4a76cfd2e45023e94a13936a2b84def98fc925e71050cffc"
+  },
+  {
+    "seed": 1298,
+    "ending": "alive",
+    "minutes": 4510,
+    "points": 0,
+    "digest": "b0928e5f5916b81a181c6d44e4d6c104cda456b7ac2ce39cc28f09df894de4b6"
+  },
+  {
+    "seed": 1299,
+    "ending": "exit_level1",
+    "minutes": 3251,
+    "points": 698,
+    "digest": "c652067edb508daa036e15ee43a60c67277fc7e26cd9e3f6de3322d7d30e3e49"
+  }
+]

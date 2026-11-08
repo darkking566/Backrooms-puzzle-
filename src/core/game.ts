@@ -4,7 +4,7 @@
 import type { ContentData } from "../../tools/content-schema";
 import { draw, pick, type RngState, type Stream } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
-import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone } from "../world/level0";
+import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone, type Level0World } from "../world/level0";
 import { newHallucinations, newRoomPersonRun, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
@@ -37,7 +37,7 @@ export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; an
 const COLOR_NAME: Record<string, Text> = { grey: T("灰色", "grey"), green: T("綠色", "green"), blue: T("藍色", "blue"), reddish: T("偏紅的", "reddish") };
 
 export class Game {
-  run: RunState; meta: Meta; world: Level0; c: ContentData;
+  run: RunState; meta: Meta; world: Level0World; c: ContentData;
   private out!: Outcome;
 
   constructor(c: ContentData, meta: Meta, run: RunState) {
@@ -54,7 +54,7 @@ export class Game {
     meta.runs += 1;
     const rng: RngState = { seed, counters: { halluc: 0, puzzles: 0, quests: 0 } };
     const run: RunState = {
-      v: SAVE_VERSION, seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
+      v: SAVE_VERSION, level: "level-0", seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
       stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
       inv: bought.map((id, k) => ({ key: "start" + k, id })), carried: [...bought],
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },

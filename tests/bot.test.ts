@@ -1,5 +1,7 @@
 /* Auto-play bot for balancing (DESIGN §18.9). Off by default: BOT=1 npx vitest run tests/bot.test.ts */
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
 import { loadContent } from "../tools/content-plugin";
 import { Game } from "../src/core/game";
 import { newMeta } from "../src/state/types";
@@ -10,6 +12,7 @@ const c = loadContent();
 describe.skipIf(!process.env.BOT)("bot", () => {
   it("plays many runs", () => {
     const ends: Record<string, number> = {}, hours: number[] = [];
+    const samples: { seed: number; ending: string; minutes: number; points: number; digest: string }[] = [];
     for (let s = 0; s < 300; s++) {
       const g = Game.newRun(c, newMeta(), 1000 + s, []); let x = s * 7919 + 1;
       const rnd = () => ((x = (x * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
@@ -31,7 +34,18 @@ describe.skipIf(!process.env.BOT)("bot", () => {
         g.dispatch({ type: "move", d: opts[rnd() < .6 ? 0 : Math.floor(rnd() * opts.length)] });
       }
       const e = g.run.ended?.ending ?? "alive"; ends[e] = (ends[e] ?? 0) + 1; hours.push(g.run.time / 60);
+      const state = JSON.parse(JSON.stringify(g.save())); delete state.level;
+      samples.push({ seed: 1000 + s, ending: e, minutes: g.run.time, points: g.run.ended?.points ?? 0,
+        digest: createHash("sha256").update(JSON.stringify({ run: state, meta: g.meta })).digest("hex") });
     }
+    const path = new URL("./fixtures/level0-bot.json", import.meta.url);
+    if (process.env.RECORD_BASELINE) writeFileSync(path, JSON.stringify(samples, null, 2) + "\n");
+    else expect(samples).toEqual(JSON.parse(readFileSync(path, "utf8")));
+    const points = samples.filter(s => s.ending !== "alive").map(s => s.points).sort((a, b) => a - b);
+    console.log("memory points", JSON.stringify({ completed: points.length, censored: samples.length - points.length,
+      mean: points.reduce((a, b) => a + b, 0) / points.length, p10: points[Math.floor(points.length * .1)],
+      median: points[Math.floor(points.length * .5)], p90: points[Math.floor(points.length * .9)], max: points.at(-1),
+      bankedMeanPerStart: samples.reduce((a, b) => a + b.points, 0) / samples.length }));
     hours.sort((a, b) => a - b);
     console.log("endings", JSON.stringify(ends), "hours median", hours[150].toFixed(0), "p10", hours[30].toFixed(0), "p90", hours[270].toFixed(0));
   }, 600000);

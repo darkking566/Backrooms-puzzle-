@@ -4,41 +4,11 @@
 import { hashWith } from "../core/rng";
 import { ck, DV, type Dir } from "../core/types";
 
-export const S = 4;                                    // cell size in metres
-export const VIEW = 8;                                 // logic view distance in cells (renderer draws at most this far)
+import { S, VIEW, edgeKey, edgeCells, passable, traversable, type Bottle, type BottleColor, type Cell, type Edge, type WorldData, type Zone, type Listener, type Level0World } from "./types";
+export * from "./types";
 
-export type Zone = "hall" | "arch" | "pillar" | "dark" | "pit" | "manila" | "red";
-export type BottleColor = "grey" | "green" | "blue" | "reddish";
-export interface Panel { int: number; warm: number; flick?: boolean; red?: boolean }
-export interface Bottle { liquid: string; color: BottleColor; full: boolean; sealed: boolean; spoiled: boolean; boiled?: boolean }
-export interface GroundItem { key: string; id: string; bottle?: Bottle; x: number; z: number }
-export interface Cell {
-  i: number; j: number; ver: number;
-  panel: Panel | "dead" | null; hole: boolean; pits: [number, number][]; items: GroundItem[];
-  searched: boolean; salt: boolean;          // salt: firesalt crystals in a corner
-}
-export type Edge = "open" | "wall" | "arch" | "flicker" | "fakeflicker" | "mwall" | "door-wood" | "door-metal" | "door-manila"
-  | "door-wood-open" | "door-metal-open" | "door-manila-open";
-
-export interface WorldData {                            // what is saved
-  seed: number; manila: [number, number];
-  cells: Cell[]; edges: [string, Edge][]; fixed: string[]; picked: string[]; opened: [string, number][];
-  flickerKey: string | null; fakeKey: string | null; corpse: [number, number] | null;
-}
-
-export const isOpenDoor = (t?: string) => !!t && t.endsWith("-open");
-export const passable = (t?: string) => t === "open" || t === "arch" || isOpenDoor(t);
-export const traversable = (t?: string) => passable(t) || t === "door-wood" || t === "door-manila";
-export const solid = (t?: string) => !!t && !passable(t);
-export function edgeKey(i: number, j: number, d: Dir | number): string { return d === 1 ? `v:${i},${j}` : d === 3 ? `v:${i - 1},${j}` : d === 2 ? `h:${i},${j}` : `h:${i},${j - 1}`; }
-export function edgeCells(k: string): [[number, number], [number, number]] {
-  const [t, rest] = k.split(":"); const [i, j] = rest.split(",").map(Number);
-  return t === "v" ? [[i, j], [i + 1, j]] : [[i, j], [i, j + 1]];
-}
-
-type Listener = (i: number, j: number) => void;
-
-export class Level0 {
+export class Level0 implements Level0World {
+  readonly level = "level-0" as const;
   readonly seed: number;
   manila: [number, number];
   cells: Map<string, Cell>;

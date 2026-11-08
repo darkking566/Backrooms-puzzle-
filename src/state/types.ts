@@ -1,6 +1,6 @@
 import type { RngState } from "../core/rng";
 import type { Dir, Lang, Text } from "../core/types";
-import type { Bottle, WorldData, Zone } from "../world/level0";
+import type { Bottle, WorldData, Zone, LevelId } from "../world/level0";
 
 export const SAVE_VERSION = 1;
 
@@ -75,6 +75,7 @@ export interface Hallucinations {
 export const newHallucinations = (): Hallucinations => ({ pianoAfter: 0, lieAfter: 0, needsReflection: false, serial: 0, history: [] });
 
 export interface RunState {
+  level: LevelId;
   v: number;
   seed: number;
   run: number;                      // which awakening this is (what you remember)

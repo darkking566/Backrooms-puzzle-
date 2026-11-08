@@ -7,9 +7,11 @@ const c = loadContent();
 describe("v1 save additions", () => {
   it("adds defaults to old loaded and imported runs without rerolling a pack", async () => {
     const g = Game.newRun(c, newMeta(), 91, []), old = JSON.parse(JSON.stringify(g.save()));
+    delete old.level;
     delete old.packPlan; delete old.lockedPack; delete old.rng.counters.puzzles;
     const meta = JSON.parse(JSON.stringify(g.meta)); delete meta.symbolLock;
     const s = importSave(exportSave(meta, old)); expect(s.meta.symbolLock).toEqual({ ruleNoteSeen: false, lastCode: null });
+    expect(s.run!.level).toBe("level-0"); expect(s.run!.world).toEqual(old.world); expect(s.run!.rng.seed).toBe(old.rng.seed);
     expect(s.run!.packPlan).toBe("none"); expect(s.run!.lockedPack).toBeNull(); expect(s.run!.rng.counters.puzzles).toBe(0);
     await persist(s.meta, old); expect((await loadRun())!.packPlan).toBe("none"); expect(SAVE_VERSION).toBe(1);
   });

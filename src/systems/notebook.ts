@@ -2,12 +2,12 @@
 import { DV, type Dir } from "../core/types";
 import { hashWith } from "../core/rng";
 import type { MapCell, MapEdge, MapKey, MapMark, RunState } from "../state/types";
-import { edgeCells, isOpenDoor, passable, type Edge, type Level0 } from "../world/level0";
+import { edgeCells, isOpenDoor, passable, type Edge, type Level0World } from "../world/level0";
 import { H } from "./survival";
 
 export const mapKey = (i: number, j: number): MapKey => `${i},${j}`;
 export const NOTEBOOK_COOLDOWN = 6 * H;
-const canSee = (r: RunState, w: Level0) => r.inv.some(x => x.id === "flashlight") || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
+const canSee = (r: RunState, w: Level0World) => r.inv.some(x => x.id === "flashlight") || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
 
 export function mapEdge(edge: Edge | undefined): MapEdge {
   if (!edge) return "unknown";
@@ -29,7 +29,7 @@ export function messyWalls(seed: number, i: number, j: number, ver: number, wall
   return copy;
 }
 
-function snapshot(r: RunState, w: Level0, i: number, j: number, visited: boolean, visible = true): MapCell | null {
+function snapshot(r: RunState, w: Level0World, i: number, j: number, visited: boolean, visible = true): MapCell | null {
   const cell = w.cells.get(mapKey(i, j));
   if (!cell) return null;
   const walls = [0, 1, 2, 3].map(d => visible ? mapEdge(w.edgeAt(i, j, d)) : "unknown") as MapCell["walls"];
@@ -39,7 +39,7 @@ function snapshot(r: RunState, w: Level0, i: number, j: number, visited: boolean
 }
 
 /** Record the current cell on entry; fill only blank pages ahead. Return a noticed discrepancy. */
-export function recordNotebook(r: RunState, w: Level0, entered = false): boolean {
+export function recordNotebook(r: RunState, w: Level0World, entered = false): boolean {
   if (!r.inv.some(x => x.id === "notebook")) return false;
   const { i, j, d } = r.pos, key = mapKey(i, j), old = r.map[key];
   if (!canSee(r, w)) {
@@ -73,7 +73,7 @@ export function recordNotebook(r: RunState, w: Level0, entered = false): boolean
 }
 
 /** Opening a nearby door changes just that observed edge, not the rest of an old drawing. */
-export function recordNotebookDoor(r: RunState, w: Level0, edge: string) {
+export function recordNotebookDoor(r: RunState, w: Level0World, edge: string) {
   if (!r.inv.some(x => x.id === "notebook") || !canSee(r, w)) return;
   const cells = edgeCells(edge), dirs: Dir[] = edge[0] === "v" ? [1, 3] : [2, 0];
   cells.forEach(([i, j], n) => { const cell = r.map[mapKey(i, j)]; if (cell) cell.walls[dirs[n]] = mapEdge(w.edges.get(edge)); });

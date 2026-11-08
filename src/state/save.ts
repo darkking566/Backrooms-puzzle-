@@ -40,6 +40,7 @@ export function migrateMeta(m: Partial<Meta> | undefined): Meta {
 }
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
 function runDefaults(r: RunState): RunState {
+  r.level ??= "level-0";
   r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
   r.fakePiano ??= null;
   r.halluc = { ...newHallucinations(), ...r.halluc };
