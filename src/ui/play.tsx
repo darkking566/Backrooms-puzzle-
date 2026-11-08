@@ -9,19 +9,11 @@ import { edgeCells, passable } from "../world/level0";
 import { ctx, L, U, lang, save } from "./ctx";
 import type { InvItem } from "../state/types";
 import { NotebookMap } from "./notebook-map";
+import { elapsedMessages } from "./time";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
   | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
-/* How long something took. With a watch you know exactly; without one you only have a feeling for it. */
-function took(m: number, watch: boolean): Text {
-  if (watch) {
-    const h = Math.floor(m / 60), mm = m % 60;
-    return h ? { zh: `${h} 小時${mm ? ` ${mm} 分鐘` : ""}`, en: `${h} h${mm ? ` ${mm} min` : ""}` } : { zh: `${m} 分鐘`, en: `${m} min` };
-  }
-  return m < 12 ? { zh: "一會兒", en: "a moment" } : m < 40 ? { zh: "一陣子", en: "a while" } : m < 100 ? { zh: "好一陣子", en: "quite a while" }
-    : m < 300 ? { zh: "幾個小時", en: "a few hours" } : { zh: "很久很久", en: "a long, long time" };
-}
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
 export function Play({ onEnd }: { onEnd: () => void }) {
@@ -62,13 +54,14 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   function act(cmd: Command, then?: () => void) {
     const v = ctx.view!; if (v.busy || g.run.ended || performance.now() < holdUntil.current || (g.run.pendingEvent && cmd.type !== "choose")) return;
     const out = g.dispatch(cmd);
-    showTime(cmd, out.minutes, !!out.ended);
+    showTime(cmd, out.minutes, !!out.ended, out.perceivedTime);
     for (const s of out.sfx) ctx.audio.sfx(s);
-    if (out.caption) showCaption(out.caption);
     if (out.event === "noise_spike") ctx.audio.sfx("spike");
     save();
     const finish = () => {
-      setBusy(false); v.syncEnv(); ctx.audio.ambience(g); v.kick(); rerender();
+      setBusy(false); v.syncEnv(); ctx.audio.ambience(g);
+      if (out.caption) ctx.audio.caption(out.caption, g);
+      v.kick(); rerender();
       if (out.ended) { ctx.audio.sfx("end"); setTimeout(onEnd, g.run.ended?.ending === "closed_loop" ? 900 : 500); }
       else if (then) then();
     };
@@ -81,13 +74,13 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     else { if (out.rebuild) v.rebuild(cmd.type === "rest" ? 2 : 1); finish(); }
     rerender();
   }
-  function showTime(cmd: Command, m: number, ended: boolean) {
+  function showTime(cmd: Command, m: number, ended: boolean, perceived?: Text) {
     if (m <= 0) return;
-    const watch = g.has("watch"), id = performance.now();
-    setDelta({ id, text: "+" + L(took(m, watch)) });
+    const messages = elapsedMessages(m, g.has("watch"), perceived), id = performance.now();
+    setDelta({ id, text: L(messages.delta) });
     if (ended || cmd.type === "move" || cmd.type === "turn" || m < 15) return;   // walking already shows time passing; short things don't need a pause
-    const long = m >= 120, t = took(m, watch);
-    setSkip({ id, long, text: cmd.type === "rest" ? { zh: `……你醒了過來。睡了${t.zh}。`, en: `...You wake. You slept ${t.en}.` } : { zh: `……過了${t.zh}。`, en: `...${t.en[0].toUpperCase() + t.en.slice(1)} passes.` } });
+    const long = m >= 120;
+    setSkip({ id, long, text: cmd.type === "rest" ? messages.slept : messages.passed });
     holdUntil.current = id + (long ? 1500 : 900);
     setTimeout(() => setSkip(s => (s && s.id === id ? null : s)), long ? 2600 : 1700);
   }

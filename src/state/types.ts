@@ -17,16 +17,32 @@ export interface LogLine { t: Text; kind?: "event" | "warn" | "caption" }
 
 export type MapKey = `${number},${number}`;
 // Only what you can recognise. Door materials and real/fake flickers are never saved here.
-export type MapEdge = "open" | "wall" | "arch" | "door" | "door-open" | "flicker";
+export type MapEdge = "open" | "wall" | "arch" | "door" | "door-open" | "flicker" | "unknown";
 export interface MapCell {
   walls: [MapEdge, MapEdge, MapEdge, MapEdge]; // N E S W, copied at the time of drawing
-  zone: Zone;
+  zone: Zone | "unknown";
   t: number;
   ver: number;
   messy: boolean;
   visited: boolean;
 }
 export type MapMark = { kind: "water" | "danger" | "exit" } | { kind: "custom"; text: string };
+
+export interface FakePiano { i: number; j: number; until: number; heard: boolean }
+export interface HallucinationRecord {
+  id: number; t: number;
+  kind: "piano" | "sound" | "memory" | "time";
+  text: Text;
+  actualMinutes?: number;
+}
+export interface Hallucinations {
+  pianoAfter: number;
+  lieAfter: number;
+  needsReflection: boolean;
+  serial: number;                         // ids remain unique when old history is trimmed
+  history: HallucinationRecord[];
+}
+export const newHallucinations = (): Hallucinations => ({ pianoAfter: 0, lieAfter: 0, needsReflection: false, serial: 0, history: [] });
 
 export interface RunState {
   v: number;
@@ -42,6 +58,8 @@ export interface RunState {
   map: Record<MapKey, MapCell>;
   mapMarks: Record<MapKey, MapMark>;
   lastNotebookRead: number | null;
+  fakePiano: FakePiano | null;
+  halluc: Hallucinations;
   rng: RngState;
   world: WorldData;
   moves: number;

@@ -133,6 +133,8 @@ textarea { font-size: 13px; resize: vertical; }
 .map-cell.zone-arch { fill: #bbc6a1; } .map-cell.zone-manila { fill: #efc97f; }
 .map-cell.zone-pillar { fill: #d5cfb4; } .map-cell.zone-dark { fill: #aaa79a; }
 .map-cell.zone-pit { fill: #8c897a; } .map-cell.zone-red { fill: #c88774; }
+.map-cell.zone-unknown { fill: #e2d7b9; stroke-dasharray: .05 .07; }
+.map-unknown-edge { fill: none; stroke: #786d4f; stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
 .map-wall, .map-edge path, .map-scribble { fill: none; stroke: #453b26; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .map-edge .map-arch-opening { stroke-width: 1; stroke-dasharray: 2 2; }
 .map-edge .map-door-leaf { stroke-width: 4; } .map-edge .map-door-swing { stroke-width: 1; }

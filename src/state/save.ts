@@ -1,6 +1,6 @@
 /* Saving goes through a small Store interface (IndexedDB now, a server later for multiplayer).
    Every action saves; a run can be left and resumed, and a reload never undoes a death. */
-import { newMeta, SAVE_VERSION, type Meta, type RunState } from "./types";
+import { newHallucinations, newMeta, SAVE_VERSION, type Meta, type RunState } from "./types";
 
 export interface Store { get(key: string): Promise<unknown>; set(key: string, v: unknown): Promise<void>; del(key: string): Promise<void> }
 
@@ -37,6 +37,11 @@ export function migrateMeta(m: Partial<Meta> | undefined): Meta {
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
 function runDefaults(r: RunState): RunState {
   r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
+  r.fakePiano ??= null;
+  r.halluc = { ...newHallucinations(), ...r.halluc };
+  r.halluc.history = (r.halluc.history ?? []).slice(-50);
+  r.halluc.serial = Math.max(r.halluc.serial, ...r.halluc.history.map(x => x.id));
+  r.rng.counters.halluc ??= 0;
   return r;
 }
 export async function loadRun(): Promise<RunState | null> { const r = (await store.get("run")) as RunState | undefined; return r && r.v === SAVE_VERSION && !r.ended ? runDefaults(r) : null; }

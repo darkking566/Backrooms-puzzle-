@@ -7,8 +7,10 @@ import { H } from "./survival";
 
 export const mapKey = (i: number, j: number): MapKey => `${i},${j}`;
 export const NOTEBOOK_COOLDOWN = 6 * H;
+const canSee = (r: RunState, w: Level0) => r.inv.some(x => x.id === "flashlight") || (r.outageLeft <= 0 && w.zone(r.pos.i, r.pos.j) !== "dark");
 
 export function mapEdge(edge: Edge | undefined): MapEdge {
+  if (!edge) return "unknown";
   if (edge === "flicker" || edge === "fakeflicker") return "flicker";
   if (isOpenDoor(edge)) return "door-open";
   if (edge?.startsWith("door-")) return "door";
@@ -27,33 +29,38 @@ export function messyWalls(seed: number, i: number, j: number, ver: number, wall
   return copy;
 }
 
-function snapshot(r: RunState, w: Level0, i: number, j: number, visited: boolean): MapCell | null {
+function snapshot(r: RunState, w: Level0, i: number, j: number, visited: boolean, visible = true): MapCell | null {
   const cell = w.cells.get(mapKey(i, j));
   if (!cell) return null;
-  const walls = [0, 1, 2, 3].map(d => mapEdge(w.edgeAt(i, j, d))) as MapCell["walls"];
+  const walls = [0, 1, 2, 3].map(d => visible ? mapEdge(w.edgeAt(i, j, d)) : "unknown") as MapCell["walls"];
   const messy = r.stats.sanity < 35;
   return { walls: messy ? messyWalls(r.seed, i, j, cell.ver, walls) : walls,
-    zone: w.zone(i, j), t: r.time, ver: cell.ver, messy, visited };
+    zone: visible ? w.zone(i, j) : "unknown", t: r.time, ver: cell.ver, messy, visited };
 }
 
 /** Record the current cell on entry; fill only blank pages ahead. Return a noticed discrepancy. */
 export function recordNotebook(r: RunState, w: Level0, entered = false): boolean {
   if (!r.inv.some(x => x.id === "notebook")) return false;
   const { i, j, d } = r.pos, key = mapKey(i, j), old = r.map[key];
+  if (!canSee(r, w)) {
+    // Arriving in darkness cannot correct, erase or refresh an earlier drawing.
+    if (old) old.visited = true;
+    else { const cell = snapshot(r, w, i, j, true, false); if (cell) r.map[key] = cell; }
+    return false;
+  }
   let changed = false;
-  if (entered || !old?.visited) {
+  if (entered || !old?.visited || old.zone === "unknown" || old.walls.includes("unknown")) {
     const next = snapshot(r, w, i, j, true);
     if (next) {
       if (old) {
         // Compare observations, not sanity-dependent pen errors or an invisible version change.
         const before = old.messy ? messyWalls(r.seed, i, j, old.ver, old.walls) : old.walls;
         const after = next.messy ? messyWalls(r.seed, i, j, next.ver, next.walls) : next.walls;
-        changed = old.zone !== next.zone || before.some((edge, k) => edge !== after[k]);
+        changed = (old.zone !== "unknown" && old.zone !== next.zone) || before.some((edge, k) => edge !== "unknown" && edge !== after[k]);
       }
       r.map[key] = next;
     }
   }
-  if ((r.outageLeft > 0 || w.zone(i, j) === "dark") && !r.inv.some(x => x.id === "flashlight")) return changed;
   let a = i, b = j;
   for (let step = 0; step < 3; step++) {
     if (!passable(w.edgeAt(a, b, d))) break;
@@ -67,7 +74,7 @@ export function recordNotebook(r: RunState, w: Level0, entered = false): boolean
 
 /** Opening a nearby door changes just that observed edge, not the rest of an old drawing. */
 export function recordNotebookDoor(r: RunState, w: Level0, edge: string) {
-  if (!r.inv.some(x => x.id === "notebook")) return;
+  if (!r.inv.some(x => x.id === "notebook") || !canSee(r, w)) return;
   const cells = edgeCells(edge), dirs: Dir[] = edge[0] === "v" ? [1, 3] : [2, 0];
   cells.forEach(([i, j], n) => { const cell = r.map[mapKey(i, j)]; if (cell) cell.walls[dirs[n]] = mapEdge(w.edges.get(edge)); });
 }

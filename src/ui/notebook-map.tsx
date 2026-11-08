@@ -16,6 +16,7 @@ function markLabel(mark: MapMark): string {
 }
 function zoneLabel(cell: MapCell): string {
   switch (cell.zone) {
+    case "unknown": return U("mapUnknown");
     case "arch": return U("mapArch");
     case "manila": return cell.visited ? U("mapManila") : U("mapRoom");
     case "pillar": return U("mapPillar");
@@ -37,6 +38,7 @@ function recordedAt(r: RunState, cell: MapCell): string {
 
 function Edge({ edge, d }: { edge: MapEdge; d: number }) {
   if (edge === "open") return null;
+  if (edge === "unknown") return <path class="map-unknown-edge" d={EDGE_PATH[d]} />;
   if (edge === "wall") return <path class="map-wall" d={EDGE_PATH[d]} />;
   // Rotation gives every remembered door/flicker exactly the same glyph, regardless of its source.
   return <g transform={`rotate(${d * 90})`} class={`map-edge map-${edge}`}>
@@ -108,6 +110,7 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
               {memory.walls.map((edge, d) => <Edge key={d} edge={edge} d={d} />)}
               {zone === "arch" && <text class="map-zone" x={0} y={.12}>∩</text>}
               {zone === "manila" && <text class="map-zone" x={0} y={.12}>M</text>}
+              {zone === "unknown" && <text class="map-zone" x={.28} y={.35}>?</text>}
               {memory.messy && <path class="map-scribble" d="M -.36,.28 l .12,-.05 .06,.07 .14,-.06 .17,.04" />}
             </g>
             {note && <text class={`map-mark mark-${note.kind}`} x={.26} y={-.12}>{MARK_SYMBOL[note.kind]}</text>}
@@ -123,7 +126,7 @@ export function NotebookMap({ run: r, act }: { run: RunState; act: Act }) {
         </g>
       </svg>
     </div>
-    <div class="map-legend small"><span>▲ {U("mapYou")}</span><span>━ {U("mapWall")}</span><span>▰ {U("mapDoor")}</span><span>∩ {U("mapArch")}</span><span>M {U("mapManila")}</span><span>⌁ {U("mapFlicker")}</span></div>
+    <div class="map-legend small"><span>▲ {U("mapYou")}</span><span>━ {U("mapWall")}</span><span>▰ {U("mapDoor")}</span><span>∩ {U("mapArch")}</span><span>M {U("mapManila")}</span><span>⌁ {U("mapFlicker")}</span><span>? {U("mapUnknown")}</span></div>
     {Object.values(r.map).some(c => c.messy) && <p class="small map-messy">{U("mapMessyHint")}</p>}
     {cell ? <div class="map-edit">
       <p class="small"><b>{zoneLabel(cell)}</b> · {U(cell.visited ? "mapVisited" : "mapSeen")}{cell.messy && <span class="map-messy"> · {U("mapMessy")}</span>}</p>

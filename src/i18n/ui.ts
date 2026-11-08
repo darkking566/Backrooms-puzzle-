@@ -20,6 +20,7 @@ export const UI = {
   mapHall: t("走廊", "Corridor"), mapRoom: t("房間", "Room"), mapWall: t("牆", "Wall"), mapDoor: t("門", "Door"), mapPillar: t("柱林", "Pillars"), mapDark: t("斷電區", "Blackout zone"), mapPit: t("坑洞區", "Pits"), mapRed: t("紅房間", "Red room"),
   mapMessy: t("字跡很亂", "Messy handwriting"), mapMessyHint: t("字跡很亂。有些線條可能畫錯了。", "Messy handwriting. Some lines may be wrong."),
   mapVisited: t("走過", "Walked here"), mapSeen: t("遠遠看過", "Seen from a distance"),
+  mapUnknown: t("細節看不清", "Details unseen"),
   mapRecordedAt: t("記錄於第 {d} 天 {time}", "Drawn on day {d} at {time}"), mapFresh: t("筆跡還很清楚。", "The lines are still clear."), mapOlder: t("這是先前畫下的。", "Drawn a while ago."), mapFaded: t("很早以前的筆跡，已經淡了。", "Old lines, fading away."),
   mapSelect: t("點一個畫過的格子，留個記號。", "Tap a drawn cell to leave a mark."), mapWater: t("水", "Water"), mapDanger: t("危險", "Danger"), mapExit: t("出口？", "Exit?"), mapErase: t("擦掉記號", "Erase mark"),
   mapCustom: t("自訂短字（最多 20 字）", "Your words (up to 20 characters)"), mapSaveMark: t("記下", "Write"),

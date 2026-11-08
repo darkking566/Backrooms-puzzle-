@@ -2,12 +2,13 @@
    through one pipeline (command → minutes pass → survival → statuses → events → autosave by the caller)
    and returns what happened for the UI and renderer to show. No Three.js, no DOM. */
 import type { ContentData } from "../../tools/content-schema";
-import { draw, pick, type RngState } from "./rng";
+import { draw, pick, type RngState, type Stream } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
 import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone } from "../world/level0";
-import { SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
+import { newHallucinations, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
+import { perceive } from "../systems/hallucinations";
 
 export const CARRY = 8;                 // weight you can carry
 export const PREP_CARRY = 5;            // weight you can bring into a run
@@ -26,7 +27,7 @@ export type Command =
   | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
-export interface Outcome { say: Text[]; caption?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; sfx: string[]; minutes: number }
+export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; sfx: string[]; minutes: number }
 
 const COLOR_NAME: Record<string, Text> = { grey: T("灰色", "grey"), green: T("綠色", "green"), blue: T("藍色", "blue"), reddish: T("偏紅的", "reddish") };
 
@@ -46,13 +47,14 @@ export class Game {
   /* ---------- new run ---------- */
   static newRun(c: ContentData, meta: Meta, seed: number, bought: string[]): Game {
     meta.runs += 1;
-    const rng: RngState = { seed, counters: {} };
+    const rng: RngState = { seed, counters: { halluc: 0 } };
     const run: RunState = {
       v: SAVE_VERSION, seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
       stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
       inv: bought.map((id, k) => ({ key: "start" + k, id })), carried: [...bought],
       pos: { i: 0, j: 0, d: 0 }, rng, world: { seed, manila: [0, 0], cells: [], edges: [], fixed: [], picked: [], opened: [], flickerKey: null, fakeKey: null, corpse: null },
       map: {}, mapMarks: {}, lastNotebookRead: null,
+      fakePiano: null, halluc: newHallucinations(),
       moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
     };
     // volunteers keep the Manila Room cabinet stocked a little (Wiki: The Manila Room)
@@ -95,7 +97,7 @@ export class Game {
     return { zone: this.zoneHere(), dark: this.isDark(), redK: 1 - sstep(.8, 3.2, this.world.redDist(i, j)), manilaK: this.zoneHere() === "manila" ? 1 : 0, inLevel0: true };
   }
   private say(t: Text, kind?: "event" | "warn" | "caption") { this.out.say.push(t); this.run.log.push({ t, kind }); if (this.run.log.length > 60) this.run.log.splice(0, this.run.log.length - 60); }
-  private rand(s: "events" | "loot" | "misc" | "shift" | "body" = "misc") { return draw(this.run.rng, s); }
+  private rand(s: Stream = "misc") { return draw(this.run.rng, s); }
   private discover(id: string) { if (!this.meta.discoveries.includes(id) && !this.run.found.includes(id)) this.run.found.push(id); }
   learn(id: string) { if (!this.meta.clues.includes(id)) this.meta.clues.push(id); }
 
@@ -112,7 +114,7 @@ export class Game {
     const r = this.run;
     if (r.ended) return this.out;
     if (r.pendingEvent && cmd.type !== "choose") return this.out;
-    const from = { ...r.pos }, hadNotebook = this.has("notebook");
+    const from = { ...r.pos }, hadNotebook = this.has("notebook"), previousSanity = r.stats.sanity, redStage = r.redStage;
     switch (cmd.type) {
       case "move": this.move(cmd.d); break;
       case "turn": this.turn(cmd.dir); break;
@@ -145,6 +147,18 @@ export class Game {
       const entered = from.i !== r.pos.i || from.j !== r.pos.j || !hadNotebook;
       if (recordNotebook(r, this.world, entered)) this.say(T("這裡跟你畫的不一樣。", "This isn't what you drew."));
       if (cmd.type === "door" && this.out.anim.kind === "door") recordNotebookDoor(r, this.world, cmd.edge);
+    }
+    if (!r.ended && this.out.minutes > 0) {
+      const z = this.zoneHere();
+      const perception = perceive(r, this.world, {
+        action: cmd.type === "move" && this.out.anim.kind === "move" ? "move" : cmd.type === "search" || cmd.type === "rest" ? cmd.type : null,
+        minutes: this.out.minutes, previousSanity,
+        important: !!this.out.caption || !!r.pendingEvent || !!this.world.flickerKey || redStage !== r.redStage || z === "pit" || z === "red" || this.world.redDist(r.pos.i, r.pos.j) <= 3.2
+      }, () => this.rand("halluc"));
+      for (const line of perception.say) this.say(line);
+      if (perception.caption) this.out.caption = perception.caption;
+      if (perception.sfx) this.out.sfx.push(perception.sfx);
+      if (perception.perceivedTime) this.out.perceivedTime = perception.perceivedTime;
     }
     return this.out;
   }

@@ -3,7 +3,7 @@ import { loadContent } from "../tools/content-plugin";
 import { Game } from "../src/core/game";
 import { newMeta, type MapCell, type RunState } from "../src/state/types";
 import { exportSave, importSave, loadRun, persist, wipe } from "../src/state/save";
-import { mapEdge, mapOpacity, messyWalls, NOTEBOOK_COOLDOWN, notebookReadGain, recordNotebook } from "../src/systems/notebook";
+import { mapEdge, mapOpacity, messyWalls, NOTEBOOK_COOLDOWN, notebookReadGain, recordNotebook, recordNotebookDoor } from "../src/systems/notebook";
 import { tick } from "../src/systems/survival";
 import { edgeKey, type Edge } from "../src/world/level0";
 
@@ -45,6 +45,40 @@ describe("notebook observations", () => {
     const g = make(["notebook"]); g.run.outageLeft = 3;
     g.run.map = {}; recordNotebook(g.run, g.world, true);
     expect(Object.keys(g.run.map)).toEqual(["0,0"]);
+    expect(g.run.map["0,0"].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
+    expect(g.run.map["0,0"].zone).toBe("unknown"); expect(g.run.map["0,0"].visited).toBe(true);
+  });
+
+  it("records only a visit in a dark zone, without revealing its walls or zone", () => {
+    const g = make(["notebook"]);
+    let dark: [number, number] | undefined;
+    for (let i = -30; i <= 30 && !dark; i++) for (let j = -30; j <= 30; j++) if (g.world.zone(i, j) === "dark") { dark = [i, j]; break; }
+    expect(dark).toBeDefined(); const [i, j] = dark!;
+    g.run.pos = { i, j, d: 0 }; g.world.ensureAround(i, j); g.run.map = {}; g.run.stats.sanity = 20;
+    recordNotebook(g.run, g.world, true);
+    const cells = Object.values(g.run.map);
+    expect(cells).toHaveLength(1); expect(cells[0].zone).toBe("unknown");
+    expect(cells[0].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
+  });
+
+  it("retains older visible drawings and their age when revisiting in total darkness", () => {
+    const g = make(["notebook"]), before = copy(g.run.map["0,-1"]);
+    g.run.time = 60; g.run.pos.j = -1; g.run.outageLeft = 3;
+    g.world.edges.set(edgeKey(0, -1, 1), "door-metal");
+    expect(recordNotebook(g.run, g.world, true)).toBe(false);
+    expect(g.run.map["0,-1"]).toEqual({ ...before, visited: true });
+  });
+
+  it("fills unseen details after the light returns without inventing a discrepancy", () => {
+    const g = make(["notebook"]); g.run.outageLeft = 3; g.run.map = {};
+    recordNotebook(g.run, g.world, true);
+    g.world.edges.set(edgeKey(0, 0, 1), "door-wood-open");
+    recordNotebookDoor(g.run, g.world, edgeKey(0, 0, 1));
+    expect(g.run.map["0,0"].walls).toEqual(["unknown", "unknown", "unknown", "unknown"]);
+    g.run.time = 30; g.run.outageLeft = 0;
+    expect(recordNotebook(g.run, g.world)).toBe(false);
+    expect(g.run.map["0,0"].walls).not.toContain("unknown"); expect(g.run.map["0,0"].zone).toBe("hall");
+    expect(g.run.map["0,0"].t).toBe(30);
   });
 
   it("keeps snapshots after a shift and redraws only on entry, with a discrepancy", () => {

@@ -4,6 +4,7 @@ import { sstep, T, type Text } from "../core/types";
 import type { Game } from "../core/game";
 import { edgeCells } from "../world/level0";
 import { hasStatus } from "../systems/survival";
+import { pianoLevels, PIANO_AUDIBLE, PIANO_CAPTION } from "../systems/hallucinations";
 
 type N = Record<string, any>;   // eslint-disable-line @typescript-eslint/no-explicit-any
 const TUNE: [number, number][] = [[57, 1], [64, 1], [60, 2], [59, 1], [57, 1], [52, 2], [0, 1], [53, 1], [57, 1], [60, 2], [59, 1.5], [55, .5], [57, 3], [0, 2]];
@@ -87,26 +88,31 @@ export class Audio {
     else if (name === "clunk") { this.thump(t, 70, .5, .55); this.burst(t, .25, "lowpass", 300, .7, .35); }
     else if (name === "relight") { for (let k = 0; k < 5; k++) this.burst(t + k * .2 + Math.random() * .06, .03, "highpass", 2500, .7, .18); }
     else if (name === "paper") { this.burst(t, .12, "highpass", 3500, .5, .08); this.burst(t + .1, .1, "highpass", 4200, .5, .05); }
+    else if (name === "distant_steps") { for (let k = 0; k < 3; k++) this.thump(t + k * .58, 68, .16, .035); }
+    else if (name === "distant_knocks") { this.thump(t, 125, .1, .045); this.thump(t + .42, 125, .1, .04); }
     else if (name === "whoosh") this.burst(t, 1.2, "lowpass", 600, .5, .5);
     else if (name === "spike") { const o = C.createOscillator(), g = C.createGain(); o.type = "sawtooth"; o.frequency.value = 2400; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .3); g.gain.linearRampToValueAtTime(0, t + 2.5); o.connect(g); g.connect(this.n.master); o.start(t); o.stop(t + 2.6); }
     else if (name === "end") { this.n.hum.gain.setTargetAtTime(0, t, .3); this.n.piano.gain.setTargetAtTime(0, t, .3); }
   }
+  /** Every spoken caption takes the same hearing-damage path, even with sound disabled. */
+  caption(text: Text, g: Game) { this.onCaption(hasStatus(g.run, "hearing_damage") ? muffle(text) : text); }
+
   /** Follow where you stand. Captions appear once when something becomes audible. */
   ambience(g: Game) {
     const { i, j } = g.run.pos, w = g.world, z = w.zone(i, j), inM = z === "manila";
     const dm = w.manilaDist(i, j), dr = w.redDist(i, j);
     let lit = 0, fl = 0;
     for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const c = w.cells.get((i + di) + "," + (j + dj)); const p = c?.panel; if (p && p !== "dead" && !p.red && !w.inManila(c!.i, c!.j)) { lit++; if (p.flick) fl++; } }
-    const pw = g.run.outageLeft ? 0 : 1, near = 1 - sstep(1.5, 7, dm), redK = 1 - sstep(.8, 3.2, dr);
+    const pw = g.run.outageLeft ? 0 : 1, piano = pianoLevels(g.run, w), redK = 1 - sstep(.8, 3.2, dr);
     this.muffled = hasStatus(g.run, "hearing_damage");
-    const lv = { hum: inM ? 0 : (.03 + .035 * lit) * pw * sstep(1.2, 4.5, dm), piano: inM ? .8 : .65 * near, cut: inM ? 5200 : 280 + 1500 * near * near, drone: .32 * redK, buzz: 0, fl: fl * pw };
+    const lv = { hum: inM ? 0 : (.03 + .035 * lit) * pw * sstep(1.2, 4.5, dm), piano: piano.piano, cut: piano.cut, drone: .32 * redK, buzz: 0, fl: fl * pw };
     if (w.flickerKey) { const [[a, b], [c, d]] = edgeCells(w.flickerKey); lv.buzz = .05 * (1 - sstep(.5, 3.5, Math.hypot((a + c) / 2 - i, (b + d) / 2 - j))); }
     this.lv = lv;
-    const st = { inM, piano: lv.piano > .06, red: redK > .25, buzz: lv.buzz > .008, crk: fl > 0 && pw > 0 };
-    const say = (t: Text) => this.onCaption(this.muffled ? muffle(t) : t);
+    const st = { inM, piano: lv.piano > PIANO_AUDIBLE, red: redK > .25, buzz: lv.buzz > .008, crk: fl > 0 && pw > 0 };
+    const say = (t: Text) => this.caption(t, g);
     if (inM && !this.capState.inM) say(T("〔嗡嗡聲停了。鋼琴聲很清楚〕", "[The hum stops. The piano is clear]"));
     else if (!inM && this.capState.inM) say(T("〔嗡嗡聲又回來了〕", "[The hum is back]"));
-    else if (!inM && lv.piano > .1 && !this.capState.piano) say(T("〔很遠的地方，有人在彈鋼琴〕", "[Far away, someone is playing piano]"));
+    else if (!inM && st.piano && !this.capState.piano) say(PIANO_CAPTION);
     else if (redK > .4 && !this.capState.red) say(T("〔嗡嗡聲變得又低又悶〕", "[The hum sinks low and dull]"));
     else if (lv.buzz > .015 && !this.capState.buzz) this.onCaption(this.muffled   // tell them what the ringing cost them
       ? T("〔你好像聽到了什麼，但耳鳴把它蓋過去了〕", "[You think you hear something, but the ringing drowns it out]")
