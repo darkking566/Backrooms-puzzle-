@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Backrooms 3D 技術展示</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Serif+TC:wght@400&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas; HUD chips top, narration + controls bottom. Single dark theme by design. */
+:root {
+  color-scheme: dark;
+  --ink: #12110c;
+  --panel: rgba(22, 20, 13, .86);
+  --line: #403b27;
+  --paper: #ebe3c4;
+  --muted: #a39a78;
+  --tube: #e6d36a;
+  --warn: #c9573c;
+  --f-ui: "IBM Plex Mono", ui-monospace, Menlo, "PingFang TC", "Microsoft JhengHei", monospace;
+  --f-story: "Noto Serif TC", "Songti TC", "PMingLiU", Georgia, serif;
+}
+html, body { height: 100%; }
+body { background: var(--ink); color: var(--paper); font-family: var(--f-ui); overflow: hidden; }
+#wrap { position: relative; height: 100%; display: flex; flex-direction: column; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.top { position: absolute; top: 10px; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; pointer-events: none; }
+.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.chip b { color: var(--tube); font-weight: 600; }
+.chip.title { color: var(--paper); }
+.bottom { position: absolute; left: 0; right: 0; bottom: 10px; padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.near { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.near:empty { display: none; }
+.near button { pointer-events: auto; background: var(--panel); border: 1px solid var(--tube); color: var(--paper); border-radius: 5px; padding: 8px 12px; font: inherit; font-size: 13px; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+.near button span { color: var(--muted); font-size: 11px; }
+.near button b { color: var(--tube); font-weight: 600; }
+.bar { flex: none; background: var(--ink); border-top: 1px solid var(--line); padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); display: flex; justify-content: center; }
+.say { pointer-events: none; max-width: min(38em, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; font-family: var(--f-story); font-size: 15px; line-height: 1.7; text-wrap: pretty; transition: opacity .4s; }
+.say:empty { opacity: 0; }
+.say.bad { border-color: var(--warn); }
+.ctrl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; max-width: 560px; width: 100%; }
+.ctrl button { background: var(--panel); border: 0; color: var(--paper); font: inherit; font-size: 13px; padding: 11px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ctrl button small { font-size: 10px; color: var(--muted); }
+.ctrl button:hover { background: rgba(48, 44, 28, .95); }
+.ctrl button[aria-pressed="true"] { color: var(--tube); }
+.ctrl button:disabled { opacity: .45; cursor: wait; }
+button:focus-visible { outline: 2px solid var(--tube); outline-offset: -2px; }
+.lbl { position: absolute; transform: translate(-50%, -50%); background: rgba(18, 17, 12, .82); border: 1px dashed var(--tube); color: var(--tube); font-size: 11px; padding: 3px 8px; border-radius: 3px; pointer-events: none; white-space: nowrap; }
+.end { position: absolute; inset: 0; background: rgba(250, 246, 225, .0); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px; pointer-events: none; opacity: 0; transition: opacity 1.2s, background 1.2s; }
+.end.on { opacity: 1; background: rgba(12, 11, 7, .94); pointer-events: auto; }
+.end h2 { font-family: var(--f-story); font-weight: 400; font-size: 24px; margin: 0; }
+.end p { color: var(--muted); max-width: 30em; line-height: 1.7; margin: 0; font-size: 13px; }
+.end button { background: var(--panel); border: 1px solid var(--tube); color: var(--tube); border-radius: 5px; padding: 10px 16px; font: inherit; cursor: pointer; }
+.err { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); }
+</style>
+
+<div id="wrap">
+  <div class="stage">
+  <canvas id="gl"></canvas>
+  <div id="labels"></div>
+  <div class="top">
+    <span class="chip title">技術展示 · Level 0</span>
+    <span class="chip">移動 <b id="mv">0</b> 格</span>
+    <span class="chip">偏移 <b id="sh">0</b> 個區塊</span>
+    <span class="chip" id="seedc">種子 <b id="sd">—</b></span>
+  </div>
+  <div class="bottom"><div class="near" id="near"></div><div class="say" id="say"></div></div>
+  </div>
+  <div class="bar">
+    <div class="ctrl">
+      <button id="bBack">回頭<small>鏡頭外會偏移</small></button>
+      <button id="bHint" aria-pressed="false">互動點<small>顯示可點處</small></button>
+      <button id="bFlash" aria-pressed="false">閃爍<small>預設關閉</small></button>
+      <button id="bSeed">換一個種子<small>重新生成</small></button>
+    </div>
+  </div>
+  <div class="end" id="end"><h2>你撲進了閃爍的牆。</h2><p>技術展示到此結束。正式版會在這裡進入 Level 1。</p><button id="bAgain">重新開始</button></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+"use strict";
+if (!window.THREE) { document.getElementById("wrap").innerHTML = '<div class="err">3D 函式庫沒有載入，請重新整理頁面。</div>'; return; }
+
+/* ---------- constants ---------- */
+const S = 4, H = 2.75, BACK = 1.35, EYE = 1.62, R = 6, PITCH = -0.09;   // slight downward look so floor items sit above the controls
+const DV = [[0, -1], [1, 0], [0, 1], [-1, 0]];         // N E S W
+const $ = id => document.getElementById(id);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- seeded randomness ---------- */
+let SEED = (Math.random() * 1e9) | 0;
+function hash(...n) { let h = 2166136261 ^ SEED; for (const v of n) { h = Math.imul(h ^ (v | 0), 16777619); h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15; } return (h >>> 0) / 4294967296; }
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- zones (fixed per seed, never shift) ---------- */
+function zone(i, j) {
+  if (i >= 2 && i <= 4 && j >= -5 && j <= -2) return "arch";       // stable arch rooms near the start
+  if (i <= -2 && i >= -7 && j >= -6 && j <= 1) return "pillar";
+  const n = hash(Math.floor(i / 5), Math.floor(j / 5), 77);
+  return n < .12 ? "arch" : n < .3 ? "pillar" : "hall";
+}
+
+/* ---------- renderer & scene ---------- */
+const canvas = $("gl");
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" }); }
+catch (e) { $("wrap").innerHTML = '<div class="err">這個瀏覽器無法使用 WebGL，3D 展示無法執行。</div>'; return; }
+const scene = new THREE.Scene();
+const FOGC = new THREE.Color(0x2b2613);
+scene.background = FOGC; scene.fog = new THREE.FogExp2(FOGC, 0.062);
+const camera = new THREE.PerspectiveCamera(68, 1, 0.05, 60);
+scene.add(new THREE.HemisphereLight(0xfff3c8, 0x4a3a1c, 0.42));
+const LIGHTS = [];
+for (let k = 0; k < 7; k++) { const L = new THREE.PointLight(0xfff4d2, 0, 10, 2); scene.add(L); LIGHTS.push(L); }
+
+/* ---------- procedural textures ---------- */
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+function canvasTex(w, h, draw, rep = [1, 1]) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"); draw(x, w, h);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep); t.anisotropy = maxAniso; return t;
+}
+function noise(x, w, h, amt, rnd) { const d = x.getImageData(0, 0, w, h); for (let i = 0; i < d.data.length; i += 4) { const v = (rnd() - .5) * amt; d.data[i] += v; d.data[i + 1] += v; d.data[i + 2] += v * .8; } x.putImageData(d, 0, 0); }
+function wallpaper(base, stripe, seed, stains) {
+  return canvasTex(512, 352, (x, w, h) => {
+    const r = mulberry(seed);
+    x.fillStyle = base; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < w; i += 32) { x.fillStyle = stripe; x.fillRect(i, 0, 12, h); }
+    x.fillStyle = "rgba(90,70,20,.10)";
+    for (let i = 16; i < w; i += 32) for (let j = 10; j < h; j += 26) { x.beginPath(); x.moveTo(i, j - 5); x.lineTo(i + 4, j); x.lineTo(i, j + 5); x.lineTo(i - 4, j); x.fill(); }
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "rgba(40,30,5,.18)"); g.addColorStop(.25, "rgba(0,0,0,0)"); g.addColorStop(.85, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(60,40,10,.35)"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    for (let k = 0; k < stains; k++) {
+      const cx = r() * w, cy = h * (.55 + r() * .5), rad = 20 + r() * 90;
+      const sg = x.createRadialGradient(cx, cy, 0, cx, cy, rad); sg.addColorStop(0, "rgba(95,70,20,.28)"); sg.addColorStop(.7, "rgba(110,85,25,.12)"); sg.addColorStop(1, "rgba(0,0,0,0)");
+      x.fillStyle = sg; x.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+    }
+    noise(x, w, h, 22, r);
+  });
+}
+const T = {
+  walls: [0, 1, 2].map(k => wallpaper("#cdb75a", "rgba(225,205,120,.35)", 11 + k, 3 + k * 2)),
+  pale: wallpaper("#d8d0a8", "rgba(240,232,200,.4)", 41, 2),
+  carpet: canvasTex(256, 256, (x, w, h) => {
+    const r = mulberry(5); x.fillStyle = "#8f7a4a"; x.fillRect(0, 0, w, h);
+    for (let k = 0; k < 9; k++) { const cx = r() * w, cy = r() * h, rad = 20 + r() * 70; const g = x.createRadialGradient(cx, cy, 0, cx, cy, rad); g.addColorStop(0, "rgba(55,40,15,.35)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }
+    for (let y = 0; y < h; y += 3) { x.fillStyle = `rgba(${r() < .5 ? "255,240,200" : "40,30,10"},.05)`; x.fillRect(0, y, w, 1); }
+    noise(x, w, h, 40, r);
+  }, [2, 2]),
+  ceil: canvasTex(256, 256, (x, w, h) => {
+    const r = mulberry(9); x.fillStyle = "#d6d0ae"; x.fillRect(0, 0, w, h);
+    for (let k = 0; k < 900; k++) { x.fillStyle = "rgba(90,80,50,.25)"; x.fillRect(r() * w, r() * h, 1.5, 1.5); }
+    x.strokeStyle = "rgba(141,133,106,.55)"; x.lineWidth = 2; x.strokeRect(0, 0, w, h); x.beginPath(); x.moveTo(w / 2, 0); x.lineTo(w / 2, h); x.moveTo(0, h / 2); x.lineTo(w, h / 2); x.stroke();
+    noise(x, w, h, 14, r);
+  }, [1, 1]),
+  panel: canvasTex(128, 256, (x, w, h) => {
+    x.fillStyle = "#fffbe6"; x.fillRect(0, 0, w, h);
+    x.strokeStyle = "rgba(170,160,120,.55)"; x.lineWidth = 2; for (let i = 8; i < w; i += 10) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); } for (let j = 8; j < h; j += 10) { x.beginPath(); x.moveTo(0, j); x.lineTo(w, j); x.stroke(); }
+    x.strokeStyle = "#b7ae8e"; x.lineWidth = 8; x.strokeRect(0, 0, w, h);
+  })
+};
+const M = {
+  walls: T.walls.map(t => new THREE.MeshStandardMaterial({ map: t, roughness: .92 })),
+  pale: new THREE.MeshStandardMaterial({ map: T.pale, roughness: .95 }),
+  carpet: new THREE.MeshStandardMaterial({ map: T.carpet, roughness: .78 }),
+  ceil: new THREE.MeshStandardMaterial({ map: T.ceil, roughness: 1 }),
+  panel: new THREE.MeshBasicMaterial({ map: T.panel, fog: true }),
+  dead: new THREE.MeshStandardMaterial({ color: 0x55513f, roughness: .6 }),
+  flicker: new THREE.MeshBasicMaterial({ color: 0xfff6cf }),
+  exit: new THREE.MeshBasicMaterial({ color: 0xe6d36a, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
+  pillar: T.walls.map(t => new THREE.MeshStandardMaterial({ map: t, roughness: .92 })),
+};
+M.pillar.forEach(m => { m.map = m.map.clone(); m.map.needsUpdate = true; m.map.repeat.set(.3, 1); });
+const archMat = new THREE.MeshStandardMaterial({ map: (() => { const t = T.pale.clone(); t.needsUpdate = true; t.repeat.set(1 / S, 1 / H); return t; })(), roughness: .95 });
+
+/* ---------- shared geometry ---------- */
+const G = {
+  floor: new THREE.PlaneGeometry(S, S).rotateX(-Math.PI / 2),
+  ceil: new THREE.PlaneGeometry(S, S).rotateX(Math.PI / 2).translate(0, H, 0),
+  wall: new THREE.BoxGeometry(S + .14, H, .14).translate(0, H / 2, 0),
+  panel: new THREE.PlaneGeometry(.62, 1.24).rotateX(Math.PI / 2).translate(0, H - .01, 0),
+  pillar: new THREE.BoxGeometry(.7, H, .7).translate(0, H / 2, 0),
+  exit: new THREE.PlaneGeometry(S * .82, H * .9).translate(0, H * .47, 0),
+  arch: (() => {
+    const s = new THREE.Shape(); s.moveTo(-S / 2 - .07, 0); s.lineTo(S / 2 + .07, 0); s.lineTo(S / 2 + .07, H); s.lineTo(-S / 2 - .07, H); s.closePath();
+    const w = 1.1, top = 1.75; const p = new THREE.Path(); p.moveTo(-w, 0); p.lineTo(-w, top); p.absarc(0, top, w, Math.PI, 0, true); p.lineTo(w, 0); p.closePath(); s.holes.push(p);
+    return new THREE.ExtrudeGeometry(s, { depth: .3, bevelEnabled: false }).translate(0, 0, -.15);
+  })(),
+  bottle: new THREE.CylinderGeometry(.075, .075, .3, 16).translate(0, .15, 0),
+  cap: new THREE.CylinderGeometry(.06, .06, .05, 12).translate(0, .325, 0),
+  proxy: new THREE.SphereGeometry(.42, 8, 6).translate(0, .2, 0)
+};
+const proxyMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+
+/* ---------- world state ---------- */
+const cells = new Map();   // "i,j" -> { i, j, ver, group, panel }
+const edges = new Map();   // "v:i,j" / "h:i,j" -> { type, mesh }
+const picked = new Set();
+const pickables = [];      // exit planes + hotspots for raycasting
+let cur = { i: 0, j: 0, d: 0 }, moves = 0, shifted = 0, flickerKey = null, busy = false, hints = false, flash = false;
+const ck = (i, j) => i + "," + j;
+function edgeKey(i, j, d) { return d === 1 ? `v:${i},${j}` : d === 3 ? `v:${i - 1},${j}` : d === 2 ? `h:${i},${j}` : `h:${i},${j - 1}`; }
+function edgeCells(k) { const [t, rest] = k.split(":"); const [i, j] = rest.split(",").map(Number); return t === "v" ? [[i, j], [i + 1, j]] : [[i, j], [i, j + 1]]; }
+function stable(i, j) { return zone(i, j) === "arch"; }
+
+function rollEdge(k) {
+  const [[a, b], [c, d]] = edgeCells(k);
+  const za = zone(a, b), zb = zone(c, d);
+  const ver = (cells.get(ck(a, b))?.ver || 0) * 31 + (cells.get(ck(c, d))?.ver || 0);
+  const r = hash(...k.slice(2).split(",").map(Number), k[0] === "v" ? 1 : 2, ver);
+  if (za === "pillar" && zb === "pillar") return "open";
+  if (za === "arch" || zb === "arch") return r < .62 ? "arch" : "wall";
+  if (za === "pillar" || zb === "pillar") return r < .7 ? "open" : "wall";
+  return r < .56 ? "open" : "wall";
+}
+function buildEdge(k, type) {
+  const e = edges.get(k); if (e?.mesh) { scene.remove(e.mesh); }
+  let mesh = null;
+  const [[a, b]] = edgeCells(k), vert = k[0] === "v";
+  const x = vert ? (a + .5) * S : a * S, z = vert ? b * S : (b + .5) * S;
+  if (type === "wall" || type === "flicker") {
+    const pale = stable(...edgeCells(k)[0]) || stable(...edgeCells(k)[1]);
+    const mat = type === "flicker" ? M.flicker : pale ? M.pale : M.walls[Math.floor(hash(a, b, vert ? 3 : 4) * 3)];
+    mesh = new THREE.Mesh(G.wall, mat);
+  } else if (type === "arch") mesh = new THREE.Mesh(G.arch, archMat);
+  if (mesh) { mesh.position.set(x, 0, z); if (vert) mesh.rotation.y = Math.PI / 2; mesh.userData.edge = k; scene.add(mesh); }
+  edges.set(k, { type, mesh });
+}
+function ensureEdge(k) { if (!edges.has(k)) buildEdge(k, rollEdge(k)); return edges.get(k).type; }
+const passable = t => t === "open" || t === "arch";
+
+function buildCell(i, j) {
+  const old = cells.get(ck(i, j)); if (old?.group) scene.remove(old.group);
+  const ver = old?.ver || 0, z = zone(i, j);
+  const g = new THREE.Group(); g.position.set(i * S, 0, j * S);
+  g.add(new THREE.Mesh(G.floor, M.carpet)); g.add(new THREE.Mesh(G.ceil, M.ceil));
+  const r = hash(i, j, ver, 9);
+  let panel = null;
+  if (r < .82) {
+    const lit = r < .74;
+    const p = new THREE.Mesh(G.panel, lit ? M.panel : M.dead);
+    if (hash(i, j, ver, 10) < .5) p.rotation.y = Math.PI / 2;
+    g.add(p); if (lit) panel = new THREE.Vector3(i * S, H - .25, j * S);
+  }
+  if (z === "pillar") { const p = new THREE.Mesh(G.pillar, M.pillar[Math.floor(r * 3)]); p.position.set(-S / 2, 0, -S / 2); g.add(p); }
+  if (!(i === 0 && j === 0) && hash(i, j, ver, 21) < .1 && !picked.has(ck(i, j) + ":" + ver)) {
+    const colors = [[0x9a9c97, "灰色"], [0x5f8f63, "綠色"], [0xa0463a, "紅色"], [0x4f6f99, "藍色"]];
+    const [col, name] = colors[Math.floor(hash(i, j, ver, 22) * 4)];
+    const full = hash(i, j, ver, 23) < .6;
+    const b = new THREE.Group();
+    b.add(new THREE.Mesh(G.bottle, new THREE.MeshStandardMaterial({ color: col, roughness: .35, metalness: .6 })));
+    b.add(new THREE.Mesh(G.cap, new THREE.MeshStandardMaterial({ color: 0x2c2b27, roughness: .5 })));
+    b.position.set((hash(i, j, 24) - .5) * 2, 0, (hash(i, j, 25) - .5) * 2); b.rotation.z = full ? 0 : Math.PI / 2; if (!full) b.position.y = .08;
+    b.userData.hot = { key: ck(i, j) + ":" + ver, i, j, group: b, name: name + "保溫瓶", text: `一個${name}的金屬保溫瓶${full ? "，立在地上，封口看起來完好。" : "，倒在地上。搖一搖，只剩一半。沒裝滿的瓶子不要喝。"}` };
+    const px = new THREE.Mesh(G.proxy, proxyMat); px.userData.proxy = true; b.add(px);
+    b.children.forEach(m => m.userData.hot = b.userData.hot);
+    g.add(b);
+  }
+  scene.add(g);
+  cells.set(ck(i, j), { i, j, ver, group: g, panel });
+}
+function ensureAround(ci, cj) {
+  for (let i = ci - R; i <= ci + R; i++) for (let j = cj - R; j <= cj + R; j++) if (!cells.has(ck(i, j))) buildCell(i, j);
+  for (let i = ci - R; i <= ci + R; i++) for (let j = cj - R; j <= cj + R; j++) { for (const d of [1, 2]) ensureEdge(edgeKey(i, j, d)); }
+  for (let i = ci - R; i <= ci + R; i++) for (let j = cj - R; j <= cj + R; j++) fixDeadEnd(i, j);
+  for (const [k, c] of cells) if (Math.abs(c.i - ci) > R + 2 || Math.abs(c.j - cj) > R + 2) { scene.remove(c.group); cells.delete(k); }
+  for (const [k, e] of edges) { const [[a, b]] = edgeCells(k); if (Math.abs(a - ci) > R + 2 || Math.abs(b - cj) > R + 2) { if (e.mesh) scene.remove(e.mesh); edges.delete(k); } }
+}
+function fixDeadEnd(i, j, protect) {
+  const ks = [0, 1, 2, 3].map(d => edgeKey(i, j, d));
+  let open = ks.filter(k => passable(edges.get(k)?.type)).length, n = 0;
+  while (open < 2 && n++ < 4) {
+    const k = ks[Math.floor(hash(i, j, n, 31) * 4)];
+    if (protect && protect(k)) continue;
+    if (!passable(edges.get(k)?.type) && edges.get(k)?.type !== "flicker") { buildEdge(k, zone(i, j) === "arch" ? "arch" : "open"); open++; }
+  }
+}
+
+/* ---------- peripheral shift ---------- */
+const frustum = new THREE.Frustum(), box = new THREE.Box3(), m4 = new THREE.Matrix4();
+function visibleSet() {
+  camera.updateMatrixWorld(); m4.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); frustum.setFromProjectionMatrix(m4);
+  const vis = new Set();
+  for (const [k, c] of cells) {
+    const dx = c.i - cur.i, dz = c.j - cur.j;
+    if (Math.abs(dx) <= 1 && Math.abs(dz) <= 1) { vis.add(k); continue; }
+    if (Math.hypot(dx, dz) > 6) continue;
+    box.min.set(c.i * S - S / 2, 0, c.j * S - S / 2); box.max.set(c.i * S + S / 2, H, c.j * S + S / 2);
+    if (frustum.intersectsBox(box)) vis.add(k);
+  }
+  return vis;
+}
+function shiftUnseen() {
+  const vis = visibleSet(); let n = 0;
+  for (const [k, c] of cells) {
+    if (vis.has(k) || stable(c.i, c.j)) continue;
+    c.ver++; n++;
+  }
+  if (!n) return 0;
+  const protect = ek => edgeCells(ek).some(([a, b]) => vis.has(ck(a, b)) || stable(a, b)) || ek === flickerKey;
+  for (const [k, c] of cells) {
+    if (vis.has(k) || stable(c.i, c.j)) continue;
+    buildCell(c.i, c.j);
+    for (let d = 0; d < 4; d++) { const ek = edgeKey(c.i, c.j, d); if (!protect(ek)) buildEdge(ek, rollEdge(ek)); }
+  }
+  for (const [k, c] of cells) if (!vis.has(k)) fixDeadEnd(c.i, c.j, protect);
+  shifted += n; return n;
+}
+
+/* ---------- stations & exits ---------- */
+function stationPos(i, j, d) { return new THREE.Vector3(i * S - DV[d][0] * BACK, EYE, j * S - DV[d][1] * BACK); }
+const yawOf = d => -d * Math.PI / 2;
+function rebuildExits() {
+  for (const p of pickables.splice(0)) if (p.userData.exit) scene.remove(p);
+  const opts = [["往前", cur.d], ["左邊", (cur.d + 3) % 4], ["右邊", (cur.d + 1) % 4]];
+  for (const [name, d] of opts) {
+    const k = edgeKey(cur.i, cur.j, d), t = edges.get(k)?.type;
+    if (!passable(t)) continue;
+    const pl = new THREE.Mesh(G.exit, M.exit);
+    pl.position.set(cur.i * S + DV[d][0] * S / 2, 0, cur.j * S + DV[d][1] * S / 2);
+    pl.rotation.y = yawOf(d);
+    pl.userData.exit = { d, name: name + (t === "arch" ? "（拱門）" : "") };
+    scene.add(pl); pickables.push(pl);
+  }
+  if (flickerKey) { const e = edges.get(flickerKey); if (e?.mesh) { e.mesh.userData.flick = true; pickables.push(e.mesh); } }
+  cells.forEach(c => c.group.traverse(o => { if (o.userData.hot && o.isMesh) pickables.push(o); }));
+  updateNear();
+}
+function itemsHere() {
+  const c = cells.get(ck(cur.i, cur.j)), out = [];
+  if (c) c.group.children.forEach(o => { if (o.userData.hot) out.push(o.userData.hot); });
+  return out;
+}
+function updateNear() {
+  const items = itemsHere();
+  $("near").innerHTML = items.map((h, k) => `<button data-near="${k}"><span>腳邊</span>${h.name}<b>撿起</b></button>`).join("");
+  $("near").querySelectorAll("button").forEach(b => b.onclick = () => { if (!busy) pickUp(items[+b.dataset.near]); });
+}
+function placeLights() {
+  const p = camera.position, list = [];
+  cells.forEach(c => { if (c.panel) list.push(c.panel); });
+  list.sort((a, b) => a.distanceToSquared(p) - b.distanceToSquared(p));
+  LIGHTS.forEach((L, k) => { const v = list[k]; if (v) { L.position.copy(v); L.intensity = k < 5 ? 1.05 : .6; } else L.intensity = 0; });
+}
+
+/* ---------- post-processing (old-photo look) ---------- */
+let rt = new THREE.WebGLRenderTarget(2, 2, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+const post = new THREE.ShaderMaterial({
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uFlash: { value: 0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uFlash; varying vec2 vUv;
+    float rnd(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime) * 43758.5453); }
+    void main(){
+      vec2 uv = vUv; vec2 c = uv - .5; float r2 = dot(c,c);
+      vec2 px = 1.0 / uRes;
+      vec2 ca = c * .006;
+      vec3 col;
+      col.r = texture2D(tDiffuse, uv + ca).r;
+      col.g = texture2D(tDiffuse, uv).g;
+      col.b = texture2D(tDiffuse, uv - ca).b;
+      vec3 blur = (texture2D(tDiffuse, uv + px*vec2(1.5,0.)).rgb + texture2D(tDiffuse, uv - px*vec2(1.5,0.)).rgb + texture2D(tDiffuse, uv + px*vec2(0.,1.5)).rgb + texture2D(tDiffuse, uv - px*vec2(0.,1.5)).rgb) * .25;
+      col = mix(col, blur, .35);
+      vec3 glow = max(blur - .72, 0.) * 1.6;           // cheap halation around the tubes
+      col += glow * vec3(1., .95, .75);
+      col = 1. - exp(-col * 1.35);                     // soft overexposure
+      col *= vec3(1.06, 1.0, .80);                     // sodium-yellow cast
+      float l = dot(col, vec3(.299,.587,.114)); col = mix(vec3(l), col, .82);
+      col *= 1. - r2 * 1.25;                           // vignette
+      col += (rnd(uv * uRes) - .5) * .085;             // grain
+      col += uFlash;
+      gl_FragColor = vec4(col, 1.);
+    }`,
+  depthTest: false, depthWrite: false
+});
+const postScene = new THREE.Scene(), postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post));
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  renderer.setPixelRatio(dpr); renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.fov = w / h < .8 ? 78 : 68; camera.updateProjectionMatrix();
+  const s = .8;                                         // render a bit below native resolution for the camera-photo softness
+  rt.setSize(Math.max(2, Math.floor(w * dpr * s)), Math.max(2, Math.floor(h * dpr * s)));
+  post.uniforms.uRes.value.set(rt.width, rt.height);
+  render();
+}
+let flickT = 0, flickV = 1;
+function render(t = performance.now()) {
+  if (flickerKey) {
+    const e = edges.get(flickerKey);
+    if (flash && !reduceMotion) { if (t - flickT > 70) { flickT = t; flickV = Math.random() < .3 ? .25 + Math.random() * .4 : 1; } }
+    else flickV = reduceMotion ? .9 : .78 + .22 * Math.sin(t / 700);
+    if (e?.mesh) M.flicker.color.setRGB(flickV, flickV * .97, flickV * .82);
+  }
+  post.uniforms.uTime.value = (t / 1000) % 100;
+  renderer.setRenderTarget(rt); renderer.render(scene, camera);
+  renderer.setRenderTarget(null); post.uniforms.tDiffuse.value = rt.texture; renderer.render(postScene, postCam);
+  if (hints) placeLabels(); else $("labels").innerHTML = "";
+}
+let loopOn = false;
+function loop(t) { if (!loopOn) return; render(t); requestAnimationFrame(loop); }
+function setLoop(on) { if (on && !loopOn) { loopOn = true; requestAnimationFrame(loop); } else if (!on) loopOn = false; }
+function flickerVisible() { return flickerKey && visibleSet().has(ck(...edgeCells(flickerKey)[0])); }
+
+/* ---------- labels for hint mode ---------- */
+const v3 = new THREE.Vector3();
+function placeLabels() {
+  const box = $("labels"); let html = "";
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  for (const p of pickables) {
+    let text, pos;
+    if (p.userData.exit) { text = "→ " + p.userData.exit.name; pos = v3.copy(p.position).setY(1.3); }
+    else if (p.userData.flick) { text = "閃爍的牆"; pos = v3.copy(p.position).setY(1.5); }
+    else if (p.userData.proxy) { text = "保溫瓶"; p.getWorldPosition(v3); v3.y += .5; pos = v3; }
+    else continue;
+    const q = pos.clone().project(camera);
+    if (q.z > 1 || q.z < -1 || Math.abs(q.x) > 1.05 || Math.abs(q.y) > 1.05) continue;
+    if (pos.distanceTo(camera.position) > 12) continue;
+    html += `<span class="lbl" style="left:${(q.x + 1) / 2 * w}px;top:${(1 - q.y) / 2 * h}px">${text}</span>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ---------- motion ---------- */
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function tween(fromP, ctrlP, toP, fromY, toY, ms, done) {
+  busy = true; setButtons(); const t0 = performance.now(); setLoop(false);
+  const step = now => {
+    let k = Math.min(1, (now - t0) / ms); const e = ease(k);
+    const a = fromP.clone().lerp(ctrlP, e), b = ctrlP.clone().lerp(toP, e); camera.position.copy(a.lerp(b, e));
+    camera.position.y = EYE + (reduceMotion ? 0 : Math.sin(e * Math.PI * 2) * .025);
+    camera.rotation.y = fromY + (toY - fromY) * e;
+    placeLights(); render(now);
+    if (k < 1) requestAnimationFrame(step);
+    else { busy = false; done(); setButtons(); setLoop(flickerVisible()); }
+  };
+  requestAnimationFrame(step);
+}
+function shortest(from, to) { let d = to - from; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return from + d; }
+function move(d, after) {
+  $("near").innerHTML = "";
+  const ni = cur.i + DV[d][0], nj = cur.j + DV[d][1];
+  ensureAround(ni, nj);
+  const from = camera.position.clone(), to = stationPos(ni, nj, d), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
+  const ctrl = d === cur.d ? from.clone().lerp(to, .5) : mid;
+  const fy = camera.rotation.y, ty = shortest(fy, yawOf(d));
+  const zonePrev = zone(cur.i, cur.j), straight = d === cur.d;
+  cur = { i: ni, j: nj, d };
+  tween(from, ctrl, to, fy, ty, reduceMotion ? 1 : (straight ? 900 : 1050), () => {
+    moves++; $("mv").textContent = moves;
+    const z = zone(ni, nj);
+    if (z !== zonePrev) say(z === "arch" ? "牆變成了淡色，開著一個個拱門。地毯深得會陷進去。這種地方據說不會偏移。" : z === "pillar" ? "一大片柱子，整齊得像格子一樣，一直排到看不見的地方。" : "又是黃色的走廊。嗡嗡聲沒有停過。");
+    if (!reduceMotion && Math.random() < .35) { const n = shiftUnseen(); $("sh").textContent = shifted; }
+    maybeFlicker();
+    rebuildExits(); placeLights(); render();
+    if (after) after();
+    else if (itemsHere().length) say("腳邊有一個" + itemsHere()[0].name + "。");
+  });
+}
+function turnAround() {
+  const n = shiftUnseen(); $("sh").textContent = shifted;
+  const nd = (cur.d + 2) % 4;
+  const from = camera.position.clone(), to = stationPos(cur.i, cur.j, nd), mid = new THREE.Vector3(cur.i * S, EYE, cur.j * S);
+  const fy = camera.rotation.y, ty = fy + Math.PI;
+  cur = { ...cur, d: nd };
+  tween(from, mid, to, fy, ty, reduceMotion ? 1 : 1100, () => {
+    say(stable(cur.i, cur.j) && n === 0 ? "你回頭看。拱門區沒有變，跟剛才一模一樣。" : n > 0 ? "你回頭看。剛才走過的路……不一樣了。" : "你回頭看。");
+    rebuildExits(); placeLights(); render();
+  });
+}
+function maybeFlicker() {
+  if (flickerKey || moves < 6) return;
+  let i = cur.i, j = cur.j;
+  for (let s = 0; s < 4; s++) {
+    const k = edgeKey(i, j, cur.d), t = edges.get(k)?.type;
+    if (t === "wall" && s >= 1) { buildEdge(k, "flicker"); flickerKey = k; say("走廊盡頭的牆在閃。不是燈在閃，是牆本身。", false); return; }
+    if (!passable(t)) return;
+    i += DV[cur.d][0]; j += DV[cur.d][1];
+  }
+}
+
+/* ---------- input ---------- */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let downAt = null;
+canvas.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse" || busy) return;
+  canvas.style.cursor = pick(e) ? "pointer" : "default";
+});
+canvas.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 10 || busy) return;
+  const hit = pick(e); if (!hit) return;
+  const u = hit.object.userData;
+  if (u.exit) move(u.exit.d);
+  else if (u.flick) { $("end").classList.add("on"); setLoop(false); }
+  else if (u.hot) {
+    const h = u.hot, dx = h.i - cur.i, dz = h.j - cur.j;
+    if (!dx && !dz) return pickUp(h);
+    const d = DV.findIndex(v => v[0] === dx && v[1] === dz);
+    if (d >= 0 && d !== (cur.d + 2) % 4 && passable(edges.get(edgeKey(cur.i, cur.j, d))?.type)) return move(d, () => pickUp(h));
+    say("太遠了，得先走近一點。");
+  }
+});
+function pickUp(h) {
+  if (!h.group.parent) return;
+  say(h.text + " 你把它收了起來。"); picked.add(h.key);
+  h.group.parent.remove(h.group);
+  rebuildExits(); render();
+}
+function pick(e) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const walls = []; edges.forEach(ed => { if (ed.mesh && !ed.mesh.userData.flick) walls.push(ed.mesh); });
+  const hits = ray.intersectObjects(pickables.concat(walls), false).filter(h => h.distance < 14);
+  let exitHit = null;
+  for (const h of hits) {            // items win over the invisible exit panels in front of them; walls stop the search
+    const u = h.object.userData;
+    if (u.hot) return h;
+    if (u.exit || u.flick) { exitHit = exitHit || h; continue; }
+    break;
+  }
+  return exitHit;
+}
+
+/* ---------- UI ---------- */
+let sayTimer = 0;
+function say(text, bad) { const el = $("say"); el.textContent = text; el.classList.toggle("bad", !!bad); clearTimeout(sayTimer); sayTimer = setTimeout(() => { el.textContent = ""; }, 7000); }
+function setButtons() { $("bBack").disabled = busy; }
+$("bBack").onclick = () => { if (!busy) turnAround(); };
+$("bHint").onclick = () => { hints = !hints; $("bHint").setAttribute("aria-pressed", hints); M.exit.opacity = hints ? .13 : 0; render(); };
+$("bFlash").onclick = () => { flash = !flash; $("bFlash").setAttribute("aria-pressed", flash); $("bFlash").querySelector("small").textContent = flash ? "已開啟" : "預設關閉"; render(); };
+$("bSeed").onclick = () => { SEED = (Math.random() * 1e9) | 0; start(); };
+$("bAgain").onclick = () => { $("end").classList.remove("on"); SEED = (Math.random() * 1e9) | 0; start(); };
+window.addEventListener("resize", resize);
+
+function start() {
+  setLoop(false);
+  cells.forEach(c => scene.remove(c.group)); cells.clear();
+  edges.forEach(e => e.mesh && scene.remove(e.mesh)); edges.clear(); picked.clear();
+  cur = { i: 0, j: 0, d: 0 }; moves = 0; shifted = 0; flickerKey = null;
+  $("mv").textContent = 0; $("sh").textContent = 0; $("sd").textContent = SEED.toString(36).toUpperCase();
+  buildEdge(edgeKey(0, 0, 0), "open"); buildEdge(edgeKey(0, -1, 0), "open"); buildEdge(edgeKey(0, 0, 1), "open"); buildEdge(edgeKey(0, 0, 3), "wall"); buildEdge(edgeKey(0, 0, 2), "wall");
+  ensureAround(0, 0);
+  camera.position.copy(stationPos(0, 0, 0)); camera.rotation.set(PITCH, 0, 0, "YXZ");
+  rebuildExits(); placeLights(); resize();
+  say("你在嗡嗡聲裡醒來。點畫面裡的開口就能走過去；點「互動點」可以看到所有能點的地方。");
+}
+camera.rotation.order = "YXZ";
+start();
+})();
+</script>

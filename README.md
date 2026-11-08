@@ -6,6 +6,7 @@
 
 - [`DESIGN.md`](DESIGN.md)：設計文件（第 12 節含主線劇透）
 - [`docs/mockups/screens.html`](docs/mockups/screens.html)：可點擊的畫面樣稿，下載後用瀏覽器開啟
+- [`docs/mockups/level0-3d.html`](docs/mockups/level0-3d.html)：Level 0 的 3D 技術展示，下載後用瀏覽器開啟（需要網路載入 Three.js）
 - [`docs/level-network.md`](docs/level-network.md)：Backrooms Wiki 層級網路整理
 - [`docs/wiki-sources.md`](docs/wiki-sources.md)：Wiki 資料來源與署名
 
