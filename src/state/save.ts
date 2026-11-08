@@ -1,6 +1,6 @@
 /* Saving goes through a small Store interface (IndexedDB now, a server later for multiplayer).
    Every action saves; a run can be left and resumed, and a reload never undoes a death. */
-import { newHallucinations, newMeta, SAVE_VERSION, type Meta, type RunState } from "./types";
+import { newHallucinations, newMeta, newRoomPersonRun, SAVE_VERSION, type Meta, type RunState } from "./types";
 
 export interface Store { get(key: string): Promise<unknown>; set(key: string, v: unknown): Promise<void>; del(key: string): Promise<void> }
 
@@ -32,7 +32,11 @@ const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 export function migrateMeta(m: Partial<Meta> | undefined): Meta {
   const base = newMeta();
   if (!m || typeof m !== "object") return base;
-  return { ...base, ...m, symbolLock: { ...base.symbolLock, ...m.symbolLock }, settings: { ...base.settings, ...(m.settings ?? {}) }, v: SAVE_VERSION };
+  return { ...base, ...m,
+    symbolLock: { ...base.symbolLock, ...m.symbolLock },
+    roomPerson: { ...base.roomPerson, ...m.roomPerson, flags: { ...base.roomPerson.flags, ...m.roomPerson?.flags } },
+    npcMeetings: { ...base.npcMeetings, ...m.npcMeetings },
+    settings: { ...base.settings, ...(m.settings ?? {}) }, v: SAVE_VERSION };
 }
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
 function runDefaults(r: RunState): RunState {
@@ -44,6 +48,8 @@ function runDefaults(r: RunState): RunState {
   r.rng.counters.halluc ??= 0;
   r.rng.counters.puzzles ??= 0;
   r.packPlan ??= "none"; r.lockedPack ??= null;
+  r.rng.counters.quests ??= 0;
+  r.roomPerson = { ...newRoomPersonRun(), ...r.roomPerson };
   return r;
 }
 export async function loadRun(): Promise<RunState | null> { const r = (await store.get("run")) as RunState | undefined; return r && r.v === SAVE_VERSION && !r.ended ? runDefaults(r) : null; }

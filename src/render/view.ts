@@ -10,7 +10,7 @@ import { H, litMat, makeGeometry, makeMaterials, shared, type Geometry, type Mat
 export type Pick =
   | { kind: "exit"; d: Dir } | { kind: "item"; key: string; i: number; j: number } | { kind: "door"; edge: string } | { kind: "flicker"; edge: string }
   | { kind: "wall"; edge: string } | { kind: "tally" } | { kind: "peel" } | { kind: "hole" } | { kind: "pit" } | { kind: "salt" } | { kind: "corpse" }
-  | { kind: "notes" } | { kind: "cabinet" } | { kind: "lockedPack" };
+  | { kind: "notes" } | { kind: "cabinet" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 export type Quality = "low" | "mid" | "high";
 const TIERS: Record<Quality, { scale: number; R: number; res: number; post: number }> = {
   low: { scale: .6, R: 4, res: 1, post: 0 }, mid: { scale: .8, R: 6, res: .5, post: 1 }, high: { scale: 1, R: 7, res: 1 / 3, post: 2 }
@@ -375,16 +375,27 @@ export class View {
   }
   private buildManila() {
     const w = this.game!.world, M = this.MAT, G = this.GEO, grp = new THREE.Group();
+    const person = this.game!.run.roomPerson;
     grp.position.set((w.manila[0] + .5) * S, 0, (w.manila[1] + .5) * S);
     const top = new THREE.Mesh(G.tableTop, M.furn), cab = new THREE.Mesh(G.cabinet, M.furnDark), paper = new THREE.Mesh(G.paper, M.paper); paper.rotation.y = .35;
     const notes: Hot = { pick: { kind: "notes" }, label: "notes", ly: .25 }, cabinet: Hot = { pick: { kind: "cabinet" }, label: "cabinet", ly: .1 };
     top.userData.hot = notes; paper.userData.hot = notes; paper.userData.tag = true; cab.userData.hot = cabinet; cab.userData.tag = true;
     grp.add(top, cab, paper);
-    for (const [cx, cz, ry] of [[-1.2, .25, Math.PI / 2], [1.15, -.3, -Math.PI / 2]]) {
+    const secondChair = person.variant === "first" ? [2.6, 2.6, Math.PI] : [1.15, -.3, -Math.PI / 2];
+    for (const [cx, cz, ry] of [[-1.2, .25, Math.PI / 2], secondChair]) {
       const ch = new THREE.Group(); ch.position.set(cx, 0, cz); ch.rotation.y = ry;
       ch.add(new THREE.Mesh(G.seat, M.furn), new THREE.Mesh(G.chairBack, M.furn));
       for (const [lx, lz] of [[-.19, -.19], [.19, -.19], [-.19, .19], [.19, .19]]) { const l = new THREE.Mesh(G.leg, M.furn); l.position.set(lx, 0, lz); ch.add(l); }
       grp.add(ch);
+    }
+    if (person.present) {
+      // A coat and empty flask anchor the narrated person; no character model is required.
+      const props = new THREE.Group(); props.position.set(person.variant === "first" ? 2.6 : 1.3, 0, person.variant === "first" ? 2.6 : .2);
+      const coat = new THREE.Mesh(G.box, M.body); coat.scale.set(.42, .48, .09); coat.position.set(0, .65, .2); props.add(coat);
+      if (person.variant === "first") { const flask = new THREE.Mesh(G.bottle, M.bottle.grey); flask.rotation.z = Math.PI / 2; flask.position.set(.45, .09, -.15); props.add(flask); }
+      const proxy = new THREE.Mesh(G.proxy, M.proxy); proxy.position.y = .45; props.add(proxy);
+      const hot: Hot = { pick: { kind: "roomPerson" }, label: "roomPerson", ly: .9 };
+      props.traverse(o => { o.userData.hot = hot; }); props.userData.tag = true; grp.add(props);
     }
     this.scene.add(grp); this.built.push(grp);
   }

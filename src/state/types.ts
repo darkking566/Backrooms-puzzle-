@@ -27,7 +27,22 @@ export interface LockedPack {
   jammed: boolean;
   openedBy: "code" | "crowbar" | null;
   items: InvItem[];
+  story?: "room_person";
 }
+export type RoomPersonVariant = "none" | "first" | "revisit" | "aftermath";
+export interface RoomPersonRun {
+  eligible: boolean; variant: RoomPersonVariant; entered: boolean; greeted: boolean; present: boolean;
+  helped: boolean; waited: boolean; promised: boolean; separated: boolean; returned: boolean; rewardPending: boolean;
+}
+export interface RoomPersonFlags {
+  helped: boolean; waited: boolean; promisedAndLeft: boolean; sawOtherLeave: boolean; leftFirst: boolean; returnedEmpty: boolean; returnedWater: boolean;
+}
+export interface RoomPersonMeta {
+  phase: "first" | "revisit" | "aftermath" | "complete";
+  misses: number; rewardClaimed: boolean; suppliesGranted: boolean; flags: RoomPersonFlags;
+}
+export const newRoomPersonRun = (): RoomPersonRun => ({ eligible: false, variant: "none", entered: false, greeted: false, present: false, helped: false, waited: false, promised: false, separated: false, returned: false, rewardPending: false });
+export const newRoomPersonMeta = (): RoomPersonMeta => ({ phase: "first", misses: 0, rewardClaimed: false, suppliesGranted: false, flags: { helped: false, waited: false, promisedAndLeft: false, sawOtherLeave: false, leftFirst: false, returnedEmpty: false, returnedWater: false } });
 export interface LogLine { t: Text; kind?: "event" | "warn" | "caption" }
 
 export type MapKey = `${number},${number}`;
@@ -89,6 +104,7 @@ export interface RunState {
   manilaTaken: number;              // flasks taken from the cabinet this run
   packPlan: "none" | "arch" | "manila";
   lockedPack: LockedPack | null;     // independent of evicted/shifted map cells; dials are UI-only
+  roomPerson: RoomPersonRun;
   ended: Ended | null;
 }
 export interface Ended { ending: string; points: number; breakdown: { label: Text; pts: number }[]; days: number }
@@ -107,11 +123,14 @@ export interface Meta {
   cabinet: InvItem[];                   // what is in the Manila Room cabinet
   corpse: Corpse | null;
   symbolLock: { ruleNoteSeen: boolean; lastCode: string | null };
+  roomPerson: RoomPersonMeta;
+  npcMeetings: Record<string, number>;
   history: { run: number; ending: string; days: number; points: number }[];
   settings: Settings;
 }
 export const newMeta = (): Meta => ({
   v: SAVE_VERSION, name: null, runs: 0, points: 0, discoveries: [], endings: [], clues: [], notes: [], cabinet: [], corpse: null, history: [],
   symbolLock: { ruleNoteSeen: false, lastCode: null },
+  roomPerson: newRoomPersonMeta(), npcMeetings: {},
   settings: { lang: "zh", flash: false, sound: false, quality: "auto", reduceMotion: false }
 });

@@ -11,9 +11,10 @@ import type { InvItem } from "../state/types";
 import { NotebookMap } from "./notebook-map";
 import { elapsedMessages } from "./time";
 import { LockedPackPanel } from "./locked-pack";
+import { RoomPersonPanel } from "./room-person";
 
 type Sheet = null | { kind: "bag" } | { kind: "notes" } | { kind: "body" } | { kind: "search" } | { kind: "rest" } | { kind: "pit" } | { kind: "ceiling" }
-  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" };
+  | { kind: "manila" } | { kind: "cabinet" } | { kind: "boil"; salt: string } | { kind: "wring" } | { kind: "log" } | { kind: "map" } | { kind: "lockedPack" } | { kind: "roomPerson" };
 const DEV = typeof location !== "undefined" && (/[?&]dev\b/.test(location.search) || location.hash === "#dev");
 const ICON: Record<string, string> = { water: "💧", food: "🍞", awake: "☾", sanity: "◉", health: "✚", wretched: "✶", status: "!" };
 
@@ -96,6 +97,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (sheet || g.run.pendingEvent) return;
     const { i, j } = g.run.pos;
     switch (p.kind) {
+      case "roomPerson": return g.canTalkToPerson() ? openPerson() : say(U("tooFar"));
       case "lockedPack": {
         if (g.canReachPack()) return openPack();
         const pos = g.run.lockedPack?.pos, d = pos ? adjacentDir(pos.i, pos.j) : null;
@@ -119,11 +121,13 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const inManila = () => g.zoneHere() === "manila";
   const openManila = () => { act({ type: "examine", what: "notes" }); ctx.audio.sfx("paper"); setSheet({ kind: "manila" }); };
   const openPack = () => { act({ type: "packExamine" }); setSheet({ kind: "lockedPack" }); };
+  const openPerson = () => { act({ type: "roomPersonTalk" }); setSheet({ kind: "roomPerson" }); };
   const say = (s: string) => { g.run.log.push({ t: { zh: s, en: s } }); rerender(); };
 
   function labelText(p: Pick): string {
     const { d } = g.run.pos;
     switch (p.kind) {
+      case "roomPerson": return L(g.personQuest.text.name);
       case "lockedPack": return L(g.packPuzzle.text.name);
       case "exit": { const t = g.world.edgeAt(g.run.pos.i, g.run.pos.j, p.d); return "→ " + U(p.d === d ? "ahead" : p.d === (d + 3) % 4 ? "toLeft" : "toRight") + (t === "arch" ? U("archS") : t?.endsWith("-open") ? U("doorS") : ""); }
       case "item": { for (const c of g.world.cells.values()) { const it = c.items.find(x => x.key === p.key); if (it) return L(g.itemName(it)); } return ""; }
@@ -143,6 +147,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
   const near: { label: string; tag: string; verb: string; run: () => void }[] = [];
   for (const it of c.items) near.push({ tag: U("atFeet"), label: L(g.itemName(it)), verb: U("pickUp"), run: () => act({ type: "pickup", key: it.key }) });
   if (g.canReachPack()) near.push({ tag: inManila() ? U("inRoom") : U("atFeet"), label: L(g.packPuzzle.text.name), verb: U("look"), run: openPack });
+  if (g.canTalkToPerson()) near.push({ tag: U("inRoom"), label: L(g.personQuest.text.name), verb: U("talk"), run: openPerson });
   if (g.world.corpse && g.meta.corpse && g.world.corpse[0] === r.pos.i && g.world.corpse[1] === r.pos.j) near.push({ tag: U("atFeet"), label: U("corpseHere"), verb: U("searchBody"), run: () => act({ type: "corpse" }) });
   if (c.salt) near.push({ tag: U("here"), label: U("salt"), verb: U("scrape"), run: () => act({ type: "salt" }) });
   if (c.hole) near.push({ tag: U("here"), label: U("hole"), verb: U("reach"), run: () => setSheet({ kind: "ceiling" }) });
@@ -203,9 +208,10 @@ export function Play({ onEnd }: { onEnd: () => void }) {
 function Panel({ sheet, close, act, setSheet }: { sheet: NonNullable<Sheet>; close: () => void; act: (c: Command, keep?: boolean) => void; setSheet: (s: Sheet) => void }) {
   const g = ctx.game!, r = g.run;
   const card = (title: string, body: preact.ComponentChildren) => (
-    <div class="sheet" onClick={e => { if (e.target === e.currentTarget) close(); }}><div class="card" role="dialog" aria-label={title}><h3>{title}<button class="x" onClick={close}>{U("close")}</button></h3>{body}</div></div>);
+    <div class="sheet" onClick={e => { if (e.target === e.currentTarget) close(); }}><div class="card" data-panel={sheet.kind} role="dialog" aria-label={title}><h3>{title}<button class="x" onClick={close}>{U("close")}</button></h3>{body}</div></div>);
   const opt = (label: string, note: string, run: () => void, disabled = false) => <button class="opt" disabled={disabled} onClick={run}>{label}<small>{note}</small></button>;
   switch (sheet.kind) {
+    case "roomPerson": return card(L(g.personQuest.text.name), <RoomPersonPanel act={cmd => act(cmd, true)} close={close} />);
     case "lockedPack": return card(L(g.packPuzzle.text.name), <LockedPackPanel act={cmd => act(cmd, true)} />);
     case "search": {
       const flasks = r.inv.filter(x => x.bottle?.liquid === "empty");
@@ -301,6 +307,7 @@ function Manila({ act }: { act: (c: Command, keep?: boolean) => void }) {
       <p>{L(c("manila_guide").text)}<small>{L({ zh: "打字機打的，邊角被翻得很軟", en: "Typewritten, the corners worn soft" })}</small></p>
       <p>{L(c("reddish_rule").text)}<small>{L({ zh: "另一張，鉛筆寫的", en: "Another sheet, in pencil" })}</small></p>
       <p>{L(c("manila_hand").text)}</p>
+      {[ctx.game!.personQuest.clues.aftermath, ctx.game!.personQuest.clues.promise, ctx.game!.personQuest.clues.waited].filter(id => m.clues.includes(id)).map(id => <p key={id}>{L(c(id).text)}</p>)}
       {m.notes.map((n, k) => <p key={k}>「{n.t}」<small>{L({ zh: `你留下的（第 ${n.run} 次）`, en: `Yours (awakening ${n.run})` })}</small></p>)}
     </div>
     <label class="small muted" for="note">{U("writeNote")}</label>

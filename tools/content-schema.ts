@@ -62,9 +62,30 @@ export const Puzzle = z.object({
 }).strict();
 export type PuzzleData = z.infer<typeof Puzzle>;
 
+export const Quest = z.object({
+  id: z.string(), kind: z.literal("manila_stranger"), npc: z.string(),
+  spawn: z.object({ minRun: z.number().int().positive(), requiresDiscovery: z.literal("manila"), chance: Chance, pityAfterMisses: z.number().int().nonnegative() }).strict(),
+  revisit: z.object({ chance: Chance, pityAfterMisses: z.number().int().nonnegative() }).strict(),
+  pack: z.object({ puzzle: z.string(), placement: z.literal("manila"), redirectCabinetTopUp: z.literal(true), extraWater: z.number().int().positive() }).strict(),
+  completionReward: z.number().int().nonnegative(), dialogue: z.string(),
+  clues: z.object({ separation: z.string(), aftermath: z.string(), promise: z.string(), waited: z.string(), returned: z.string() }).strict(),
+  text: z.object({ name: Text, first: Text, revisit: Text, lowSanity: Text, cabinetEmpty: Text, cabinetStocked: Text,
+    greeting: Text, familiar: Text, recovered: Text, gone: Text, playerLeft: Text, personLeft: Text,
+    returnedWet: Text, returnedDry: Text, leftWater: Text, aftermath: Text, reward: Text, packPaper: Text, packInside: Text,
+    noWater: Text, notReady: Text }).strict()
+}).strict();
+export const Dialogue = z.object({ id: z.string(), choices: z.array(z.object({
+  id: z.string(), action: z.enum(["ask", "give_water", "give_water_and_promise", "promise", "wait", "ask_leave"]),
+  when: z.enum(["always", "needs_water", "ready_unpromised", "not_waited", "ready"]),
+  requires: z.object({ water: z.literal("sealed_grey") }).strict().optional(),
+  minutes: z.number().int().nonnegative(), text: Text, result: Text
+}).strict()).min(1) }).strict();
+export type QuestData = z.infer<typeof Quest>;
+export type DialogueChoice = z.infer<typeof Dialogue>["choices"][number];
+
 export const Content = z.object({
   items: z.array(Item), liquids: z.array(Liquid), events: z.array(Event), endings: z.array(Ending),
-  clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle)
+  clues: z.array(Clue), sources: z.array(Source), puzzles: z.array(Puzzle), quests: z.array(Quest), dialogue: z.array(Dialogue)
 });
 export type ContentData = z.infer<typeof Content>;
 
@@ -73,7 +94,16 @@ export function checkRefs(c: ContentData): string[] {
   const errs: string[] = [];
   const ids = (a: { id: string }[], what: string) => { const s = new Set<string>(); for (const x of a) { if (s.has(x.id)) errs.push(`duplicate ${what} id: ${x.id}`); s.add(x.id); } return s; };
   const items = ids(c.items, "item"), sources = ids(c.sources, "source"), endings = ids(c.endings, "ending");
-  ids(c.liquids, "liquid"); ids(c.events, "event"); const clues = ids(c.clues, "clue"); ids(c.puzzles, "puzzle");
+  ids(c.liquids, "liquid"); ids(c.events, "event"); const clues = ids(c.clues, "clue"), puzzles = ids(c.puzzles, "puzzle"), dialogue = ids(c.dialogue, "dialogue"); ids(c.quests, "quest");
+  for (const q of c.quests) {
+    if (!puzzles.has(q.pack.puzzle)) errs.push(`${q.id}: unknown puzzle ${q.pack.puzzle}`);
+    if (!dialogue.has(q.dialogue)) errs.push(`${q.id}: unknown dialogue ${q.dialogue}`);
+    for (const id of Object.values(q.clues)) if (!clues.has(id)) errs.push(`${q.id}: unknown clue ${id}`);
+  }
+  for (const d of c.dialogue) {
+    ids(d.choices, `${d.id} choice`);
+    for (const ch of d.choices) if (ch.action.startsWith("give_water") && !ch.requires?.water) errs.push(`${d.id}.${ch.id}: giving water requires sealed_grey`);
+  }
   for (const p of c.puzzles) {
     if (!clues.has(p.methodClue)) errs.push(`${p.id}: unknown clue ${p.methodClue}`);
     for (const x of p.contents) if (!items.has(x.item)) errs.push(`${p.id}: unknown item ${x.item}`);

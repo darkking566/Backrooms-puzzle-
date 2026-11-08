@@ -1,0 +1,46 @@
+- id: room_person
+  choices:
+    - id: ask_time
+      action: ask
+      when: always
+      minutes: 0
+      text: { zh: 「你在這裡多久了？」, en: '"How long have you been here?"' }
+      result: { zh: 「不知道。燈一直亮著。」, en: '"I do not know. The lights have stayed on."' }
+    - id: ask_door
+      action: ask
+      when: always
+      minutes: 0
+      text: { zh: 「不能一起出去嗎？」, en: '"Can we leave together?"' }
+      result: { zh: 「一起走也沒用。出了門，就只剩自己的腳步。」, en: '"Walking together does not help. Past the door, you only hear your own footsteps."' }
+    - id: give_water
+      action: give_water
+      when: needs_water
+      requires: { water: sealed_grey }
+      minutes: 3
+      text: { zh: 把一瓶水交給對方，不作承諾, en: "Give them a bottle of water without making a promise" }
+      result: { zh: 對方喝得很慢，中間停了兩次。最後把瓶子放穩，才說：「謝謝。」, en: 'They drink slowly, stopping twice. Only after setting the bottle down do they say, "Thank you."' }
+    - id: give_and_promise
+      action: give_water_and_promise
+      when: needs_water
+      requires: { water: sealed_grey }
+      minutes: 3
+      text: { zh: 把水交給對方。「我去找更多，我會回來。」, en: 'Give them the water. "I will look for more. I will come back."' }
+      result: { zh: 對方喝了一些水。「好。」然後往旁邊挪了一點，把門口讓出來。, en: 'They drink some water. "All right." Then they shift aside, leaving the way to the door clear.' }
+    - id: promise
+      action: promise
+      when: ready_unpromised
+      minutes: 1
+      text: { zh: 「我去找更多，我會回來。」, en: '"I will look for more. I will come back."' }
+      result: { zh: 「好。」對方往旁邊挪了一點，把門口讓出來。, en: '"All right." They shift aside, leaving the way to the door clear.' }
+    - id: wait
+      action: wait
+      when: not_waited
+      minutes: 30
+      text: { zh: 坐在旁邊，陪對方等一會兒, en: "Sit beside them and wait a while" }
+      result: { zh: 你們坐了一會兒。沒有人說話。對方看著椅子。「剛才那個人坐過這裡。我還沒問名字。」, en: 'You sit together for a while. Neither of you speaks. They look at the chair. "The person who left sat here. I had not asked their name."' }
+    - id: ask_leave
+      action: ask_leave
+      when: always
+      minutes: 5
+      text: { zh: 「你先走。我在這裡看著。」, en: '"You go first. I will watch from here."' }
+      result: { zh: 對方扶著椅背站起來，往門口走去。, en: "They stand, holding the chair, and walk towards the door." }

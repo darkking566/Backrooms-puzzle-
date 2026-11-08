@@ -17,4 +17,15 @@ describe("v1 save additions", () => {
     const m = newMeta(); m.symbolLock = { ruleNoteSeen: true } as typeof m.symbolLock;
     expect(migrateMeta(m).symbolLock).toEqual({ ruleNoteSeen: true, lastCode: null });
   });
+  it("loads phase-one packs unchanged and never inserts an encounter into an old run", () => {
+    const g = Game.newRun(c, newMeta(), 73, []), old = JSON.parse(JSON.stringify(g.save()));
+    old.lockedPack = { id: "fallen_pack", pos: { i: 0, j: 0 }, order: ["circle", "triangle", "square"], marksOrder: ["square", "circle", "triangle"], numbers: { circle: 0, triangle: 4, square: 4 }, seen: true, hasRuleNote: true, marksSeen: true, failures: 3, jammed: true, openedBy: null, items: [{ key: "old:water", id: "almond_water" }] };
+    delete old.roomPerson; delete old.rng.counters.quests;
+    const m = JSON.parse(JSON.stringify(g.meta)); delete m.roomPerson; delete m.npcMeetings;
+    const s = importSave(exportSave(m, old)); expect(s.run!.lockedPack).toEqual(old.lockedPack);
+    expect(s.run!.roomPerson.variant).toBe("none"); expect(s.run!.rng.counters.quests).toBe(0); expect(s.meta.npcMeetings).toEqual({});
+    const partial = newMeta(); partial.roomPerson = { flags: { helped: true } } as typeof partial.roomPerson;
+    const migrated = migrateMeta(partial); expect(migrated.roomPerson.flags.helped).toBe(true); expect(migrated.roomPerson.flags.waited).toBe(false); expect(migrated.roomPerson.phase).toBe("first");
+  });
+
 });

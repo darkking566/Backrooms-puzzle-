@@ -27,3 +27,19 @@
 - id: symbol_lock_method
   title: { zh: 知道符號鎖的解法, en: The Symbol Lock Method }
   text: { zh: 名牌決定順序。數各符號下面的刻痕，空框算零。, en: The tag gives the order. Count the marks below each symbol; an empty box means zero. }
+- id: room_person_separation
+  title: { zh: 門外只剩一個人, en: "Alone Past the Door" }
+  text: { zh: 你們在房間裡看得見彼此。出了門，就找不到了。你沒有看見對方死去。, en: "You could see each other inside the room. Past the door, you could no longer find them. You never saw them die." }
+  source: manila-room
+- id: room_person_paper
+  title: { zh: 給下一個人, en: "For the Next Person" }
+  text: { zh: 「給下一個人。拿一瓶就好。」這幾個字跟旁邊那張紙很像。有一筆停在同樣的地方。, en: '"For the next person. Take one bottle." These words resemble the ones on the other sheet. One stroke pauses in the same place.' }
+- id: room_person_promise
+  title: { zh: 紙條多了一行, en: "Another Line on the Paper" }
+  text: { zh: 「門不用留著。」沒有署名。, en: '"You do not need to leave the door open." No signature.' }
+- id: room_person_chair
+  title: { zh: 那張椅子, en: "The Chair" }
+  text: { zh: 「椅子留在原處。」紙角折了兩次。, en: '"Leave the chair where it is." The corner of the paper has been folded twice.' }
+- id: room_person_returned
+  title: { zh: 這次留下的水, en: "The Water That Stayed" }
+  text: { zh: 你帶水回到房間。人不在了。你把水放進櫃子。, en: "You brought water back to the room. They were gone. You put the water in the cabinet." }

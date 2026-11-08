@@ -5,11 +5,12 @@ import type { ContentData } from "../../tools/content-schema";
 import { draw, pick, type RngState, type Stream } from "./rng";
 import { ck, DV, sstep, T, type Dir, type Text } from "./types";
 import { Level0, edgeCells, edgeKey, passable, isOpenDoor, type Bottle, type GroundItem, type Zone } from "../world/level0";
-import { newHallucinations, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
+import { newHallucinations, newRoomPersonRun, SAVE_VERSION, type MapKey, type MapMark, type Meta, type RunState } from "../state/types";
 import { addStatus, clearStatus, tick, H, type Activity, type Env } from "../systems/survival";
 import { notebookReadBlock, notebookReadGain, recordNotebook, recordNotebookDoor, setMapMark } from "../systems/notebook";
 import { perceive } from "../systems/hallucinations";
 import { makePack, matchesPack, validCode } from "../systems/symbol-lock";
+import { personChoiceVisible, personReady, planRoomPerson, sealedGreyWater } from "../systems/room-person";
 
 export const CARRY = 8;                 // weight you can carry
 export const PREP_CARRY = 5;            // weight you can bring into a run
@@ -27,10 +28,11 @@ export type Command =
   | { type: "corpse" }
   | { type: "packExamine" } | { type: "packMarks" } | { type: "packAttempt"; code: number[] }
   | { type: "packUnjam" } | { type: "packForce" } | { type: "packTake"; key: string }
+  | { type: "roomPersonTalk" } | { type: "roomPersonChoice"; id: string; waterKey?: string }
   | { type: "mapMark"; key: MapKey; mark: MapMark | null } | { type: "rereadNotebook" };
 
 export type Anim = { kind: "move"; d: Dir; from: { i: number; j: number; d: Dir } } | { kind: "turn"; dir: -1 | 1 | 2; from: { i: number; j: number; d: Dir } } | { kind: "door"; edge: string } | { kind: "none" };
-export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; sfx: string[]; minutes: number }
+export interface Outcome { say: Text[]; caption?: Text; perceivedTime?: Text; anim: Anim; event?: string; ended?: boolean; rebuild?: boolean; important?: boolean; sfx: string[]; minutes: number }
 
 const COLOR_NAME: Record<string, Text> = { grey: T("灰色", "grey"), green: T("綠色", "green"), blue: T("藍色", "blue"), reddish: T("偏紅的", "reddish") };
 
@@ -50,7 +52,7 @@ export class Game {
   /* ---------- new run ---------- */
   static newRun(c: ContentData, meta: Meta, seed: number, bought: string[]): Game {
     meta.runs += 1;
-    const rng: RngState = { seed, counters: { halluc: 0, puzzles: 0 } };
+    const rng: RngState = { seed, counters: { halluc: 0, puzzles: 0, quests: 0 } };
     const run: RunState = {
       v: SAVE_VERSION, seed, run: meta.runs, time: 0, clock0: Math.floor((seed % 1440 + 1440) % 1440),
       stats: { water: 68, food: 70, awake: 60, sanity: 82, wretched: 0, health: 100 }, status: {},
@@ -59,13 +61,23 @@ export class Game {
       map: {}, mapMarks: {}, lastNotebookRead: null,
       fakePiano: null, halluc: newHallucinations(),
       packPlan: "none", lockedPack: null,
+      roomPerson: newRoomPersonRun(),
       moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
     };
-    // volunteers keep the Manila Room cabinet stocked a little (Wiki: The Manila Room)
-    if (meta.cabinet.filter(x => x.id === "almond_water").length < 2) meta.cabinet.push({ key: "vol" + meta.runs, id: "almond_water" });
     const g = new Game(c, meta, run);
-    const p = g.packPuzzle;
-    if (run.run >= p.spawn.minRun && g.rand("puzzles") < p.spawn.chance) run.packPlan = "arch";
+    run.roomPerson = planRoomPerson(g.personQuest, meta, () => g.rand("quests"));
+    const topUp = meta.cabinet.filter(x => x.id === "almond_water").length < 2;
+    if (run.roomPerson.variant === "first") {
+      // Move only this run's volunteer bottle. Never remove any stored item.
+      const q = g.personQuest, p = c.puzzles.find(p => p.id === q.pack.puzzle)!;
+      run.lockedPack = makePack(p, run, meta, { i: g.world.manila[0], j: g.world.manila[1] }, () => g.rand("puzzles"));
+      run.lockedPack.story = "room_person";
+      run.lockedPack.items = Array.from({ length: q.pack.extraWater + (topUp ? 1 : 0) }, (_, k) => ({ key: `pack:${run.run}:${k}`, id: "almond_water" }));
+    } else {
+      if (topUp) meta.cabinet.push({ key: "vol" + meta.runs, id: "almond_water" });
+      const p = g.packPuzzle;
+      if (run.run >= p.spawn.minRun && g.rand("puzzles") < p.spawn.chance) run.packPlan = "arch";
+    }
     recordNotebook(run, g.world, true);
     run.log.push({ t: T(`你在嗡嗡聲裡醒來。這是你記得的第 ${meta.runs} 次。`, `You wake up in the hum. This is the ${ordinal(meta.runs)} time you remember.`) });
     return g;
@@ -111,6 +123,13 @@ export class Game {
     const p = this.run.lockedPack?.pos, r = this.run.pos;
     return !!p && ((p.i === r.i && p.j === r.j) || (this.world.inManila(p.i, p.j) && this.zoneHere() === "manila"));
   }
+  get personQuest() { return this.c.quests.find(q => q.id === "room_person")!; }
+  get personDialogue() { return this.c.dialogue.find(d => d.id === this.personQuest.dialogue)!; }
+  get packPaper() { return this.run.lockedPack?.story === "room_person" ? this.personQuest.text.packPaper : this.packPuzzle.text.paper; }
+  get packInside() { return this.run.lockedPack?.story === "room_person" ? this.personQuest.text.packInside : this.packPuzzle.text.inside; }
+  canTalkToPerson() { return this.zoneHere() === "manila" && this.run.roomPerson.entered && this.run.roomPerson.present; }
+  personWater() { return this.run.inv.filter(sealedGreyWater); }
+  personChoices() { return this.personDialogue.choices.filter(ch => personChoiceVisible(ch, this.run.roomPerson)).map(ch => ({ ch, ok: !ch.requires?.water || this.personWater().length > 0 })); }
 
   /** Pass time; may end the run. */
   private pass(minutes: number, act: Activity = "idle") {
@@ -157,6 +176,8 @@ export class Game {
       case "packUnjam": this.packUnjam(); break;
       case "packForce": this.packForce(); break;
       case "packTake": this.packTake(cmd.key); break;
+      case "roomPersonTalk": this.roomPersonTalk(); break;
+      case "roomPersonChoice": this.roomPersonChoice(cmd.id, cmd.waterKey); break;
       case "mapMark": setMapMark(r, cmd.key, cmd.mark); break;
       case "rereadNotebook": this.rereadNotebook(); break;
     }
@@ -170,7 +191,7 @@ export class Game {
       const perception = perceive(r, this.world, {
         action: cmd.type === "move" && this.out.anim.kind === "move" ? "move" : cmd.type === "search" || cmd.type === "rest" ? cmd.type : null,
         minutes: this.out.minutes, previousSanity,
-        important: !!this.out.caption || !!r.pendingEvent || !!this.world.flickerKey || redStage !== r.redStage || z === "pit" || z === "red" || this.world.redDist(r.pos.i, r.pos.j) <= 3.2
+        important: !!this.out.important || !!this.out.caption || !!r.pendingEvent || !!this.world.flickerKey || redStage !== r.redStage || z === "pit" || z === "red" || this.world.redDist(r.pos.i, r.pos.j) <= 3.2
       }, () => this.rand("halluc"));
       for (const line of perception.say) this.say(line);
       if (perception.caption) this.out.caption = perception.caption;
@@ -195,6 +216,8 @@ export class Game {
     this.pass(mins, "walk"); if (r.ended) return;
     if (z === "red") return this.end("closed_loop");
     this.zoneNarration(zonePrev, z);
+    if (zonePrev !== "manila" && z === "manila") this.enterRoomPerson();
+    if (zonePrev === "manila" && z !== "manila" && r.roomPerson.present && r.roomPerson.entered) this.separateRoomPerson(false);
     this.redSigns();
     if (z === "pit" && (r.stats.awake > 24 * H || r.stats.water < 15) && this.rand("events") < .06) {
       this.say(T("你的腳步一軟，踩空了——", "Your step falters and finds nothing—"), "warn");
@@ -477,9 +500,10 @@ export class Game {
   }
   private examine(what: "tally" | "peel" | "notes") {
     this.pass(2);
+    if (this.run.ended) return;
     if (what === "tally") { this.learn("tally_marks"); this.say(this.c.clues.find(x => x.id === "tally_marks")!.text); this.discover("tally_marks"); }
     if (what === "peel") this.say(T("壁紙剝落了一角，翻起來的邊緣摸起來是濕的。底下不是牆，是一層深紅色的東西。", "A corner of wallpaper has peeled away; the curled edge is wet. Underneath is not wall but something deep red."));
-    if (what === "notes") { this.learn("manila_guide"); this.learn("manila_hand"); this.learn("reddish_rule"); this.learn("flicker_wall"); }
+    if (what === "notes") { this.learn("manila_guide"); this.learn("manila_hand"); this.learn("reddish_rule"); this.learn("flicker_wall"); if (this.zoneHere() === "manila") this.readPersonPaper(); }
   }
   private cabinetTake(key: string) {
     const m = this.meta, x = m.cabinet.find(y => y.key === key); if (!x || this.zoneHere() !== "manila") return;
@@ -491,6 +515,9 @@ export class Game {
     const x = this.take(key); if (!x || this.zoneHere() !== "manila") { if (x) this.run.inv.push(x); return; }
     this.meta.cabinet.push(x); this.pass(1);
     this.say(T(`你把${this.itemName(x).zh}放進櫃子裡，留給下一個人。`, `You leave the ${this.itemName(x).en.toLowerCase()} in the cabinet for the next one.`));
+    if (!this.run.ended && this.run.roomPerson.returned && sealedGreyWater(x) && !this.meta.roomPerson.flags.returnedWater) {
+      this.meta.roomPerson.flags.returnedWater = true; this.learn(this.personQuest.clues.returned); this.say(this.personQuest.text.leftWater); this.out.important = true;
+    }
   }
   private writeNote(text: string) {
     const t = text.trim().slice(0, 200); if (!t || this.zoneHere() !== "manila") return;
@@ -529,7 +556,7 @@ export class Game {
     const p = this.run.lockedPack!, t = this.packPuzzle.text;
     p.openedBy = by; p.jammed = false;
     this.learn(this.packPuzzle.methodClue); this.discover("fallen_pack");
-    this.say(by === "code" ? t.opened : t.forced); this.say(t.inside); this.say(t.paper);
+    this.say(by === "code" ? t.opened : t.forced); this.say(this.packInside); this.say(this.packPaper);
     this.out.caption = by === "code" ? t.openedCaption : t.forcedCaption;
     this.out.sfx.push(by === "code" ? "lock_open" : "lock_break"); this.out.rebuild = true;
   }
@@ -563,6 +590,78 @@ export class Game {
     this.pass(1); if (this.run.ended) return;
     p.items = p.items.filter(y => y !== x); this.run.inv.push(x);
     this.say(T(`你拿走了${this.itemName(x).zh}。`, `You take the ${this.itemName(x).en.toLowerCase()}.`));
+  }
+
+  /* ---------- the person in the room ---------- */
+  private enterRoomPerson() {
+    const r = this.run.roomPerson, m = this.meta.roomPerson, q = this.personQuest;
+    if (r.separated && !r.returned) {
+      r.returned = true; m.flags.returnedEmpty = true;
+      this.say(this.personWater().length ? q.text.returnedWet : q.text.returnedDry); this.out.important = true;
+    }
+    if (r.entered) return;
+    r.entered = true;
+    if (r.eligible) m.misses = r.variant === "none" ? m.misses + 1 : 0;
+    if (r.present) {
+      this.meta.npcMeetings[q.npc] = (this.meta.npcMeetings[q.npc] ?? 0) + 1;
+      this.discover("room_person"); this.say(r.variant === "first" ? q.text.first : q.text.revisit);
+      if (r.variant === "first") {
+        if (this.run.stats.sanity < 35) this.say(q.text.lowSanity);
+        this.say(this.meta.cabinet.length ? q.text.cabinetStocked : q.text.cabinetEmpty);
+      }
+      this.out.important = true;
+    } else if (r.variant === "aftermath") {
+      if (m.flags.helped && !m.suppliesGranted) {
+        this.meta.cabinet.push({ key: `person:thanks:${this.run.run}`, id: "almond_water" }); m.suppliesGranted = true;
+      }
+      this.say(q.text.aftermath); this.out.important = true;
+    }
+  }
+  private roomPersonTalk() {
+    if (!this.canTalkToPerson()) return;
+    const r = this.run.roomPerson, q = this.personQuest;
+    if (!r.greeted) {
+      r.greeted = true;
+      this.say((this.meta.npcMeetings[q.npc] ?? 0) > 1 ? q.text.familiar : q.text.greeting);
+      this.out.important = true;
+    }
+  }
+  private roomPersonChoice(id: string, waterKey?: string) {
+    if (!this.canTalkToPerson()) return;
+    const r = this.run.roomPerson, m = this.meta.roomPerson, q = this.personQuest;
+    const ch = this.personDialogue.choices.find(ch => ch.id === id);
+    if (!ch || !personChoiceVisible(ch, r)) return;
+    const water = this.run.inv.find(x => x.key === waterKey);
+    if (ch.requires?.water && (!water || !sealedGreyWater(water))) return this.say(q.text.noWater);
+    if (ch.action === "ask_leave" && !personReady(r)) return this.say(q.text.notReady);
+    this.pass(ch.minutes); if (this.run.ended) return;
+    this.out.important = true;
+    if (ch.action === "give_water" || ch.action === "give_water_and_promise") {
+      this.take(water!.key); r.helped = true; m.flags.helped = true;
+      if (ch.action === "give_water_and_promise") r.promised = true;
+    } else if (ch.action === "promise") r.promised = true;
+    else if (ch.action === "wait") { r.waited = true; m.flags.waited = true; }
+    this.say(ch.result);
+    if (ch.action === "ask_leave") this.separateRoomPerson(true);
+  }
+  private separateRoomPerson(otherFirst: boolean) {
+    const r = this.run.roomPerson, m = this.meta.roomPerson, q = this.personQuest;
+    if (r.separated) return;
+    r.present = false; r.separated = true;
+    if (otherFirst) m.flags.sawOtherLeave = true;
+    else { m.flags.leftFirst = true; if (r.promised) m.flags.promisedAndLeft = true; }
+    this.learn(q.clues.separation); this.say(otherFirst ? q.text.personLeft : q.text.playerLeft); this.out.important = true; this.out.rebuild = true;
+    if (r.variant === "first" && m.phase === "first") m.phase = "revisit";
+    else if (r.variant === "revisit" && m.phase === "revisit") m.phase = "aftermath";
+    if (!m.rewardClaimed) { m.rewardClaimed = true; r.rewardPending = true; }
+  }
+  private readPersonPaper() {
+    if (this.run.roomPerson.variant !== "aftermath" || !this.run.roomPerson.entered || this.meta.roomPerson.phase === "complete") return;
+    const q = this.personQuest, m = this.meta.roomPerson;
+    this.learn(q.clues.aftermath);
+    if (m.flags.promisedAndLeft) this.learn(q.clues.promise);
+    if (m.flags.waited) this.learn(q.clues.waited);
+    m.phase = "complete"; this.out.important = true; this.out.sfx.push("paper");
   }
 
   private rereadNotebook() {
@@ -608,6 +707,7 @@ export class Game {
     const e = this.c.endings.find(x => x.id === id)!;
     const days = Math.floor(r.time / (24 * H));
     const breakdown: { label: Text; pts: number }[] = [];
+    if (r.roomPerson.rewardPending) breakdown.push({ label: this.personQuest.text.reward, pts: this.personQuest.completionReward });
     if (days) breakdown.push({ label: T(`撐過了 ${days} 天`, `Survived ${days} day${days > 1 ? "s" : ""}`), pts: days * 10 });
     const hours = Math.floor(r.time / H); if (hours >= 6) breakdown.push({ label: T(`在 Level 0 待了 ${hours} 小時`, `${hours} hours in Level 0`), pts: Math.floor(hours / 6) * 2 });
     for (const f of r.found) breakdown.push({ label: T(`第一次發現：${DISC[f]?.zh ?? f}`, `First discovery: ${DISC[f]?.en ?? f}`), pts: 15 });
@@ -641,7 +741,7 @@ export const DISC: Record<string, Text> = {
   zone_arch: T("拱門區", "the arch zone"), zone_pillar: T("柱林", "the pillar field"), zone_dark: T("斷電區", "the blackout zone"), zone_pit: T("坑洞區", "the pits"),
   manila: T("曼尼拉房間", "the Manila Room"), red_signs: T("紅房間", "a red room"), flicker_wall: T("閃爍的牆", "the flickering wall"),
   ceiling_stash: T("天花板夾層", "the ceiling void"), firesalt: T("火鹽", "firesalt"), liquid_pain: T("Liquid Pain", "Liquid Pain"),
-  own_corpse: T("自己的遺體", "your own body"), tally_marks: T("牆上的記號", "the marks on the wall"), fallen_pack: T("上鎖的舊背包", "the locked backpack")
+  own_corpse: T("自己的遺體", "your own body"), tally_marks: T("牆上的記號", "the marks on the wall"), fallen_pack: T("上鎖的舊背包", "the locked backpack"), room_person: T("房裡的人", "the person in the room")
 };
 const CORPSE_NOTE: Record<string, Text> = {
   death_dehydration: T("水。一定要找到水。不要省著喝，省著喝的人都死了。", "Water. Find water. Don't ration it; the ones who rationed are dead."),

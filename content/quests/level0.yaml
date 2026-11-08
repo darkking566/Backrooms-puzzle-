@@ -1,0 +1,36 @@
+- id: room_person
+  kind: manila_stranger
+  npc: manila_stranger
+  spawn: { minRun: 3, requiresDiscovery: manila, chance: 0.35, pityAfterMisses: 2 }
+  revisit: { chance: 0.5, pityAfterMisses: 2 }
+  pack: { puzzle: fallen_pack, placement: manila, redirectCabinetTopUp: true, extraWater: 1 }
+  completionReward: 20
+  dialogue: room_person
+  clues:
+    separation: room_person_separation
+    aftermath: room_person_paper
+    promise: room_person_promise
+    waited: room_person_chair
+    returned: room_person_returned
+  text:
+    name: { zh: 房裡的人, en: "The Person in the Room" }
+    first: { zh: 角落有人靠牆坐著，兩隻手抱著一個空瓶。你走進來，對方只抬了一下眼睛。, en: "Someone sits against the wall in the corner, holding an empty bottle in both hands. As you enter, they barely lift their eyes." }
+    revisit: { zh: 對方站在桌旁。看起來比你記得的年長些，袖口補過了。看見你時，手停在半空。, en: "They stand beside the table, looking a little older than you remember. The cuff has been mended. When they see you, their hand stops halfway." }
+    lowSanity: { zh: 你先看見空瓶，才看清抱著瓶子的手。你不太敢相信房裡真的有人。, en: "You notice the empty bottle before the hands holding it. You hardly dare believe someone is really here." }
+    cabinetEmpty: { zh: 櫃門開著。裡面沒有水。木板上有幾個圓形的淡印。, en: "The cabinet stands open. No water inside. A few pale rings mark the wood." }
+    cabinetStocked: { zh: 櫃子裡還有東西。對方看了一眼，又看回手裡的空瓶。, en: "There are still supplies in the cabinet. They glance at them, then back at the empty bottle in their hands." }
+    greeting: { zh: 「有水嗎？一點就好。」, en: '"Do you have water? A little is enough."' }
+    familiar: { zh: 「我們……見過嗎？」, en: '"Have we… met?"' }
+    recovered: { zh: 對方把瓶子放穩了。呼吸比剛才平穩一些。, en: "They set the bottle down. Their breathing is steadier now." }
+    gone: { zh: 椅子還朝著門口。人不在了。, en: "The chair still faces the door. They are gone." }
+    playerLeft: { zh: 你跨過門檻。嗡嗡聲回來了，把房裡細小的聲音全蓋住。, en: "You cross the threshold. The hum returns, covering every small sound from the room." }
+    personLeft: { zh: 對方走過門檻。「那我在外面——」後半句沒有傳回來。走廊裡只有嗡嗡聲。, en: 'They cross the threshold. "Then I will wait outside—" The rest never reaches you. Only the hum remains in the corridor.' }
+    returnedWet: { zh: 椅子還朝著門口。人不在了。你手裡的水還沒開封。, en: "The chair still faces the door. They are gone. The water in your hand is still sealed." }
+    returnedDry: { zh: 你回到那張椅子旁。房裡沒有回應。, en: "You return to the chair. Nothing in the room answers." }
+    leftWater: { zh: 你把水放進櫃子。這一次，水留下了。, en: "You put the water in the cabinet. This time, the water stays." }
+    aftermath: { zh: 角落沒有空瓶。櫃子裡多了一只紙袋，袋口摺得很整齊。桌上壓著一張紙。, en: "No empty bottle in the corner. There is a paper bag in the cabinet, its top neatly folded. A sheet of paper lies on the table." }
+    reward: { zh: 房裡的人：記住了這次分離, en: 'The Person in the Room: remembering the separation' }
+    packPaper: { zh: 「一瓶給自己。一瓶留著。」, en: '"One for yourself. Keep the other."' }
+    packInside: { zh: 瓶口封得好好的。旁邊墊著摺好的紙，右下角折了兩次，折痕已經發白。, en: "The bottles are still sealed. Folded paper cushions them. Its lower-right corner has been folded twice; the crease has turned white." }
+    noWater: { zh: 你身上沒有一瓶封好的灰色杏仁水。, en: "You are not carrying a sealed bottle of grey almond water." }
+    notReady: { zh: 「再坐一下。」對方把空瓶抱緊了些。, en: '"A little longer." They draw the empty bottle closer.' }

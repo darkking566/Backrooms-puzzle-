@@ -26,7 +26,7 @@ export function LockedPackPanel({ act }: { act: (cmd: Command) => void }) {
         : <button class="opt" onClick={() => act({ type: "packAttempt", code })}>{U("packAttempt")}<small>{U("minutes", { m: def.minutes.attempt })}</small></button>}
       <button class="opt" disabled={!g.has("crowbar")} onClick={() => act({ type: "packForce" })}>{U("packForce")}<small>{g.has("crowbar") ? U("minutes", { m: def.minutes.force }) : U("needs", { x: L(g.item("crowbar").name) })}</small></button>
     </> : <>
-      <p class="story">{L(def.text.inside)}</p><div class="paper"><p>{L(def.text.paper)}</p></div>
+      <p class="story">{L(g.packInside)}</p><div class="paper"><p>{L(g.packPaper)}</p></div>
       {p.items.length ? p.items.map(x => <button class="opt" key={x.key} onClick={() => act({ type: "packTake", key: x.key })}>{L(g.itemName(x))}<small>{U("take")}</small></button>) : <p>{L(def.text.empty)}</p>}
     </>}
     <p class="story" aria-live="polite">{L(g.run.log[g.run.log.length - 1]?.t ?? def.text.description)}</p>

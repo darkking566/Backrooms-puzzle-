@@ -9,7 +9,7 @@ function shuffle<T>(values: readonly T[], rand: () => number): T[] {
   return a;
 }
 export function packCode(pack: LockedPack): number[] { return pack.order.map(s => pack.numbers[s]); }
-export function validCode(code: readonly number[]): boolean { return code.length === 3 && code.every(n => Number.isInteger(n) && n >= 0 && n <= 9); }
+export function validCode(code: readonly number[]): boolean { return Array.isArray(code) && code.length === 3 && [0, 1, 2].every(k => Number.isInteger(code[k]) && code[k] >= 0 && code[k] <= 9); }
 export function matchesPack(pack: LockedPack, code: readonly number[]): boolean { return validCode(code) && packCode(pack).every((n, k) => n === code[k]); }
 
 export function makePack(p: PuzzleData, r: RunState, m: Meta, pos: { i: number; j: number }, rand: () => number): LockedPack {
