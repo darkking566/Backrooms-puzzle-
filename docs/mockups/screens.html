@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Backrooms 畫面樣稿</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600&family=Noto+Serif+TC:wght@400;600&display=swap">
+<style>
+/* Layout: one-screen game shell. Phone = stacked column; ≥900px = scene left, log/controls right. Deliberately single dark theme (fluorescent-at-night). */
+:root {
+  color-scheme: dark;
+  --ink: #15140f;          /* page ground: unlit office */
+  --panel: #1f1d15;        /* HUD panels */
+  --panel-2: #2a271c;
+  --line: #3d3926;
+  --paper: #e9e1c3;        /* pale wallpaper — main text */
+  --muted: #a39a78;
+  --tube: #e6d36a;         /* fluorescent tube — accent */
+  --tube-dim: #8f8240;
+  --warn: #c9573c;
+  --calm: #8fb3a3;         /* Manila Room piano */
+  --f-ui: "IBM Plex Sans Condensed", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+  --f-story: "Noto Serif TC", "Songti TC", "PMingLiU", Georgia, serif;
+  --f-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--ink); color: var(--paper); font-family: var(--f-ui); font-size: 15px; overflow: hidden; }
+button { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--tube); outline-offset: 2px; }
+
+#app { height: 100%; display: flex; flex-direction: column; max-width: 1180px; margin: 0 auto;
+  padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+
+/* Mockup bar (not part of the game) */
+.mockbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px max(16px, env(safe-area-inset-left, 0px)) 8px max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px dashed var(--line); background: var(--ink); font-size: 12px; color: var(--muted); }
+.mockbar .tag { font-family: var(--f-data); letter-spacing: .12em; text-transform: uppercase; color: var(--tube-dim); }
+.mockbar select, .mockbar button { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; color: var(--paper); font-size: 12px; cursor: pointer; }
+.mockbar .spacer { flex: 1; }
+@media (max-width: 480px) { .mockbar .tag { display: none; } }
+.mockbar button[aria-pressed="true"] { border-color: var(--tube-dim); color: var(--tube); }
+
+main { flex: 1; min-height: 0; position: relative; }
+.screen { position: absolute; inset: 0; overflow: auto; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+
+/* ---------- Title ---------- */
+.title-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; text-align: center; }
+.logo { font-family: var(--f-data); font-weight: 600; font-size: clamp(40px, 11vw, 84px); letter-spacing: .28em; color: var(--tube); text-shadow: 0 0 18px rgba(230,211,106,.35); margin-right: -.28em; }
+.logo-sub { font-family: var(--f-data); color: var(--muted); letter-spacing: .3em; font-size: 12px; margin-top: -18px; }
+.warnbox { max-width: 34em; border: 1px solid var(--warn); border-radius: 6px; padding: 14px 16px; text-align: left; font-size: 14px; line-height: 1.6; background: rgba(201,87,60,.08); }
+.warnbox strong { color: var(--warn); display: block; margin-bottom: 4px; letter-spacing: .06em; }
+.warnbox label { display: flex; gap: 8px; align-items: center; margin-top: 10px; cursor: pointer; color: var(--paper); }
+.menu { display: flex; flex-direction: column; gap: 10px; width: min(280px, 100%); }
+.btn { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; cursor: pointer; text-align: center; transition: border-color .15s, background .15s; }
+.btn:hover:not(:disabled) { border-color: var(--tube-dim); background: var(--panel-2); }
+.btn.primary { border-color: var(--tube-dim); color: var(--tube); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+/* ---------- Prep / Death (narrow card screens) ---------- */
+.narrow { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.wake-count { font-family: var(--f-story); font-size: 22px; text-wrap: balance; }
+.wake-count em { font-style: normal; color: var(--tube); font-family: var(--f-data); }
+.kv { display: flex; justify-content: space-between; font-family: var(--f-data); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.kv b { color: var(--paper); font-weight: 600; }
+.weightbar { display: flex; gap: 3px; }
+.weightbar i { flex: 1; height: 10px; border-radius: 2px; background: var(--panel-2); border: 1px solid var(--line); }
+.weightbar i.on { background: var(--tube-dim); border-color: var(--tube-dim); }
+.weightbar i.over { background: var(--warn); border-color: var(--warn); }
+.shop { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.shop-row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 11px 12px; border-top: 1px solid var(--line); background: var(--panel); cursor: pointer; text-align: left; border-left: 0; border-right: 0; border-bottom: 0; width: 100%; }
+.shop-row:first-child { border-top: 0; }
+.shop-row .box { width: 18px; height: 18px; border: 1px solid var(--muted); border-radius: 3px; display: grid; place-items: center; font-size: 12px; color: var(--ink); }
+.shop-row[aria-pressed="true"] .box { background: var(--tube); border-color: var(--tube); }
+.shop-row .nm { min-width: 0; }
+.shop-row .nm small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.shop-row .cost { font-family: var(--f-data); font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.shop-row.locked { cursor: not-allowed; opacity: .5; }
+.note { font-size: 13px; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--line); padding-left: 10px; }
+
+.death-head { font-family: var(--f-story); font-size: 26px; text-align: center; padding-top: 10px; }
+.cause { text-align: center; }
+.cause .c1 { font-family: var(--f-data); color: var(--warn); letter-spacing: .08em; font-size: 13px; }
+.cause .c2 { font-family: var(--f-story); color: var(--muted); margin-top: 6px; }
+.ledger { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; display: flex; flex-direction: column; gap: 8px; }
+.ledger .kv.total { border-top: 1px dashed var(--line); padding-top: 8px; color: var(--tube); }
+.ledger .kv.total b { color: var(--tube); }
+.corpse { font-family: var(--f-story); line-height: 1.7; color: var(--paper); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---------- Explore ---------- */
+.explore { position: absolute; inset: 0; display: grid; grid-template-rows: auto auto minmax(0,1fr) auto auto; }
+.hud { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.stat { display: flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; }
+.stat .g { font-family: var(--f-story); font-size: 13px; width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 3px; color: var(--paper); }
+.stat .pips { display: flex; gap: 2px; }
+.stat .pips i { width: 5px; height: 12px; background: var(--panel-2); border-radius: 1px; }
+.stat .pips i.on { background: var(--paper); }
+.stat.low .pips i.on { background: var(--warn); }
+.hud .clock { margin-left: auto; font-family: var(--f-data); font-size: 12px; color: var(--muted); }
+.conds { width: 100%; display: flex; gap: 6px; flex-wrap: wrap; min-height: 0; }
+.conds span { font-size: 11px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--warn); color: var(--warn); }
+.conds:empty { display: none; }
+
+.view { position: relative; width: 100%; aspect-ratio: 10 / 8; max-height: 52vh; margin: 0 auto; background: #000; overflow: hidden; touch-action: manipulation; display: flex; justify-content: center; }
+.stage { position: relative; height: 100%; aspect-ratio: 10 / 8; max-width: 100%; overflow: hidden; }
+.view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.vignette { position: absolute; inset: 0; pointer-events: none; transition: box-shadow .8s; }
+.grain { position: absolute; inset: -20%; pointer-events: none; opacity: .09; mix-blend-mode: overlay; background-size: 160px 160px; animation: grain .9s steps(4) infinite; }
+@keyframes grain { 0% { transform: translate(0,0) } 25% { transform: translate(-3%,2%) } 50% { transform: translate(2%,-3%) } 75% { transform: translate(-2%,-1%) } }
+.hot { position: absolute; background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; padding: 0; transition: border-color .2s, background .2s; }
+.hot .lbl { position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); white-space: nowrap; font-size: 11px; background: rgba(21,20,15,.88); color: var(--paper); padding: 2px 7px; border-radius: 3px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.hot.exit .lbl { bottom: auto; top: 50%; transform: translate(-50%,-50%); }
+.hot:hover .lbl, .view.hints .hot .lbl { opacity: 1; }
+.hot:hover, .view.hints .hot { border-color: rgba(233,225,195,.55); background: rgba(233,225,195,.06); }
+.view.hints .hot.exit { border-style: dashed; }
+.view.targeting .hot:not(.exit) { border-color: var(--tube); background: rgba(230,211,106,.12); }
+.target-banner { position: absolute; left: 8px; right: 8px; top: 8px; background: rgba(21,20,15,.9); border: 1px solid var(--tube-dim); color: var(--tube); font-size: 12px; padding: 6px 10px; border-radius: 4px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.target-banner button { background: none; border: 1px solid var(--line); border-radius: 3px; padding: 2px 8px; cursor: pointer; color: var(--paper); font-size: 12px; }
+.caption { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-family: var(--f-data); font-size: 12px; color: var(--paper); background: rgba(0,0,0,.6); padding: 3px 10px; border-radius: 3px; white-space: nowrap; max-width: 94%; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.caption:empty { display: none; }
+.caption.blur { filter: blur(1.2px); }
+
+.logwrap { min-height: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.log { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 14px 4px; font-family: var(--f-story); font-size: 15px; line-height: 1.75; display: flex; flex-direction: column; gap: 6px; }
+.log p { margin: 0; color: var(--muted); }
+.log p:last-child, .log p.fresh { color: var(--paper); }
+.log p.sys { font-family: var(--f-data); font-size: 12px; color: var(--tube-dim); }
+.log p.bad { color: var(--warn); }
+.log p.calm { color: var(--calm); }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 14px 10px; }
+.choices:empty { display: none; }
+.choice { background: var(--panel-2); border: 1px solid var(--tube-dim); color: var(--tube); border-radius: 5px; padding: 8px 12px; cursor: pointer; font-size: 14px; }
+.choice:hover { background: #343020; }
+
+.actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
+.actions button, .tabs button { background: var(--panel); border: 0; padding: 11px 4px; cursor: pointer; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.actions button small, .tabs button small { font-family: var(--f-data); font-size: 10px; color: var(--muted); }
+.actions button:hover, .tabs button:hover { background: var(--panel-2); }
+.actions button[aria-pressed="true"] { color: var(--tube); }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabs button { background: var(--ink); }
+
+/* Sheets */
+.sheet-back { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; z-index: 5; }
+.sheet { width: 100%; max-height: 78%; background: var(--panel); border-top: 1px solid var(--tube-dim); border-radius: 12px 12px 0 0; display: flex; flex-direction: column; }
+.sheet-h { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.sheet-h h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: .04em; }
+.sheet-h button { background: none; border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.sheet-b { overflow-y: auto; padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.inv { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.slot { aspect-ratio: 1; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px; cursor: pointer; text-align: left; }
+.slot[aria-pressed="true"] { border-color: var(--tube); }
+.slot .w { font-family: var(--f-data); font-size: 10px; color: var(--muted); }
+.slot .n { font-size: 13px; line-height: 1.3; }
+.slot.empty { border-style: dashed; cursor: default; opacity: .4; }
+.detail { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.detail p { margin: 0; font-family: var(--f-story); line-height: 1.7; }
+.detail .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.subtabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.subtabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 10px; cursor: pointer; color: var(--muted); }
+.subtabs button[aria-selected="true"] { color: var(--tube); border-bottom-color: var(--tube); }
+.entry { border-left: 2px solid var(--line); padding: 2px 0 2px 10px; }
+.entry h3 { margin: 0 0 2px; font-size: 14px; }
+.entry p { margin: 0; font-family: var(--f-story); font-size: 14px; line-height: 1.7; color: var(--muted); }
+.entry.q h3::before { content: "◇ "; color: var(--tube-dim); }
+.entry.q.done h3::before { content: "◆ "; color: var(--tube); }
+textarea { width: 100%; min-height: 120px; background: var(--ink); color: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-family: var(--f-story); font-size: 14px; line-height: 1.7; resize: vertical; box-sizing: border-box; }
+.mapc { width: 100%; aspect-ratio: 4 / 3; background: #e9e1c3; border-radius: 4px; display: block; }
+.bodyrow { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: baseline; }
+.bodyrow .g { font-family: var(--f-story); color: var(--muted); }
+.bodyrow p { margin: 0; font-family: var(--f-story); line-height: 1.6; }
+
+.modal { position: absolute; inset: 0; z-index: 8; background: rgba(10,10,6,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; }
+.modal h2 { font-family: var(--f-story); font-weight: 400; font-size: 24px; margin: 0; text-wrap: balance; }
+.modal p { color: var(--muted); max-width: 30em; line-height: 1.7; margin: 0; }
+
+/* Desktop / landscape */
+@media (min-width: 900px) {
+  .explore { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0,1fr) auto auto; }
+  .hud { grid-column: 1 / -1; }
+  .view { grid-column: 1; grid-row: 2 / 5; max-height: none; height: 100%; aspect-ratio: auto; }
+  .logwrap { grid-column: 2; grid-row: 2; border-left: 1px solid var(--line); }
+  .actions { grid-column: 2; grid-row: 3; border-left: 1px solid var(--line); }
+  .tabs { grid-column: 2; grid-row: 4; border-left: 1px solid var(--line); }
+  .sheet-back { justify-content: flex-end; align-items: stretch; }
+  .sheet { width: 400px; max-height: none; border-radius: 0; border-top: 0; border-left: 1px solid var(--tube-dim); }
+}
+@media (prefers-reduced-motion: reduce) { .grain { animation: none; } .vignette { transition: none; } }
+</style>
+
+<div id="app">
+  <div class="mockbar">
+    <span class="tag" data-t="mock">畫面樣稿</span>
+    <select id="screenSel" aria-label="screen"></select>
+    <span class="spacer"></span>
+    <button id="flashBtn" aria-pressed="false"></button>
+    <button id="soundBtn" aria-pressed="false"></button>
+    <button id="langBtn">EN</button>
+  </div>
+  <main id="main"></main>
+</div>
+
+<script>
+(() => {
+"use strict";
+/* ---------------- state ---------------- */
+const S = {
+  lang: "zh", screen: "title", flash: false, sound: false,
+  node: "start", prev: null, moves: 0, minutes: 0,
+  st: { water: 62, food: 48, rest: 70, mind: 74 },
+  conds: [], inv: [], sel: null, targeting: null, hints: false,
+  visited: {}, flags: {}, log: [], choices: [], sheet: null, sub: "clues",
+  myNote: "", modal: null, points: 320, picked: { aw: 1, crow: 1 }
+};
+const L = (zh, en) => ({ zh, en });
+const tx = v => (v && typeof v === "object" && "zh" in v) ? v[S.lang] : v;
+
+/* ---------------- UI strings ---------------- */
+const U = {
+  mock: L("畫面樣稿", "Mockup"),
+  flashOn: L("閃爍效果：開", "Flicker: on"), flashOff: L("閃爍效果：關", "Flicker: off"),
+  soundOn: L("聲音：開", "Sound: on"), soundOff: L("聲音：關", "Sound: off"),
+  scrTitle: L("1 標題畫面", "1 Title"), scrPrep: L("2 開局準備", "2 Loadout"), scrExplore: L("3 探索主畫面", "3 Explore"),
+  scrBag: L("4 背包", "4 Backpack"), scrNotes: L("5 筆記本", "5 Notebook"), scrMap: L("6 地圖", "6 Map"),
+  scrBody: L("7 身體狀態", "7 Body"), scrDeath: L("8 死亡結算", "8 Death summary"),
+  sub: L("（暫定名稱）· 畫面樣稿", "(working title) · mockup"),
+  warnT: L("光敏性癲癇警告", "PHOTOSENSITIVITY WARNING"),
+  warnB: L("本遊戲包含閃爍的燈光效果。閃爍效果預設關閉，關閉時會改用穩定的光暈和文字提示。", "This game contains flickering lights. Flicker is off by default; when off, the game uses a steady glow and text cues instead."),
+  warnC: L("開啟閃爍效果", "Enable flicker effects"),
+  wake: L("醒來", "Wake up"), wakeS: L("進入開局準備", "Go to loadout"),
+  cont: L("繼續", "Continue"), contS: L("沒有進行中的一局", "No run in progress"),
+  codex: L("圖鑑", "Codex"), codexS: L("樣稿未包含", "Not in mockup"),
+  credits: L("資料來源", "Sources"), creditsS: L("Backrooms Wiki · CC BY-SA 3.0", "Backrooms Wiki · CC BY-SA 3.0"),
+  wakeN: L("第 <em>14</em> 次醒來", "Waking up for the <em>14th</em> time"),
+  pts: L("可用點數", "Points available"), left: L("剩餘點數", "Points left"), load: L("負重", "Load"),
+  prepNote: L("每局消耗：帶入的物品用掉就沒了。死亡時物品會留在遺體上，下一局找到遺體就能拿回一部分。", "Spent per run: carried items are gone once used. On death they stay on your body; find it next run to recover some."),
+  locked: L("未解鎖", "Locked"), over: L("超過負重", "Over capacity"),
+  died: L("你倒下了。", "You collapse."),
+  surv: L("存活", "Survived"), reach: L("到達", "Reached"),
+  total: L("合計", "Total"), again: L("再次醒來", "Wake again"),
+  back: L("回頭", "Turn around"), backS: L("1 分", "1 min"),
+  search: L("搜索", "Search"), searchS: L("30 分", "30 min"),
+  rest: L("休息", "Rest"), restS: L("視地點", "varies"),
+  hints: L("互動點", "Hotspots"), hintsS: L("顯示", "show"),
+  bag: L("背包", "Backpack"), notes: L("筆記", "Notebook"), map: L("地圖", "Map"), body: L("身體", "Body"),
+  close: L("關閉", "Close"),
+  inspect: L("查看", "Inspect"), use: L("使用", "Use"), drink: L("喝", "Drink"), drop: L("丟棄", "Drop"),
+  pickTarget: L("點選要使用「{x}」的目標", "Tap a target for “{x}”"), cancel: L("取消", "Cancel"),
+  clues: L("線索", "Clues"), quests: L("任務", "Tasks"), mine: L("我的筆記", "My notes"),
+  mineHelp: L("在曼尼拉房間寫下的筆記，下一局還會在桌上。其他地方寫的會被孤立效應抹掉。", "Notes written in the Manila Room stay on the table next run. Anywhere else, the Isolation Effect erases them."),
+  mapHelp: L("沒在看的地方會偏移，地圖上越久沒去的區塊越淡。拱門區不會偏移，永遠清楚。", "Unobserved areas shift, so areas you left long ago fade. Arch rooms never shift and stay sharp."),
+  noMap: L("你沒有紙筆，畫不了地圖。", "No pen and paper, so no map."),
+  clock: L("時間 ??:??", "Time ??:??"), clockN: L("沒有手錶，只知道過了很久。", "No watch. Only that it has been a long time."),
+  g_water: L("水", "H₂O"), g_food: L("食", "Fd"), g_rest: L("睡", "Zz"), g_mind: L("心", "Mn"),
+  through: L("你穿過了牆。", "You fall through the wall."),
+  throughP: L("Level 1 — 樣稿到此結束。正式版會在這裡結算這一層，然後進入 Level 1。", "Level 1 — the mockup ends here. The full game would wrap up this level and continue into Level 1."),
+  restart: L("重新開始樣稿", "Restart mockup"), seeDeath: L("看死亡結算樣稿", "See death summary"),
+  empty: L("空", "empty"), w: L("重", "wt")
+};
+const u = k => tx(U[k]);
+
+/* ---------------- items ---------------- */
+const ITEMS = {
+  aw:   { n: L("灰色杏仁水（未開封）", "Grey Almond Water (sealed)"), w: 1, cost: 40,
+          d: L("金屬保溫瓶，封口完好，裝到瓶口。一瓶大約 600 大卡。", "Metal thermos, seal intact, filled to the brim. About 600 kcal a bottle."), drink: true },
+  crow: { n: L("撬棍", "Crowbar"), w: 3, cost: 120,
+          d: L("有點生鏽，很沉。可以撬開天花板板、箱子和通風口。", "A little rusty, heavy. Pries open ceiling tiles, crates and vents."), target: true },
+  torch:{ n: L("手電筒", "Flashlight"), w: 1, cost: 60, d: L("斷電區必備。在 Level 1 停電時開燈會引來東西。", "Essential in blackout zones. On Level 1, light during a Flickering draws things to you.") },
+  plug: { n: L("耳塞", "Earplugs"), w: 0, cost: 20, d: L("噪音飆高時保護聽力，但戴著會聽不清聲音線索。", "Protects hearing during noise spikes, but muffles sound cues.") },
+  pad:  { n: L("筆記本與筆", "Notepad & pen"), w: 1, cost: 30, d: L("可以畫地圖。理智低的時候重讀筆記能讓你冷靜一點。", "Lets you map. Rereading it when your mind slips calms you a little."), always: true },
+  watch:{ n: L("手錶", "Watch"), w: 0, cost: 50, d: "", locked: true },
+  salt: { n: L("火鹽結晶", "Firesalt crystal"), w: 0, d: L("橘色、半透明，長在牆角。溶進水裡會發熱，可以把水煮沸。", "Orange, translucent, grows in corners. Dissolves hot in water; enough to boil it.") },
+  can:  { n: L("罐頭", "Canned food"), w: 1, d: L("曼尼拉房間櫃子裡的。標籤是手寫的：「給下一個人」。", "From the Manila Room cupboard. Handwritten label: “for the next one.”") },
+  half: { n: L("灰色保溫瓶（沒裝滿）", "Grey thermos (not full)"), w: 1, d: L("有凹痕。搖一搖，只剩一半。沒裝滿的瓶子可能被人動過。", "Dented. Shaken, it is half empty. A bottle that isn't full may have been tampered with."), drink: true, risky: true },
+  pack: { n: L("小背包（跌落物）", "Small backpack (fallen)"), w: 1, d: L("卡在天花板夾層裡。拉鍊上有一個三位數的密碼鎖。", "Wedged above the ceiling. A three-digit lock on the zipper.") }
+};
+
+/* ---------------- world nodes ---------------- */
+const NODES = {
+  start: { kind: "corridor", depth: 5, open: { left: [1], front: true },
+    exits: [ { side: "left", seg: 1, to: "fork", n: L("左側的走廊", "Corridor on the left") },
+             { side: "front", to: "pillars", n: L("繼續往前", "Keep going ahead") } ],
+    hots: [ { id: "bottle", x: .57, y: .80, w: .09, h: .11, n: L("地上的保溫瓶", "Thermos on the floor") } ],
+    enter: L("你在嗡嗡聲裡醒來。地毯是濕的，空氣裡有一股霉味。走廊往前延伸，左邊有一個開口。", "You wake to the buzzing. The carpet is wet; the air smells of mildew. The hall runs ahead, with an opening on the left."),
+    map: [1, 2] },
+  fork: { kind: "corridor", depth: 2, open: { left: [1], right: [1] },
+    exits: [ { side: "left", seg: 1, to: "arches", n: L("左邊：牆的顏色比較淡", "Left: paler walls") },
+             { side: "right", seg: 1, to: "pillars", n: L("右邊：好像很空曠", "Right: sounds wide open") } ],
+    hots: [],
+    enter: L("走廊在這裡結束，左右各有一條路。左邊的牆好像比較淡；右邊傳來的嗡嗡聲很空，像是一個很大的空間。", "The hall ends here, splitting left and right. The left walls look paler; the hum from the right sounds hollow, like a huge room."),
+    map: [0, 1] },
+  arches: { kind: "arches", stable: true,
+    exits: [ { side: "archL", to: "manila_near", n: L("左邊的拱門", "Left archway") },
+             { side: "archR", to: "start", n: L("右邊的拱門", "Right archway") } ],
+    hots: [ { id: "tile", x: .40, y: .03, w: .20, h: .10, n: L("鬆動的天花板板", "Loose ceiling tile") },
+            { id: "sit", x: .05, y: .42, w: .16, h: .22, n: L("拱門的邊緣", "Edge of an archway") } ],
+    enter: L("牆變成了淡色，上面開著一個個拱門。地毯深得會陷進去。這種地方據說不會偏移。", "The walls turn pale, cut with archways. The carpet is deep enough to sink into. Places like this are said not to shift."),
+    map: [0, 0] },
+  pillars: { kind: "pillars",
+    exits: [ { side: "pfront", to: "flicker", n: L("選一個方向一直走", "Pick a heading and keep to it") },
+             { side: "pleft", to: "fork", n: L("往左邊的柱子之間", "Between the pillars to the left") } ],
+    hots: [ { id: "corner", x: .80, y: .70, w: .12, h: .12, n: L("柱子底部的結晶", "Crystals at a pillar's base") } ],
+    enter: L("一大片柱子，整齊得像格子一樣，一直排到看不見的地方。地毯在這裡比較淺、比較乾。", "A field of pillars in a perfect grid, running out of sight. The carpet here is shallower and drier."),
+    map: [2, 1] },
+  manila_near: { kind: "corridor", depth: 3, open: { front: "door" },
+    exits: [ { side: "front", to: "manila_in", n: L("木門", "Wooden door") } ],
+    hots: [],
+    enter: L("嗡嗡聲越來越小了。在那片安靜裡，你聽到……鋼琴聲？前面有一面褐色的牆，貼著牛皮紙色的壁紙，中間開著一扇木門。", "The hum is fading. In the quiet you hear... a piano? Ahead stands a brown wall papered the colour of manila folders, with a wooden door in its middle."),
+    caption: L("（輕柔的鋼琴聲）", "(soft piano)"), map: [0, -1] },
+  manila_in: { kind: "manila",
+    exits: [ { side: "dfront", to: "flicker", n: L("對面的門：門縫在閃", "Far door: light flickers under it") },
+             { side: "dleft", to: "pillars", n: L("左邊的門", "Left door") },
+             { side: "dright", to: "arches", n: L("右邊的門", "Right door") } ],
+    hots: [ { id: "table", x: .37, y: .58, w: .26, h: .12, n: L("八角桌上的紙", "Papers on the octagonal table") },
+            { id: "cupboard", x: .40, y: .71, w: .20, h: .10, n: L("桌下的櫃子", "Cupboard under the table") } ],
+    enter: L("一個方形的房間，木地板，一張八角桌和兩張椅子，四面牆上各有一扇門。嗡嗡聲完全消失了，只剩下鋼琴聲。你第一次覺得可以好好呼吸。", "A square room with floorboards, an octagonal table, two chairs, and a door in every wall. The hum is gone; only the piano remains. For the first time you can breathe."),
+    caption: L("（鋼琴聲）", "(piano)"), map: [0, -2], calm: true },
+  flicker: { kind: "corridor", depth: 4, open: { front: "flicker" },
+    exits: [],
+    hots: [ { id: "wall", x: .36, y: .30, w: .28, h: .34, n: L("閃爍的牆", "The flickering wall") } ],
+    enter: L("走廊盡頭的牆在閃。不是燈在閃，是牆本身。", "The wall at the end of the hall is flickering. Not the lights. The wall itself."),
+    caption: L("（嗡嗡聲忽大忽小）", "(the hum surges and drops)"), map: [3, 1] }
+};
+
+/* ---------------- helpers ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function say(text, kind = "") { S.log.push({ text, kind }); if (S.log.length > 60) S.log.shift(); }
+function clamp(v) { return Math.max(0, Math.min(100, v)); }
+function spend(min, cost = {}) {
+  S.minutes += min;
+  for (const k of ["water", "food", "rest", "mind"]) S.st[k] = clamp(S.st[k] - (cost[k] ?? 0));
+}
+function pips(v) { return Math.ceil(v / 20); }
+const DESC = {
+  water: [L("頭暈，看東西在晃。", "Dizzy; the world sways."), L("嘴唇裂開了。", "Your lips have cracked."), L("喉嚨很乾。", "Your throat is dry."), L("有點口乾。", "A little thirsty."), L("還不渴。", "Not thirsty.")],
+  food:  [L("手在發抖，使不上力。", "Your hands shake; no strength."), L("胃在絞痛。", "Your stomach cramps."), L("肚子很餓。", "You're hungry."), L("有點餓。", "A little hungry."), L("不餓。", "Not hungry.")],
+  rest:  [L("眼睛快睜不開了。", "You can barely keep your eyes open."), L("每一步都很沉。", "Every step is heavy."), L("有點累。", "Somewhat tired."), L("還撐得住。", "Holding up."), L("精神還好。", "Alert.")],
+  mind:  [L("你不確定眼前的東西是不是真的。", "You're not sure what you see is real."), L("走廊盡頭好像有人影。", "There might be a figure at the end of the hall."), L("嗡嗡聲讓你很煩躁。", "The hum grates on you."), L("有點不安。", "Uneasy."), L("還算冷靜。", "Fairly calm.")]
+};
+const desc = k => tx(DESC[k][Math.max(0, pips(S.st[k]) - 1)]);
+
+/* ---------------- audio (hum + piano) ---------------- */
+let AC = null, humGain = null, pianoTimer = null;
+function audioStart() {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === "suspended") AC.resume();
+    if (!humGain) {
+      humGain = AC.createGain(); humGain.gain.value = 0;
+      const lp = AC.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900;
+      [[60, "sawtooth", .35], [120, "sine", .5], [180, "sine", .15]].forEach(([f, t, g]) => {
+        const o = AC.createOscillator(); o.type = t; o.frequency.value = f;
+        const og = AC.createGain(); og.gain.value = g; o.connect(og).connect(lp); o.start();
+      });
+      lp.connect(humGain).connect(AC.destination);
+    }
+    audioUpdate();
+  } catch (e) { S.sound = false; }
+}
+function audioStop() { if (humGain) humGain.gain.setTargetAtTime(0, AC.currentTime, .1); clearInterval(pianoTimer); pianoTimer = null; }
+function audioUpdate() {
+  if (!S.sound || !AC || S.screen !== "explore") { audioStop(); return; }
+  const n = NODES[S.node];
+  const hum = n.kind === "manila" ? 0 : S.node === "manila_near" ? .012 : S.node === "flicker" ? .05 : .03;
+  humGain.gain.setTargetAtTime(hum, AC.currentTime, .4);
+  const piano = n.kind === "manila" || S.node === "manila_near";
+  if (piano && !pianoTimer) {
+    const notes = [261.6, 311.1, 392, 466.2, 392, 311.1, 349.2, 293.7]; let i = 0;
+    pianoTimer = setInterval(() => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = "triangle"; o.frequency.value = notes[i++ % notes.length];
+      const vol = n.kind === "manila" ? .07 : .025;
+      g.gain.setValueAtTime(vol, AC.currentTime); g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + 1.6);
+      o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + 1.7);
+    }, 700);
+  } else if (!piano && pianoTimer) { clearInterval(pianoTimer); pianoTimer = null; }
+}
+
+/* ---------------- canvas renderer ---------------- */
+const CW = 1000, CH = 800, CX = CW / 2, CY = CH * .47;
+function G(k) { const s = 1 / (1 + k * .6); return { x0: CX - CW * .5 * s, x1: CX + CW * .5 * s, y0: CY - CH * .55 * s, y1: CY + CH * .56 * s, s }; }
+function mix(a, b, t) { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`; }
+function quad(c, pts, fill) { c.beginPath(); c.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) c.lineTo(...pts[i]); c.closePath(); c.fillStyle = fill; c.fill(); }
+const lerp = (a, b, t) => a + (b - a) * t;
+const FOG = "#17150c";
+let flickerLevel = 1, rafId = 0;
+
+function palette(kind) {
+  if (kind === "arches") return { wall: "#d6cfa6", ceil: "#d9d4b8", floor: "#8a7650", tube: "#fff7cf" };
+  if (kind === "manila") return { wall: "#c4a777", ceil: "#cdbb94", floor: "#7a5434", tube: "#fff1d0" };
+  return { wall: "#cdb755", ceil: "#d7cfa0", floor: "#9c8550", tube: "#fffbe0" };
+}
+function drawCorridor(c, n, P) {
+  const N = n.depth || 4;
+  const open = n.open || {};
+  for (let k = N - 1; k >= 0; k--) {
+    const a = G(k), b = G(k + 1), f = Math.min(.85, k / (N + 1) * 1.05);
+    quad(c, [[a.x0, a.y0], [a.x1, a.y0], [b.x1, b.y0], [b.x0, b.y0]], mix(P.ceil, FOG, f));
+    const tl = (t, u) => [lerp(lerp(a.x0, a.x1, t), lerp(b.x0, b.x1, t), u), lerp(a.y0, b.y0, u)];
+    quad(c, [tl(.36, .25), tl(.64, .25), tl(.64, .65), tl(.36, .65)], mix(P.tube, FOG, f * .7 * (2 - flickerLevel)));
+    quad(c, [[a.x0, a.y1], [a.x1, a.y1], [b.x1, b.y1], [b.x0, b.y1]], mix(P.floor, FOG, f));
+    for (const side of ["left", "right"]) {
+      const ax = side === "left" ? a.x0 : a.x1, bx = side === "left" ? b.x0 : b.x1;
+      const isOpen = (open[side] || []).includes(k);
+      quad(c, [[ax, a.y0], [bx, b.y0], [bx, b.y1], [ax, a.y1]], mix(isOpen ? "#6a5a27" : P.wall, FOG, f + (side === "right" ? .06 : 0)));
+      if (isOpen) {
+        const p = (t, v) => [lerp(ax, bx, t), lerp(lerp(a.y0, b.y0, t), lerp(a.y1, b.y1, t), v)];
+        const gr = c.createLinearGradient(ax, 0, bx, 0); gr.addColorStop(0, mix("#3b3317", FOG, f)); gr.addColorStop(1, mix("#7d6c32", FOG, f));
+        quad(c, [p(.12, .1), p(.88, .1), p(.88, 1), p(.12, 1)], gr);
+        quad(c, [p(.12, .1), p(.88, .1), p(.88, .18), p(.12, .2)], mix(P.ceil, FOG, f + .2));
+      } else {
+        c.strokeStyle = "rgba(60,48,10,.18)"; c.lineWidth = 1;
+        for (let i = 1; i < 6; i++) { const t = i / 6; c.beginPath(); c.moveTo(lerp(ax, bx, t), lerp(a.y0, b.y0, t)); c.lineTo(lerp(ax, bx, t), lerp(a.y1, b.y1, t)); c.stroke(); }
+      }
+    }
+  }
+  const e = G(N), ff = Math.min(.9, N / (N + 1) * 1.05);
+  if (open.front === true) {
+    const g = c.createRadialGradient(CX, CY, 2, CX, CY, (e.x1 - e.x0));
+    g.addColorStop(0, "#0b0a05"); g.addColorStop(1, mix(P.wall, FOG, ff));
+    c.fillStyle = g; c.fillRect(e.x0, e.y0, e.x1 - e.x0, e.y1 - e.y0);
+  } else if (open.front === "door") {
+    c.fillStyle = mix("#8a6a43", FOG, ff * .7); c.fillRect(e.x0, e.y0, e.x1 - e.x0, e.y1 - e.y0);
+    const dw = (e.x1 - e.x0) * .34, dh = (e.y1 - e.y0) * .78;
+    c.fillStyle = "#5a3a1e"; c.fillRect(CX - dw / 2, e.y1 - dh, dw, dh);
+    c.fillStyle = "#2a1a0c"; c.fillRect(CX - dw / 2 + dw * .5, e.y1 - dh, dw * .5, dh);
+    c.fillStyle = "rgba(255,240,200,.25)"; c.fillRect(CX - dw / 2 + dw * .48, e.y1 - dh, 3, dh);
+  } else if (open.front === "flicker") {
+    const lv = flickerLevel;
+    const g = c.createRadialGradient(CX, CY, 4, CX, CY, (e.x1 - e.x0) * .8);
+    g.addColorStop(0, `rgba(255,252,220,${.55 + .45 * lv})`); g.addColorStop(1, mix(P.wall, "#ffffff", .2 * lv));
+    c.fillStyle = g; c.fillRect(e.x0, e.y0, e.x1 - e.x0, e.y1 - e.y0);
+  } else {
+    c.fillStyle = mix(P.wall, FOG, ff); c.fillRect(e.x0, e.y0, e.x1 - e.x0, e.y1 - e.y0);
+  }
+}
+function drawArches(c, n, P) {
+  drawCorridor(c, { depth: 2, open: {} }, P);
+  const e = G(2), w = e.x1 - e.x0, h = e.y1 - e.y0;
+  [[.08, .40], [.52, .40]].forEach(([fx, fw]) => {
+    const x = e.x0 + w * fx, aw = w * fw, top = e.y0 + h * .28, r = aw / 2;
+    c.fillStyle = "#24200f"; c.beginPath(); c.moveTo(x, e.y1); c.lineTo(x, top + r); c.arc(x + r, top + r, r, Math.PI, 0); c.lineTo(x + aw, e.y1); c.closePath(); c.fill();
+    const g = c.createLinearGradient(0, top, 0, e.y1); g.addColorStop(0, "rgba(214,207,166,.12)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = g; c.fill();
+  });
+  // archway cut into near-left wall (sit hotspot)
+  const a = G(0), b = G(1);
+  c.fillStyle = "#3a3419"; const x0 = lerp(a.x0, b.x0, .25), x1 = lerp(a.x0, b.x0, .75);
+  c.beginPath(); c.moveTo(x0, lerp(a.y1, b.y1, .25)); c.lineTo(x0, lerp(a.y0, b.y0, .25) + 120); c.quadraticCurveTo((x0 + x1) / 2, lerp(a.y0, b.y0, .5) + 20, x1, lerp(a.y0, b.y0, .75) + 70); c.lineTo(x1, lerp(a.y1, b.y1, .75)); c.closePath(); c.fill();
+  // loose tile
+  c.fillStyle = "#b9b395"; c.fillRect(CW * .40, CH * .03, CW * .2, CH * .08);
+  c.fillStyle = "#151208"; c.fillRect(CW * .40, CH * .03 + CH * .07, CW * .2, CH * .015);
+}
+function drawPillars(c, n, P) {
+  c.fillStyle = mix(P.ceil, FOG, .2); c.fillRect(0, 0, CW, CY);
+  const g = c.createLinearGradient(0, CY, 0, CH); g.addColorStop(0, FOG); g.addColorStop(1, mix(P.floor, FOG, .1));
+  c.fillStyle = g; c.fillRect(0, CY, CW, CH - CY);
+  const gc = c.createLinearGradient(0, 0, 0, CY); gc.addColorStop(0, mix(P.ceil, FOG, .05)); gc.addColorStop(1, FOG);
+  c.fillStyle = gc; c.fillRect(0, 0, CW, CY);
+  for (let k = 7; k >= 1; k--) {
+    const s = 1 / (1 + k * .55), f = Math.min(.92, k / 8);
+    for (let col = -4; col <= 4; col++) {
+      if (col === 0) continue;
+      const x = CX + col * CW * .36 * s, pw = CW * .09 * s;
+      const top = CY - CH * .55 * s, bot = CY + CH * .56 * s;
+      c.fillStyle = mix(P.wall, FOG, f); c.fillRect(x - pw / 2, top, pw, bot - top);
+      c.fillStyle = mix("#7d6c32", FOG, f); c.fillRect(x + pw * .2, top, pw * .3, bot - top);
+      if (k < 7) { c.fillStyle = mix(P.tube, FOG, f * .8); c.fillRect(x + CW * .18 * s - pw * .6, top + 4 * s, pw * 1.2, 6 * s + 1); }
+    }
+  }
+  c.fillStyle = "#e0883a"; c.globalAlpha = .9;
+  [[.83, .79], [.86, .78], [.85, .81]].forEach(([fx, fy]) => { c.beginPath(); c.moveTo(CW * fx, CH * fy); c.lineTo(CW * fx + 8, CH * fy - 20); c.lineTo(CW * fx + 16, CH * fy); c.closePath(); c.fill(); });
+  c.globalAlpha = 1;
+}
+function drawManila(c, n, P) {
+  const a = G(0), b = G(1.4);
+  quad(c, [[a.x0, a.y0], [a.x1, a.y0], [b.x1, b.y0], [b.x0, b.y0]], mix(P.ceil, FOG, .15));
+  quad(c, [[a.x0, a.y1], [a.x1, a.y1], [b.x1, b.y1], [b.x0, b.y1]], P.floor);
+  c.strokeStyle = "rgba(30,15,5,.35)"; c.lineWidth = 2;
+  for (let i = 1; i < 12; i++) { const t = i / 12; c.beginPath(); c.moveTo(lerp(a.x0, a.x1, t), a.y1); c.lineTo(lerp(b.x0, b.x1, t), b.y1); c.stroke(); }
+  for (const side of ["left", "right"]) {
+    const ax = side === "left" ? a.x0 : a.x1, bx = side === "left" ? b.x0 : b.x1;
+    quad(c, [[ax, a.y0], [bx, b.y0], [bx, b.y1], [ax, a.y1]], mix(P.wall, FOG, side === "left" ? .12 : .2));
+    const p = (t, v) => [lerp(ax, bx, t), lerp(lerp(a.y0, b.y0, t), lerp(a.y1, b.y1, t), v)];
+    quad(c, [p(.35, .38), p(.62, .4), p(.62, 1), p(.35, 1)], "#5a3a1e");
+  }
+  c.fillStyle = mix(P.wall, FOG, .05); c.fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+  const dw = (b.x1 - b.x0) * .2, dh = (b.y1 - b.y0) * .7;
+  c.fillStyle = "#5a3a1e"; c.fillRect(CX - dw / 2, b.y1 - dh, dw, dh);
+  c.fillStyle = `rgba(255,250,215,${.35 + .4 * flickerLevel})`; c.fillRect(CX - dw / 2, b.y1 - 6, dw, 6);
+  c.fillStyle = P.tube; c.fillRect(CX - 70, a.y0 + 40, 140, 18);
+  // octagonal table + chairs
+  const ty = CH * .66, tr = CW * .15;
+  c.fillStyle = "#4a2e17"; c.beginPath();
+  for (let i = 0; i < 8; i++) { const ang = Math.PI / 8 + i * Math.PI / 4; c.lineTo(CX + Math.cos(ang) * tr, ty + Math.sin(ang) * tr * .32); } c.closePath(); c.fill();
+  c.fillStyle = "#2e1c0d"; c.fillRect(CX - tr * .55, ty + tr * .12, tr * 1.1, CH * .1);
+  c.fillStyle = "#e9e1c3"; c.save(); c.translate(CX - 20, ty - 6); c.rotate(-.12); c.fillRect(0, 0, 46, 14); c.restore();
+  c.fillStyle = "#3b2412"; c.fillRect(CX - tr * 1.6, ty - 90, 40, 160); c.fillRect(CX + tr * 1.35, ty - 90, 40, 160);
+}
+function drawScene() {
+  const cv = $("#scene"); if (!cv) return;
+  const c = cv.getContext("2d"); const n = NODES[S.node]; const P = palette(n.kind);
+  c.clearRect(0, 0, CW, CH); c.fillStyle = FOG; c.fillRect(0, 0, CW, CH);
+  if (n.kind === "arches") drawArches(c, n, P);
+  else if (n.kind === "pillars") drawPillars(c, n, P);
+  else if (n.kind === "manila") drawManila(c, n, P);
+  else drawCorridor(c, n, P);
+  if (S.node === "start" && !S.flags.bottle) {
+    c.fillStyle = "#8d8f8a"; c.fillRect(CW * .59, CH * .82, 26, 58); c.fillStyle = "#5d5f5a"; c.fillRect(CW * .59, CH * .82, 26, 10);
+  }
+  // sanity: shadow figure at the edge
+  if (S.st.mind < 45 && n.kind !== "manila") {
+    c.fillStyle = "rgba(5,4,2,.55)"; const x = CW * .9, y = CY - 40;
+    c.beginPath(); c.ellipse(x, y, 14, 18, 0, 0, 7); c.fill(); c.fillRect(x - 16, y + 14, 32, 120);
+  }
+}
+function animate() {
+  cancelAnimationFrame(rafId);
+  const n = NODES[S.node];
+  const needs = S.screen === "explore" && (S.node === "flicker" || n.kind === "manila");
+  if (!needs) { flickerLevel = 1; drawScene(); return; }
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let t0 = 0;
+  const step = t => {
+    if (S.flash && !reduce) { if (t - t0 > 70) { t0 = t; flickerLevel = Math.random() < .25 ? .15 + Math.random() * .3 : 1; } }
+    else flickerLevel = reduce ? .8 : .75 + .25 * Math.sin(t / 900);
+    drawScene(); rafId = requestAnimationFrame(step);
+  };
+  rafId = requestAnimationFrame(step);
+}
+
+/* exits → hotspot rectangles in canvas coords */
+function exitRect(n, ex) {
+  if (ex.side === "front") { const e = G(n.depth || 4); return { x: e.x0, y: e.y0, w: e.x1 - e.x0, h: e.y1 - e.y0 }; }
+  if (ex.side === "left" || ex.side === "right") {
+    const a = G(ex.seg), b = G(ex.seg + 1);
+    const ax = ex.side === "left" ? a.x0 : a.x1, bx = ex.side === "left" ? b.x0 : b.x1;
+    const x = Math.min(lerp(ax, bx, .12), lerp(ax, bx, .88)), w = Math.abs(lerp(ax, bx, .76));
+    return { x, y: lerp(a.y0, b.y0, .5), w, h: lerp(a.y1, b.y1, .5) - lerp(a.y0, b.y0, .5) };
+  }
+  const e = G(2), w = e.x1 - e.x0, h = e.y1 - e.y0;
+  if (ex.side === "archL") return { x: e.x0 + w * .08, y: e.y0 + h * .28, w: w * .40, h: h * .72 };
+  if (ex.side === "archR") return { x: e.x0 + w * .52, y: e.y0 + h * .28, w: w * .40, h: h * .72 };
+  if (ex.side === "pfront") return { x: CW * .38, y: CH * .28, w: CW * .24, h: CH * .42 };
+  if (ex.side === "pleft") return { x: CW * .04, y: CH * .3, w: CW * .2, h: CH * .5 };
+  const b = G(1.4), dw = (b.x1 - b.x0) * .2, dh = (b.y1 - b.y0) * .7;
+  if (ex.side === "dfront") return { x: CX - dw / 2, y: b.y1 - dh, w: dw, h: dh * .5 };
+  if (ex.side === "dleft") return { x: CW * .02, y: CH * .38, w: CW * .1, h: CH * .5 };
+  if (ex.side === "dright") return { x: CW * .88, y: CH * .38, w: CW * .1, h: CH * .5 };
+}
+
+/* ---------------- game actions ---------------- */
+function enter(id, how) {
+  S.prev = S.node; S.node = id; S.moves++;
+  const n = NODES[id];
+  const ext = n.kind === "pillars" ? 20 : n.kind === "arches" ? 25 : 12;
+  spend(ext, { water: 4, food: 2, rest: 3, mind: n.calm ? -12 : 3 });
+  S.visited[id] = S.moves;
+  if (how) say(how);
+  say(tx(n.enter), n.calm ? "calm" : "");
+  if (S.moves >= 3 && !S.flags.noise && !n.calm && id !== "manila_near") {
+    S.flags.noise = 1;
+    say(tx(L("嗡嗡聲突然變得很刺耳，耳朵開始發痛。", "The hum suddenly spikes, painfully loud.")), "bad");
+    S.choices = [
+      { t: L("摀住耳朵，快走", "Cover your ears, keep moving"), f: () => { spend(10); say(tx(L("你摀著耳朵走了一段，聲音慢慢退了。", "You walk on with your ears covered until it recedes."))); } },
+      { t: L("不管它，繼續看", "Ignore it, keep looking"), f: () => { S.conds.push("hear"); say(tx(L("聲音退去後，你的耳朵還在嗡嗡作響。聽什麼都隔了一層。", "When it passes your ears still ring. Everything sounds muffled.")), "bad"); } }
+    ];
+    if (S.inv.includes("plug")) S.choices.unshift({ t: L("戴上耳塞", "Put in earplugs"), f: () => { say(tx(L("你戴上耳塞。世界一下子安靜了。", "You put in the earplugs. The world goes quiet."))); } });
+  } else S.choices = [];
+  S.sheet = null; S.targeting = null;
+  render();
+}
+function turnAround() {
+  const n = NODES[S.node];
+  spend(1, { mind: 2 });
+  if (n.stable) { say(tx(L("你回頭看。拱門區沒有變，跟剛才一模一樣。", "You look back. The arch room hasn't changed at all."))); render(); return; }
+  const pool = ["start", "fork", "pillars", "arches"].filter(k => k !== S.node);
+  const to = pool[Math.floor(Math.random() * pool.length)];
+  enter(to, tx(L("你回頭看。剛才走過的路……不見了。", "You look back. The way you came... is gone.")));
+}
+function search() {
+  spend(30, { water: 3, food: 2, rest: 3, mind: 1 });
+  const n = NODES[S.node];
+  if (S.node === "pillars" && !S.flags.salt) { S.flags.salt = 1; S.inv.push("salt"); say(tx(L("你沿著柱子底部摸過去，找到幾顆橘色半透明的結晶。是火鹽。", "Feeling along the pillar bases you find a few translucent orange crystals. Firesalt."))); }
+  else if (n.kind === "manila") say(tx(L("你把房間仔細看了一遍。桌上的紙和櫃子才是重點。", "You look the room over. The papers and the cupboard are what matter.")));
+  else say(tx(L("你花了半小時翻找。地毯、牆角、天花板……什麼都沒有。", "Half an hour of searching. Carpet, corners, ceiling... nothing.")));
+  render();
+}
+function rest() {
+  const n = NODES[S.node];
+  if (n.kind === "arches") { spend(90, { water: 5, food: 3, rest: -25, mind: -4 }); say(tx(L("你爬上拱門邊緣坐了一會兒，終於不用踩在濕地毯上了。", "You climb onto the edge of an archway and sit a while, off the wet carpet at last."))); }
+  else if (n.kind === "pillars") {
+    say(tx(L("這裡的地毯比較乾，可以睡。要面向哪裡睡？", "The carpet is drier here; you could sleep. Which way do you face?")));
+    S.choices = [
+      { t: L("面向前進的方向", "Face the way you're going"), f: () => { spend(360, { water: 14, food: 10, rest: -60, mind: -6 }); say(tx(L("你醒來時，前方的柱子還在原處。至少方向沒丟。", "When you wake, the pillars ahead are where they were. At least you kept your heading."))); } },
+      { t: L("隨便躺下", "Just lie down"), f: () => { spend(360, { water: 14, food: 10, rest: -60, mind: -2 }); say(tx(L("你醒來，四周的柱子排列全變了。你已經不知道自己原本要往哪走。", "You wake to a different grid of pillars. You no longer know which way you were heading.")), "bad"); } }
+    ];
+  }
+  else if (n.kind === "manila") { spend(240, { water: 10, food: 6, rest: -50, mind: -20 }); say(tx(L("你趴在桌上睡著了。醒來時鋼琴聲還在。", "You fall asleep at the table. The piano is still playing when you wake.")), "calm"); }
+  else say(tx(L("地毯濕透了，這裡沒辦法躺。", "The carpet is soaked; you can't lie down here.")));
+  render();
+}
+function useHot(h) {
+  if (S.targeting) {
+    const it = S.targeting; S.targeting = null;
+    if (it === "crow" && h.id === "tile") return openTile(true);
+    say(tx(L("這樣好像沒有用。", "That doesn't seem to do anything."))); render(); return;
+  }
+  S.choices = [];
+  switch (h.id) {
+    case "bottle":
+      say(tx(L("一個灰色的金屬保溫瓶，有凹痕。你拿起來搖一搖，只剩一半。", "A dented grey metal thermos. You shake it: half empty.")));
+      S.choices = [
+        { t: L("撿起來", "Take it"), f: () => { S.flags.bottle = 1; S.inv.push("half"); say(tx(L("你把它收進背包。", "You put it in your pack."))); } },
+        { t: L("放著", "Leave it"), f: () => say(tx(L("你想起一條規則：沒裝滿的瓶子不要喝。", "You remember a rule: never drink from a bottle that isn't full."))) }
+      ]; break;
+    case "tile":
+      say(tx(L("有一片天花板板沒有完全卡好，上面好像有東西。", "One ceiling tile isn't seated properly. Something seems to be above it.")));
+      S.choices = [{ t: L("用手推開（40 分，可能受傷）", "Push it with your hands (40 min, may hurt)"), f: () => openTile(false) }];
+      if (S.inv.includes("crow")) S.choices.unshift({ t: L("用撬棍撬開（10 分）", "Pry it with the crowbar (10 min)"), f: () => openTile(true) });
+      break;
+    case "sit": rest(); return;
+    case "corner": search(); return;
+    case "table":
+      if (!S.flags.read) { S.flags.read = 1; say(tx(L("桌上有幾份手寫的教學：「找到閃爍的牆，撲進去。」最底下壓著一張紙條，字跡你很熟。是你自己的字。", "Handwritten guides lie on the table: “Find the flickering wall. Throw yourself in.” Under them is a note in handwriting you know. Your own.")), "calm");
+        say(tx(L("「第 13 次。柱林那邊有火鹽。別喝紅色的，不管它看起來像什麼。」", "“13th time. There's firesalt among the pillars. Don't drink the red one, whatever it looks like.”"))); }
+      else say(tx(L("你又讀了一遍自己的紙條。你不記得寫過它。", "You read your own note again. You don't remember writing it.")));
+      break;
+    case "cupboard":
+      if (!S.flags.cup) { S.flags.cup = 1; S.inv.push("can", "aw"); say(tx(L("櫃子裡有一個罐頭和一瓶封好的杏仁水，貼著手寫標籤：「給下一個人」。", "Inside: a can of food and a sealed Almond Water, labelled by hand: “for the next one.”")), "calm"); }
+      else say(tx(L("櫃子空了。", "The cupboard is empty.")));
+      break;
+    case "wall": S.modal = "through"; break;
+  }
+  render();
+}
+function openTile(crow) {
+  if (S.flags.tile) { say(tx(L("夾層裡已經沒東西了。", "Nothing left up there."))); render(); return; }
+  S.flags.tile = 1; S.choices = [];
+  if (crow) { spend(10, { rest: 2 }); say(tx(L("撬棍卡進縫裡一扳，天花板板就掀開了。", "One twist of the crowbar and the tile lifts free."))); }
+  else { spend(40, { rest: 6, water: 2 }); S.conds.push("cut"); say(tx(L("你墊腳推了很久，板子邊緣割破了你的手。", "You push on tiptoe for a long time; the tile's edge cuts your hand.")), "bad"); }
+  S.inv.push("pack"); say(tx(L("夾層裡卡著一個小背包。拉鍊上掛著三位數的密碼鎖。", "A small backpack is wedged up there, its zipper held by a three-digit lock.")));
+  render();
+}
+function drink(id) {
+  const i = S.inv.indexOf(id); if (i < 0) return;
+  S.inv.splice(i, 1); S.sel = null;
+  if (id === "half") { S.st.water = clamp(S.st.water + 15); S.conds.push("sick"); say(tx(L("味道沒什麼不對……但過了一會兒，胃開始不舒服。", "It tastes fine... but after a while your stomach turns.")), "bad"); }
+  else { S.st.water = clamp(S.st.water + 30); S.st.food = clamp(S.st.food + 25); say(tx(L("微甜，帶一點杏仁味。你一口氣喝完了。", "Faintly sweet, a hint of almond. You drink it all at once."))); }
+  S.sheet = null; render();
+}
+
+/* ---------------- rendering ---------------- */
+const CONDS = { hear: L("聽力受損", "Hearing damaged"), cut: L("割傷", "Cut"), sick: L("腸胃不適", "Stomach upset") };
+function weight() { return Object.keys(S.picked).reduce((s, k) => s + (S.picked[k] ? ITEMS[k].w : 0), 0) + ITEMS.pad.w; }
+function spent() { return Object.keys(S.picked).reduce((s, k) => s + (S.picked[k] ? ITEMS[k].cost : 0), 0); }
+
+function vTitle() {
+  return `<section class="screen title-screen">
+    <div class="logo">BACKROOMS</div><div class="logo-sub">${u("sub")}</div>
+    <div class="warnbox"><strong>${u("warnT")}</strong>${u("warnB")}
+      <label><input type="checkbox" id="flashChk" ${S.flash ? "checked" : ""}> ${u("warnC")}</label></div>
+    <div class="menu">
+      <button class="btn primary" data-go="prep">${u("wake")}<small>${u("wakeS")}</small></button>
+      <button class="btn" disabled>${u("cont")}<small>${u("contS")}</small></button>
+      <button class="btn" disabled>${u("codex")}<small>${u("codexS")}</small></button>
+      <button class="btn" disabled>${u("credits")}<small>${u("creditsS")}</small></button>
+    </div></section>`;
+}
+function vPrep() {
+  const W = weight(), cap = 8, left = S.points - spent();
+  const bar = Array.from({ length: cap }, (_, i) => `<i class="${i < W ? (W > cap ? "over" : "on") : ""}"></i>`).join("");
+  const rows = ["aw", "crow", "torch", "plug", "watch"].map(k => {
+    const it = ITEMS[k];
+    if (it.locked) return `<div class="shop-row locked"><span class="box"></span><span class="nm">${tx(it.n)}<small>${u("locked")}</small></span><span class="cost">${it.cost}${S.lang === "zh" ? "點" : " pts"}</span></div>`;
+    return `<button class="shop-row" data-pick="${k}" aria-pressed="${!!S.picked[k]}"><span class="box">${S.picked[k] ? "✓" : ""}</span>
+      <span class="nm">${tx(it.n)}<small>${tx(it.d)}</small></span><span class="cost">${it.cost}${S.lang === "zh" ? "點" : " pts"}<br>${u("w")} ${it.w}</span></button>`;
+  }).join("");
+  return `<section class="screen"><div class="narrow">
+    <div class="wake-count">${u("wakeN")}</div>
+    <div class="kv"><span>${u("pts")}</span><b>${S.points}</b></div>
+    <div><div class="kv" style="margin-bottom:6px"><span>${u("load")}</span><b>${W} / ${cap}${W > cap ? " · " + u("over") : ""}</b></div><div class="weightbar">${bar}</div></div>
+    <div class="shop">${rows}</div>
+    <p class="note">${S.lang === "zh" ? "筆記本與筆固定隨身（重 1）。" : "Notepad & pen always come along (wt 1)."} ${u("prepNote")}</p>
+    <div class="kv"><span>${u("left")}</span><b>${left}</b></div>
+    <button class="btn primary" id="wakeBtn" ${left < 0 || W > cap ? "disabled" : ""}>${u("wake")}</button>
+  </div></section>`;
+}
+function vDeath() {
+  const rows = [[L("存活天數", "Days survived"), 30], [L("新發現：拱門區", "New find: Arch rooms"), 15], [L("新死法：Liquid Pain", "New death: Liquid Pain"), 10], [L("層級任務：走出柱林", "Level task: Out of the pillars"), 30]];
+  return `<section class="screen"><div class="narrow">
+    <div class="death-head">${u("died")}</div>
+    <div class="cause"><div class="c1">${S.lang === "zh" ? "死因：LIQUID PAIN" : "CAUSE: LIQUID PAIN"}</div><div class="c2">${S.lang === "zh" ? "「那瓶水比平常苦了一點。」" : "“That water was a little more bitter than usual.”"}</div></div>
+    <div class="kv"><span>${u("surv")}</span><b>${S.lang === "zh" ? "3 天 7 小時" : "3 d 7 h"}</b></div>
+    <div class="kv"><span>${u("reach")}</span><b>Level 0</b></div>
+    <div class="ledger">${rows.map(([n, p]) => `<div class="kv"><span>${tx(n)}</span><b>+${p}</b></div>`).join("")}
+      <div class="kv total"><span>${u("total")}</span><b>+85</b></div></div>
+    <p class="corpse">${S.lang === "zh" ? "你的遺體留在 Level 0 的某處。身上還有：撬棍、半瓶水。" : "Your body lies somewhere in Level 0. Still on it: a crowbar, half a bottle of water."}</p>
+    <div class="row2"><button class="btn" disabled>${u("codex")}</button><button class="btn primary" data-go="prep">${u("again")}</button></div>
+  </div></section>`;
+}
+function vExplore() {
+  const n = NODES[S.node];
+  const stat = k => `<button class="stat ${S.st[k] < 30 ? "low" : ""}" data-sheet="body" title="${esc(desc(k))}"><span class="g">${u("g_" + k)}</span><span class="pips">${Array.from({ length: 5 }, (_, i) => `<i class="${i < pips(S.st[k]) ? "on" : ""}"></i>`).join("")}</span></button>`;
+  const pct = r => `left:${r.x / CW * 100}%;top:${r.y / CH * 100}%;width:${r.w / CW * 100}%;height:${r.h / CH * 100}%`;
+  const hots = n.hots.filter(h => !(h.id === "bottle" && S.flags.bottle)).map((h, i) => `<button class="hot" data-hot="${i}" style="${pct({ x: h.x * CW, y: h.y * CH, w: h.w * CW, h: h.h * CH })}" aria-label="${esc(tx(h.n))}"><span class="lbl">${tx(h.n)}</span></button>`).join("");
+  const exits = n.exits.map((e, i) => `<button class="hot exit" data-exit="${i}" style="${pct(exitRect(n, e))}" aria-label="${esc(tx(e.n))}"><span class="lbl">→ ${tx(e.n)}</span></button>`).join("");
+  const m = S.st.mind, vig = m < 45 ? 150 : m < 65 ? 110 : 80;
+  const cap = n.caption ? tx(n.caption) : "";
+  const hear = S.conds.includes("hear");
+  return `<section class="explore">
+    <div class="hud">${["water", "food", "rest", "mind"].map(stat).join("")}<span class="clock" title="${esc(u("clockN"))}">${u("clock")}</span>
+      <div class="conds">${S.conds.map(c => `<span>${tx(CONDS[c])}</span>`).join("")}</div></div>
+    <div class="view ${S.hints ? "hints" : ""} ${S.targeting ? "targeting" : ""}" id="view">
+      <div class="stage"><canvas id="scene" width="${CW}" height="${CH}"></canvas>
+      <div class="grain" id="grain"></div>
+      <div class="vignette" style="box-shadow: inset 0 0 ${vig}px ${vig / 3}px rgba(0,0,0,.85)"></div>
+      ${exits}${hots}
+      ${S.targeting ? `<div class="target-banner"><span>${u("pickTarget").replace("{x}", tx(ITEMS[S.targeting].n))}</span><button id="cancelT">${u("cancel")}</button></div>` : ""}
+      <div class="caption ${hear ? "blur" : ""}">${hear && cap ? (S.lang === "zh" ? "（某處……有聲音？）" : "(somewhere... a sound?)") : cap}</div>
+    </div></div>
+    <div class="logwrap"><div class="log" id="log">${S.log.slice(-14).map(e => `<p class="${e.kind}">${esc(e.text)}</p>`).join("")}</div>
+      <div class="choices">${S.choices.map((c, i) => `<button class="choice" data-choice="${i}">${tx(c.t)}</button>`).join("")}</div></div>
+    <div class="actions">
+      <button id="aBack">${u("back")}<small>${u("backS")}</small></button>
+      <button id="aSearch">${u("search")}<small>${u("searchS")}</small></button>
+      <button id="aRest">${u("rest")}<small>${u("restS")}</small></button>
+      <button id="aHints" aria-pressed="${S.hints}">${u("hints")}<small>${u("hintsS")}</small></button>
+    </div>
+    <div class="tabs">
+      <button data-sheet="bag">${u("bag")}<small>${S.inv.length} / 8</small></button>
+      <button data-sheet="notes">${u("notes")}<small>&nbsp;</small></button>
+      <button data-sheet="map">${u("map")}<small>&nbsp;</small></button>
+      <button data-sheet="body">${u("body")}<small>&nbsp;</small></button>
+    </div>
+    ${S.sheet ? vSheet() : ""}
+    ${S.modal === "through" ? `<div class="modal"><h2>${u("through")}</h2><p>${u("throughP")}</p><div class="row2"><button class="btn" id="mRestart">${u("restart")}</button><button class="btn primary" data-go="death">${u("seeDeath")}</button></div></div>` : ""}
+  </section>`;
+}
+function vSheet() {
+  let title = "", body = "";
+  if (S.sheet === "bag") {
+    title = u("bag");
+    const W = S.inv.reduce((s, k) => s + ITEMS[k].w, 0);
+    const slots = S.inv.map((k, i) => `<button class="slot" data-slot="${i}" aria-pressed="${S.sel === i}"><span class="n">${tx(ITEMS[k].n)}</span><span class="w">${u("w")} ${ITEMS[k].w}</span></button>`);
+    while (slots.length < 8) slots.push(`<div class="slot empty"><span class="n">${u("empty")}</span></div>`);
+    let det = "";
+    if (S.sel != null && S.inv[S.sel]) {
+      const it = ITEMS[S.inv[S.sel]];
+      det = `<div class="detail"><p>${tx(it.d)}</p><div class="acts">
+        ${it.drink ? `<button class="choice" id="dDrink">${u("drink")}</button>` : ""}
+        ${it.target ? `<button class="choice" id="dUse">${u("use")}</button>` : ""}
+        <button class="choice" disabled style="opacity:.4">${u("drop")}</button></div></div>`;
+    }
+    body = `<div class="kv"><span>${u("load")}</span><b>${W} / 8</b></div><div class="inv">${slots.join("")}</div>${det}`;
+  } else if (S.sheet === "notes") {
+    title = u("notes");
+    const tabs = ["clues", "quests", "mine"].map(t => `<button role="tab" data-sub="${t}" aria-selected="${S.sub === t}">${u(t)}</button>`).join("");
+    let inner = "";
+    if (S.sub === "clues") {
+      const cl = [[L("閃爍的牆", "The flickering wall"), L("撐得夠久，找到一面閃爍的牆，撲進去。", "Survive long enough to find a flickering wall, then throw yourself through.")],
+        [L("沒裝滿的瓶子", "Bottles that aren't full"), L("不要喝。可能被人動過。", "Don't drink. Someone may have tampered with it.")]];
+      if (S.flags.read) cl.push([L("你自己的紙條", "Your own note"), L("「第 13 次。柱林那邊有火鹽。別喝紅色的，不管它看起來像什麼。」", "“13th time. There's firesalt among the pillars. Don't drink the red one, whatever it looks like.”")]);
+      inner = cl.map(([h, p]) => `<div class="entry"><h3>${tx(h)}</h3><p>${tx(p)}</p></div>`).join("");
+    } else if (S.sub === "quests") {
+      const q = [[L("離開 Level 0", "Leave Level 0"), L("找到閃爍的牆。", "Find the flickering wall."), false],
+        [L("找到曼尼拉房間", "Find the Manila Room"), L("有人說，嗡嗡聲變小的地方會聽到鋼琴聲。", "They say where the hum fades, you'll hear a piano."), NODES[S.node].kind === "manila" || !!S.visited.manila_in]];
+      if (S.flags.read) q.push([L("為什麼是我？", "Why me?"), L("孤立效應會抹掉所有人的筆記。為什麼你的沒有被抹掉？", "The Isolation Effect erases everyone's notes. Why not yours?"), false]);
+      inner = q.map(([h, p, d]) => `<div class="entry q ${d ? "done" : ""}"><h3>${tx(h)}</h3><p>${tx(p)}</p></div>`).join("");
+    } else inner = `<p class="note">${u("mineHelp")}</p><textarea id="myNote" aria-label="${u("mine")}">${esc(S.myNote)}</textarea>`;
+    body = `<div class="subtabs" role="tablist">${tabs}</div>${inner}`;
+  } else if (S.sheet === "map") {
+    title = u("map"); body = `<canvas class="mapc" id="mapc" width="480" height="360"></canvas><p class="note">${u("mapHelp")}</p>`;
+  } else if (S.sheet === "body") {
+    title = u("body");
+    body = ["water", "food", "rest", "mind"].map(k => `<div class="bodyrow"><span class="g">${u("g_" + k)}</span><p>${desc(k)}</p></div>`).join("")
+      + (S.conds.length ? `<div class="conds">${S.conds.map(c => `<span>${tx(CONDS[c])}</span>`).join("")}</div>` : "")
+      + `<p class="note">${S.lang === "zh" ? "不顯示數字。身體的感覺就是你唯一的資訊。" : "No numbers. How your body feels is all you get."}</p>`;
+  }
+  return `<div class="sheet-back" id="sheetBack"><div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="sheet-h"><h2>${title}</h2><button id="sheetX">${u("close")}</button></div><div class="sheet-b">${body}</div></div></div>`;
+}
+function drawMap() {
+  const cv = $("#mapc"); if (!cv) return; const c = cv.getContext("2d");
+  c.fillStyle = "#e9e1c3"; c.fillRect(0, 0, 480, 360);
+  c.strokeStyle = "rgba(60,50,20,.12)"; for (let x = 0; x < 480; x += 24) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 360); c.stroke(); }
+  const pos = id => { const [gx, gy] = NODES[id].map; return [140 + gx * 80, 200 + gy * 70]; };
+  const ids = Object.keys(S.visited);
+  c.lineWidth = 2;
+  ids.forEach(id => NODES[id].exits.forEach(e => { if (S.visited[e.to]) { const a = S.moves - Math.min(S.visited[id], S.visited[e.to]); c.strokeStyle = `rgba(40,30,10,${Math.max(.12, .8 - a * .15)})`; c.beginPath(); c.moveTo(...pos(id)); c.lineTo(...pos(e.to)); c.stroke(); } }));
+  ids.forEach(id => {
+    const n = NODES[id], age = S.moves - S.visited[id], al = n.stable ? .9 : Math.max(.1, .9 - age * .18);
+    const [x, y] = pos(id);
+    c.fillStyle = `rgba(40,30,10,${al})`; c.strokeStyle = `rgba(40,30,10,${al})`;
+    if (n.stable) { c.strokeRect(x - 16, y - 12, 32, 24); c.beginPath(); c.arc(x, y + 2, 8, Math.PI, 0); c.stroke(); }
+    else c.fillRect(x - 14, y - 10, 28, 20);
+    if (id === S.node) { c.strokeStyle = "#a3341c"; c.lineWidth = 3; c.strokeRect(x - 20, y - 16, 40, 32); c.lineWidth = 2; }
+  });
+  c.font = "14px 'Noto Serif TC', serif"; c.fillStyle = "rgba(40,30,10,.7)";
+  c.fillText(S.lang === "zh" ? "（手繪）" : "(hand-drawn)", 12, 24);
+}
+
+function screenList() { return [["title", "scrTitle"], ["prep", "scrPrep"], ["explore", "scrExplore"], ["bag", "scrBag"], ["notes", "scrNotes"], ["map", "scrMap"], ["body", "scrBody"], ["death", "scrDeath"]]; }
+function render() {
+  document.documentElement.lang = S.lang === "zh" ? "zh-Hant" : "en";
+  $("#langBtn").textContent = S.lang === "zh" ? "EN" : "中文";
+  $("#flashBtn").textContent = u(S.flash ? "flashOn" : "flashOff"); $("#flashBtn").setAttribute("aria-pressed", S.flash);
+  $("#soundBtn").textContent = u(S.sound ? "soundOn" : "soundOff"); $("#soundBtn").setAttribute("aria-pressed", S.sound);
+  $("[data-t=mock]").textContent = u("mock");
+  const sel = $("#screenSel"); const cur = S.screen === "explore" && S.sheet ? S.sheet : S.screen;
+  sel.innerHTML = screenList().map(([v, k]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${u(k)}</option>`).join("");
+  const main = $("#main");
+  main.innerHTML = S.screen === "title" ? vTitle() : S.screen === "prep" ? vPrep() : S.screen === "death" ? vDeath() : vExplore();
+  if (S.screen === "explore") {
+    const g = $("#grain"); if (g) g.style.backgroundImage = `url(${grainURL()})`;
+    const lg = $("#log"); if (lg) lg.scrollTop = lg.scrollHeight;
+    drawMap();
+  }
+  animate(); audioUpdate();
+}
+let _grain = null;
+function grainURL() {
+  if (_grain) return _grain;
+  const c = document.createElement("canvas"); c.width = c.height = 160; const x = c.getContext("2d"); const d = x.createImageData(160, 160);
+  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); return (_grain = c.toDataURL());
+}
+function newRun() {
+  Object.assign(S, { node: "start", prev: null, moves: 0, minutes: 0, st: { water: 62, food: 48, rest: 70, mind: 74 }, conds: [], sel: null, targeting: null, visited: { start: 0 }, flags: {}, log: [], choices: [], sheet: null, modal: null });
+  S.inv = Object.keys(S.picked).filter(k => S.picked[k]).concat("pad");
+  say(tx(NODES.start.enter));
+  say(tx(L("（樣稿提示：點畫面裡的開口就能移動。點「互動點」可以顯示所有能點的地方。）", "(Mockup tip: tap an opening in the scene to move. “Hotspots” reveals everything tappable.)")), "sys");
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, [data-go]"); if (!t) return;
+  if (t.id === "langBtn") { S.lang = S.lang === "zh" ? "en" : "zh"; return render(); }
+  if (t.id === "flashBtn") { S.flash = !S.flash; return render(); }
+  if (t.id === "soundBtn") { S.sound = !S.sound; if (S.sound) audioStart(); else audioStop(); return render(); }
+  if (t.dataset.go) { if (t.dataset.go === "prep") S.screen = "prep"; else S.screen = t.dataset.go; S.modal = null; return render(); }
+  if (t.dataset.pick) { S.picked[t.dataset.pick] = S.picked[t.dataset.pick] ? 0 : 1; return render(); }
+  if (t.id === "wakeBtn") { newRun(); S.screen = "explore"; return render(); }
+  if (t.dataset.exit != null) { if (S.targeting) { S.targeting = null; } const ex = NODES[S.node].exits[+t.dataset.exit]; return enter(ex.to); }
+  if (t.dataset.hot != null) { const hs = NODES[S.node].hots.filter(h => !(h.id === "bottle" && S.flags.bottle)); return useHot(hs[+t.dataset.hot]); }
+  if (t.dataset.choice != null) { const c = S.choices[+t.dataset.choice]; S.choices = []; c.f(); return render(); }
+  if (t.id === "aBack") return turnAround();
+  if (t.id === "aSearch") return search();
+  if (t.id === "aRest") return rest();
+  if (t.id === "aHints") { S.hints = !S.hints; return render(); }
+  if (t.dataset.sheet) { S.sheet = t.dataset.sheet; S.sel = null; return render(); }
+  if (t.id === "sheetX") { S.sheet = null; return render(); }
+  if (t.dataset.sub) { S.sub = t.dataset.sub; return render(); }
+  if (t.dataset.slot != null) { S.sel = S.sel === +t.dataset.slot ? null : +t.dataset.slot; return render(); }
+  if (t.id === "dDrink") return drink(S.inv[S.sel]);
+  if (t.id === "dUse") { S.targeting = S.inv[S.sel]; S.sheet = null; S.sel = null; S.hints = false; return render(); }
+  if (t.id === "cancelT") { S.targeting = null; return render(); }
+  if (t.id === "mRestart") { S.modal = null; S.screen = "prep"; return render(); }
+});
+document.addEventListener("click", e => { if (e.target.id === "sheetBack") { S.sheet = null; render(); } });
+document.addEventListener("change", e => {
+  if (e.target.id === "flashChk") { S.flash = e.target.checked; render(); }
+  if (e.target.id === "screenSel") {
+    const v = e.target.value;
+    if (["bag", "notes", "map", "body"].includes(v)) { if (S.screen !== "explore") { newRun(); S.screen = "explore"; } S.sheet = v; S.sel = null; }
+    else { if (v === "explore" && !S.log.length) newRun(); S.screen = v; S.sheet = null; S.modal = null; }
+    render();
+  }
+});
+document.addEventListener("input", e => { if (e.target.id === "myNote") S.myNote = e.target.value; });
+
+render();
+})();
+</script>
