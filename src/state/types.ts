@@ -118,6 +118,7 @@ export interface RunState {
   lastOutage: number;
   redStage: number;
   eventsDone: string[];
+  eventLast: Record<string, number>; // event id -> run time (minutes) it last fired
   pendingEvent: string | null;
   found: string[];                  // first-time discoveries made this run
   log: LogLine[];

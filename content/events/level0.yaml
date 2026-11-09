@@ -1,7 +1,19 @@
+# Level 0 choice events. One roll per step picks among the eligible events (see Game.maybeEvent).
+#   cooldown   game hours before the same event can fire again
+#   maxPerRun  hard cap per run (once: per_run is the same as maxPerRun: 1)
+#   again      opening line used from the second time on, so repeats read differently
+#   sfx        one-shot sound played when it fires
+# A global gap (EVENT_GAP in src/core/game.ts) also keeps any two events apart.
+
+# ---------- sounds ----------
 - id: noise_spike
   text: { zh: 嗡嗡聲突然變得很刺耳，像有一根針直直刺進耳朵裡。, en: "The hum suddenly turns piercing, like a needle driven straight into your ears." }
+  again: { zh: 又來了。嗡嗡聲一下子拔高，刺得你眼睛都瞇了起來。, en: "Again. The hum leaps up, sharp enough to make you squint." }
   caption: { zh: 〔嗡嗡聲突然變得很刺耳〕, en: "[The hum spikes, painfully loud]" }
-  trigger: { on: move, chance: 0.035, zones: [hall, pillar, pit, arch] }
+  trigger: { on: move, chance: 0.03, zones: [hall, pillar, pit, arch] }
+  cooldown: 5
+  maxPerRun: 6
+  sfx: spike
   choices:
     - text: { zh: 摀住耳朵，蹲下來等它過去, en: "Cover your ears and wait it out" }
       result: { zh: 你蹲在地上摀著耳朵，不知道過了多久，聲音才慢慢退回原本的嗡嗡聲。, en: "You crouch with your hands over your ears. After who knows how long, it sinks back to the usual hum." }
@@ -17,7 +29,7 @@
 - id: whisper
   text: { zh: 嗡嗡聲裡好像夾著一點別的聲音。像有人在很遠的地方，小聲地叫一個名字。, en: "There is something else in the hum. As if someone far away is quietly calling a name." }
   caption: { zh: 〔嗡嗡聲裡有很小的人聲〕, en: "[A faint voice inside the hum]" }
-  trigger: { on: move, chance: 0.02, zones: [hall, pillar], minHours: 10 }
+  trigger: { on: move, chance: 0.025, zones: [hall, pillar], minHours: 8 }
   once: per_run
   choices:
     - text: { zh: 停下來仔細聽, en: Stop and listen }
@@ -29,8 +41,11 @@
   source: level-0
 - id: scratching
   text: { zh: 牆的另一邊傳來抓撓的聲音，很慢，一下一下的。, en: "Scratching from the other side of the wall. Slow. One stroke at a time." }
+  again: { zh: 那個抓撓聲又出現了。還是一樣慢，好像從來沒有停過，只是你走開了。, en: "The scratching again. Just as slow, as if it never stopped and you only walked away from it." }
   caption: { zh: 〔牆後傳來抓撓聲〕, en: "[Scratching behind the wall]" }
-  trigger: { on: move, chance: 0.015, zones: [hall], minHours: 20 }
+  trigger: { on: move, chance: 0.025, zones: [hall, pillar], minHours: 16 }
+  cooldown: 10
+  maxPerRun: 3
   choices:
     - text: { zh: 敲敲牆, en: Knock on the wall }
       result: { zh: 你敲了兩下。抓撓聲停了。過了很久，牆的另一邊也敲了兩下。, en: "You knock twice. The scratching stops. A long while later, two knocks come back." }
@@ -38,4 +53,189 @@
     - text: { zh: 安靜地走開, en: Walk away quietly }
       result: { zh: 你一步一步退開，直到再也聽不到為止。, en: "You back away step by step until you can no longer hear it." }
       effects: { time: 10, sanity: -3 }
+  source: level-0
+- id: distant_steps
+  text: { zh: 遠處有腳步聲。不快不慢，踩在濕地毯上，啪嗒、啪嗒。, en: "Footsteps, somewhere far off. Not fast, not slow. Wet carpet: pat, pat." }
+  again: { zh: 又是那個腳步聲。這次好像比上次近一點。, en: "Those footsteps again. A little closer than last time, maybe." }
+  caption: { zh: 〔遠處有腳步聲〕, en: "[Distant footsteps]" }
+  trigger: { on: move, chance: 0.03, zones: [hall, pillar, arch], minHours: 3 }
+  cooldown: 6
+  maxPerRun: 4
+  sfx: distant_steps
+  choices:
+    - text: { zh: 朝聲音走過去, en: Walk toward the sound }
+      result: { zh: 你循著聲音轉過兩個轉角。那裡沒有人，只有一串濕腳印，一直走進牆裡。, en: "You follow it around two corners. No one is there. Only a line of wet footprints that walks straight into the wall." }
+      effects: { time: 15, sanity: -5 }
+    - text: { zh: 貼著牆站好，等它過去, en: Press against the wall and let it pass }
+      result: { zh: 你貼著牆一動也不動。腳步聲越來越遠，最後只剩嗡嗡聲。, en: "You stand flat against the wall, not moving. The steps fade until there is only the hum." }
+      effects: { time: 10, sanity: -2 }
+    - text: { zh: 喊一聲「有人嗎？」, en: "Call out: \"Hello?\"" }
+      result: { zh: 你的聲音被地毯吃掉了一半。腳步聲停了一下，然後換了方向，越走越遠。, en: "The carpet swallows half your voice. The steps pause, then turn and walk away." }
+      effects: { sanity: -4 }
+  source: level-0
+- id: phone_ring
+  text: { zh: 不知道哪裡有電話在響。老式的鈴聲，一聲接一聲，很有耐心。, en: "Somewhere a phone is ringing. An old bell ring, one after another, very patient." }
+  caption: { zh: 〔電話鈴聲〕, en: "[A phone ringing]" }
+  trigger: { on: move, chance: 0.015, zones: [hall, pillar], minHours: 14 }
+  once: per_run
+  choices:
+    - text: { zh: 去找那支電話, en: Go find the phone }
+      result: { zh: 鈴聲在你走到的前一秒停了。牆上掛著一支電話，聽筒是溫的。你拿起來，另一頭只有和這裡一樣的嗡嗡聲。, en: "It stops a second before you reach it. A phone hangs on the wall; the receiver is warm. You lift it. On the other end is the same hum as here." }
+      effects: { time: 25, sanity: -9 }
+    - text: { zh: 不要接。繼續走, en: "Don't answer. Keep walking" }
+      result: { zh: 你數著鈴聲走開。數到第十三聲的時候它停了，你卻覺得耳朵裡還在響。, en: "You count the rings as you walk away. It stops at thirteen, but it keeps ringing in your head." }
+      effects: { sanity: -3 }
+  source: level-0
+
+# ---------- sights ----------
+- id: flicker_wave
+  text: { zh: 前面的燈管一根接一根閃了起來，像一道浪朝你這邊推過來。, en: "The tubes ahead start flickering one after another, a wave rolling toward you." }
+  again: { zh: 燈光又開始一排一排地閃。你已經知道它會從哪裡過來。, en: "The lights ripple again, row by row. You already know which way it will come." }
+  trigger: { on: move, chance: 0.03, zones: [hall, pillar] }
+  cooldown: 6
+  maxPerRun: 4
+  sfx: relight
+  choices:
+    - text: { zh: 閉上眼睛，等它過去, en: "Close your eyes and wait" }
+      result: { zh: 光在你的眼皮上閃了幾下，然後穩定下來。睜開眼睛，一切照舊。, en: "Light flutters on your eyelids, then steadies. You open your eyes. Nothing has changed." }
+      effects: { time: 5, sanity: -1 }
+    - text: { zh: 盯著它看, en: Watch it }
+      result: { zh: 你盯著閃爍的節奏。三長、兩短、三長。你越看越覺得它在拼什麼字，可是怎麼也讀不出來。, en: "You watch the rhythm. Three long, two short, three long. The longer you look the more it seems to spell something, but you can't read it." }
+      effects: { time: 10, sanity: -4 }
+  source: level-0
+- id: tally_marks
+  text: { zh: 牆紙上有一排用指甲刻出來的劃記，五道一組，一路延伸到轉角後面。, en: "Tally marks scratched into the wallpaper with a fingernail, in groups of five, running on past the corner." }
+  trigger: { on: move, chance: 0.02, zones: [hall, pillar], minHours: 6 }
+  once: per_run
+  choices:
+    - text: { zh: 數一數有多少道, en: Count them }
+      result: { zh: 你數到兩百一十三道。最後一組只劃了三道，第三道劃到一半就停了。, en: "You count two hundred and thirteen. The last group has only three, and the third stops halfway." }
+      effects: { time: 15, sanity: -5 }
+    - text: { zh: 在旁邊也劃一道, en: Add a mark of your own }
+      result: { zh: 你在旁邊劃了一道。很淺，但它在那裡。至少有人知道你來過。, en: "You scratch a mark beside them. Shallow, but there. At least something knows you were here." }
+      effects: { time: 3, sanity: 3 }
+  source: level-0
+- id: dejavu
+  text: { zh: 這段走廊你一定來過。同一塊水漬，同一根壞掉的燈管，連地毯上的皺摺都一樣。, en: "You have been in this hallway before. Same water stain, same dead tube, even the same wrinkle in the carpet." }
+  again: { zh: 又是這裡。那塊水漬好像比上次大了一點。, en: "Here again. The water stain looks a little bigger than last time." }
+  trigger: { on: move, chance: 0.02, zones: [hall, pillar], minHours: 10 }
+  cooldown: 12
+  maxPerRun: 3
+  choices:
+    - text: { zh: 在牆上做個記號, en: Mark the wall }
+      result: { zh: 你舉起手，然後停住了。牆上已經有一個一模一樣的記號，筆劃的習慣也和你一樣。, en: "You raise your hand and stop. There is already a mark there, exactly like yours, drawn the way you draw." }
+      effects: { time: 3, sanity: -6 }
+    - text: { zh: 告訴自己只是很像，繼續走, en: "Tell yourself it only looks alike, and move on" }
+      result: { zh: 只是很像。這裡每一條走廊都很像。你說了三次，才肯相信。, en: "It only looks alike. Every hallway here does. You say it three times before you believe it." }
+      effects: { sanity: -2 }
+  source: level-0
+- id: wet_ceiling
+  text: { zh: 天花板有一塊磁磚吸飽了水，正一滴一滴往下滴，在地毯上積成一小灘。, en: "A ceiling tile has soaked through and is dripping, one drop at a time, into a small puddle on the carpet." }
+  again: { zh: 又一塊滴水的天花板。水滴落下的節奏剛好跟嗡嗡聲對上。, en: "Another dripping tile. The drops fall exactly in time with the hum." }
+  trigger: { on: move, chance: 0.025, zones: [hall, pit, dark] }
+  cooldown: 8
+  maxPerRun: 3
+  choices:
+    - text: { zh: 用手接一點來喝, en: Cup your hands and drink }
+      result: { zh: 水是溫的，有鐵鏽和舊紙的味道。喉嚨好一點了，胃卻不太高興。, en: "The water is warm and tastes of rust and old paper. Your throat feels better; your stomach does not." }
+      effects: { time: 10, water: 6, health: -2 }
+    - text: { zh: 不要碰，繞過去, en: "Don't touch it. Go around" }
+      result: { zh: 你繞開那灘水。鞋底還是濕了。, en: "You step around the puddle. Your soles get wet anyway." }
+  source: level-0
+- id: left_behind
+  text: { zh: 牆角有一個被踩扁的空背包，拉鍊開著。裡面什麼都沒有，只有一張摺起來的紙。, en: "A flattened, empty backpack lies in the corner, zip open. Nothing inside but a folded sheet of paper." }
+  trigger: { on: move, chance: 0.015, zones: [hall, pillar, arch], minHours: 4 }
+  once: per_run
+  sfx: paper
+  choices:
+    - text: { zh: 打開那張紙, en: Unfold the paper }
+      result: { zh: 上面寫著：「不要相信會動的牆。累了就睡，但要背對著牆。」字跡越寫越歪，最後一行看不出寫什麼。, en: "It says: \"Don't trust walls that move. Sleep when you're tired, but with your back to a wall.\" The writing gets worse; the last line can't be read." }
+      effects: { time: 5, sanity: 2 }
+    - text: { zh: 不要碰別人的東西, en: "Leave someone else's things alone" }
+      result: { zh: 你沒有碰它。走了很遠之後，你還在想那個人現在在哪裡。, en: "You leave it. Long after, you are still wondering where its owner is now." }
+      effects: { sanity: -2 }
+  source: level-0
+
+# ---------- places ----------
+- id: dark_breath
+  text: { zh: 黑暗裡，離你不遠的地方，有呼吸聲。很慢，很深，和你的不一樣。, en: "In the dark, not far from you, something is breathing. Slow and deep. Not in time with yours." }
+  caption: { zh: 〔附近有呼吸聲〕, en: "[Breathing, close by]" }
+  trigger: { on: move, chance: 0.05, zones: [dark], minHours: 4 }
+  cooldown: 8
+  maxPerRun: 3
+  choices:
+    - text: { zh: 屏住呼吸，一動也不動, en: Hold your breath and don't move }
+      result: { zh: 你憋到胸口發痛。那個呼吸聲多喘了一口，然後也停了，好像在學你。, en: "You hold it until your chest hurts. The other breathing takes one more breath, then stops too, as if copying you." }
+      effects: { time: 5, sanity: -6 }
+    - text: { zh: 用手電筒照過去, en: Shine the flashlight at it }
+      requires: { item: flashlight }
+      result: { zh: 光圈掃過去，那裡只有一面潮濕的牆。呼吸聲停了。你不知道它是不是本來就不存在。, en: "The beam sweeps over a damp wall and nothing else. The breathing stops. You can't tell if it was ever there." }
+      effects: { time: 2, sanity: -2 }
+    - text: { zh: 摸著牆快點離開, en: Feel along the wall and get out fast }
+      result: { zh: 你沿著牆快步走開，膝蓋撞上了什麼硬的東西。呼吸聲沒有跟上來。, en: "You hurry away along the wall and crack your knee on something hard. The breathing does not follow." }
+      effects: { health: -3, sanity: -3 }
+  source: level-0
+- id: pit_echo
+  text: { zh: 這裡的回音不太對。你的腳步聲總是晚一步才傳回來，而且多了一步。, en: "The echo here is wrong. Your footsteps always come back a beat late, and there is one step too many." }
+  trigger: { on: move, chance: 0.06, zones: [pit] }
+  cooldown: 6
+  maxPerRun: 3
+  sfx: distant_steps
+  choices:
+    - text: { zh: 停下來聽, en: Stop and listen }
+      result: { zh: 你停下來。回音又走了一步，才停。, en: "You stop. The echo takes one more step before it stops." }
+      effects: { time: 5, sanity: -5 }
+    - text: { zh: 不要停，走快一點, en: "Don't stop. Walk faster" }
+      result: { zh: 你越走越快，回音也越走越快。走出這一區之後，它才終於對上你的節奏。, en: "You go faster; so does the echo. Only once you are out of this stretch does it fall back into step." }
+      effects: { sanity: -2 }
+  source: level-0
+- id: quiet_arch
+  text: { zh: 拱門底下的地毯特別厚，嗡嗡聲在這裡變得很小。這是你很久以來覺得最安靜的地方。, en: "The carpet under the arches is thick, and the hum is small here. It is the quietest place you have felt in a long time." }
+  again: { zh: 又是一段安靜的拱門。你的肩膀自己放鬆了下來。, en: "Another quiet stretch of arches. Your shoulders loosen on their own." }
+  trigger: { on: move, chance: 0.05, zones: [arch] }
+  cooldown: 10
+  maxPerRun: 4
+  choices:
+    - text: { zh: 坐下來喘口氣, en: Sit down and breathe }
+      result: { zh: 你靠著柱子坐了一會兒，什麼都不想。站起來的時候，腦袋清楚了一點。, en: "You sit against a column for a while and think about nothing. When you stand, your head is a little clearer." }
+      effects: { time: 30, sanity: 6, rest: 20 }
+    - text: { zh: 不能停，繼續走, en: "Can't stop. Keep going" }
+      result: { zh: 你沒有停下來，但經過的時候放慢了腳步。, en: "You don't stop, but you slow down as you pass through." }
+      effects: { sanity: 1 }
+  source: level-0
+
+# ---------- while resting ----------
+- id: dream_outside
+  text: { zh: 你夢到外面。有窗戶，有風，有人在叫你吃飯。然後嗡嗡聲從夢的邊緣滲了進來。, en: "You dream of outside. A window, a breeze, someone calling you in to eat. Then the hum seeps in at the edges." }
+  again: { zh: 你又夢到外面了。這次的窗戶小了一點，叫你的聲音也遠了一點。, en: "You dream of outside again. The window is a little smaller this time, the voice a little further." }
+  trigger: { on: rest, chance: 0.2, zones: [hall, pillar, dark, pit, arch] }
+  cooldown: 16
+  maxPerRun: 3
+  choices:
+    - text: { zh: 閉著眼睛，再多留一下, en: "Keep your eyes shut and stay a little longer" }
+      result: { zh: 你緊緊抓著那個畫面，直到它碎掉。醒來的時候臉是濕的，但心裡比較踏實。, en: "You hold on to the picture until it breaks. You wake with a wet face, but steadier inside." }
+      effects: { time: 30, sanity: 5 }
+    - text: { zh: 睜開眼睛, en: Open your eyes }
+      result: { zh: 黃色的牆，黃色的燈，濕的地毯。你躺了很久才坐起來。, en: "Yellow walls, yellow light, wet carpet. You lie there a long time before you sit up." }
+      effects: { sanity: -3 }
+  source: level-0
+- id: woken_knock
+  text: { zh: 你被敲擊聲吵醒。就在你頭旁邊的牆上，叩、叩。你醒了之後，它就不敲了。, en: "A knocking wakes you. On the wall right beside your head: knock, knock. Once you're awake, it stops." }
+  again: { zh: 又被敲醒了。這次你很確定，是從牆裡面敲的。, en: "Knocked awake again. This time you are sure: it came from inside the wall." }
+  caption: { zh: 〔牆上有敲擊聲〕, en: "[Knocking on the wall]" }
+  trigger: { on: rest, chance: 0.15, zones: [hall, pillar, dark, pit], minHours: 10 }
+  cooldown: 12
+  maxPerRun: 3
+  sfx: distant_knocks
+  choices:
+    - text: { zh: 起來四處看看, en: Get up and look around }
+      result: { zh: 你繞著附近找了一圈。牆是實心的，另一邊什麼都沒有。至少看起來是這樣。, en: "You circle the area. The wall is solid, nothing on the other side. That is how it looks, anyway." }
+      effects: { time: 15, sanity: -4 }
+    - text: { zh: 戴上耳塞，翻身繼續睡, en: "Put in the earplugs and roll over" }
+      requires: { item: earplugs }
+      result: { zh: 敲擊聲變成了很遠很遠的悶響，然後什麼都沒有了。你又睡了一會兒。, en: "The knocking becomes a dull sound very far away, then nothing. You sleep a while longer." }
+      effects: { time: 60, rest: 60, sanity: -1 }
+    - text: { zh: 閉上眼睛，假裝沒聽到, en: "Shut your eyes and pretend you didn't hear" }
+      result: { zh: 你閉著眼睛數心跳，數到天花板上的燈都數完了，還是沒睡著。, en: "You lie with your eyes shut counting heartbeats until you've counted every light in the ceiling. Sleep does not come back." }
+      effects: { time: 30, sanity: -5 }
   source: level-0

@@ -32,8 +32,12 @@ export const Liquid = z.object({
 const Choice = z.object({ text: Text, requires: z.object({ item: z.string() }).strict().optional(), result: Text, effects: Effects.optional() }).strict();
 export const Event = z.object({
   id: z.string(), text: Text, caption: Text.optional(),
-  trigger: z.object({ on: z.enum(["move", "rest"]), chance: z.number(), zones: z.array(z.string()).optional(), minHours: z.number().optional() }).strict(),
+  again: Text.optional(),          // shown instead of text when the event has already happened this run
+  trigger: z.object({ on: z.enum(["move", "rest"]), chance: z.number().min(0).max(1), zones: z.array(z.enum(["hall", "arch", "pillar", "dark", "pit"])).min(1), minHours: z.number().optional() }).strict(),
   once: z.enum(["per_run", "never"]).default("never"),
+  cooldown: z.number().min(0).default(0),        // game hours before this event can fire again
+  maxPerRun: z.number().int().positive().optional(),
+  sfx: z.enum(["spike", "distant_steps", "distant_knocks", "creak", "rattle", "paper", "whoosh", "relight", "clunk"]).optional(),
   choices: z.array(Choice).min(1), source: z.string().optional()
 }).strict();
 
@@ -158,6 +162,7 @@ export function checkRefs(c: ContentData): string[] {
   for (const x of [...c.items, ...c.liquids, ...c.events, ...c.clues]) src(x.source, x.id);
   for (const l of c.liquids) if (l.deadly && !endings.has(l.deadly)) errs.push(`${l.id}: unknown ending ${l.deadly}`);
   for (const e of c.events) for (const ch of e.choices) if (ch.requires && !items.has(ch.requires.item)) errs.push(`${e.id}: unknown item ${ch.requires.item}`);
+  for (const e of c.events) if (e.choices[0].requires) errs.push(`${e.id}: the first choice must not need an item, so the event can always be closed`);
   // player-facing text must not use pronouns for the player (DESIGN 13.3); warn on he/she/他/她 in English/Chinese
   const walk = (o: unknown, path: string) => {
     if (o && typeof o === "object") { for (const [k, v] of Object.entries(o)) walk(v, path + "." + k); }

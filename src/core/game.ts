@@ -22,6 +22,7 @@ import { personChoiceVisible, personReady, planRoomPerson, sealedGreyWater } fro
 
 export const CARRY = 8;                 // weight you can carry
 export const PREP_CARRY = 5;            // weight you can bring into a run
+export const EVENT_GAP = 90;           // game minutes after any Level 0 event before the next can fire
 
 export type Command =
   | { type: "move"; d: Dir } | { type: "turn"; dir: -1 | 1 | 2 } | { type: "search" } | { type: "rest"; hours: number }
@@ -85,7 +86,7 @@ export class Game {
       fakePiano: null, halluc: newHallucinations(),
       packPlan: "none", lockedPack: null,
       roomPerson: newRoomPersonRun(),
-      moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
+      moves: 0, shifted: 0, outageLeft: 0, lastOutage: -99, redStage: 0, eventsDone: [], eventLast: {}, pendingEvent: null, found: [], log: [], manilaTaken: 0, ended: null
     };
     const g = new Game(c, meta, run);
     run.roomPerson = planRoomPerson(g.personQuest, meta, () => g.rand("quests"));
@@ -384,18 +385,31 @@ export class Game {
   }
 
   /* ---------- events ---------- */
+  /** One roll per step: every eligible event gets its own share, so list order never starves later events. */
   private maybeEvent(on: "move" | "rest", z: AnyZone) {
     const r = this.run; if (r.ended || r.pendingEvent) return;
-    for (const e of this.c.events) {
-      if (e.trigger.on !== on || (e.trigger.zones && !e.trigger.zones.includes(z))) continue;
-      if (e.trigger.minHours && r.time / H < e.trigger.minHours) continue;
-      if (e.once === "per_run" && r.eventsDone.includes(e.id)) continue;
-      if (this.rand("events") < e.trigger.chance) {
-        r.pendingEvent = e.id; r.eventsDone.push(e.id);
-        this.say(e.text, "event"); if (e.caption) this.out.caption = e.caption;
-        this.out.event = e.id; return;
-      }
-    }
+    const last = Math.max(-Infinity, ...Object.values(r.eventLast));
+    if (r.time - last < EVENT_GAP) return;
+    const times = (id: string) => r.eventsDone.filter(x => x === id).length;
+    const ok = this.c.events.filter(e => {
+      if (e.trigger.on !== on || !e.trigger.zones.includes(z as never)) return false;
+      if (e.trigger.minHours && r.time / H < e.trigger.minHours) return false;
+      const n = times(e.id);
+      if ((e.once === "per_run" && n) || (e.maxPerRun && n >= e.maxPerRun)) return false;
+      return !(e.id in r.eventLast) || r.time - r.eventLast[e.id] >= e.cooldown * H;
+    });
+    if (!ok.length) return;
+    let u = this.rand("events");
+    const e = ok.find(x => (u -= x.trigger.chance) < 0); if (!e) return;
+    r.pendingEvent = e.id; r.eventsDone.push(e.id); r.eventLast[e.id] = r.time;
+    this.say(this.eventText(e.id), "event"); if (e.caption) this.out.caption = e.caption;
+    if (e.sfx) this.out.sfx.push(e.sfx);
+    this.out.event = e.id;
+  }
+  /** The pending event's opening line: the `again` wording once it has already happened this run. */
+  eventText(id: string): Text {
+    const e = this.c.events.find(x => x.id === id)!;
+    return e.again && this.run.eventsDone.filter(x => x === id).length > 1 ? e.again : e.text;
   }
   availableChoices(id: string) { const e = this.c.events.find(x => x.id === id)!; return e.choices.map(ch => ({ ch, ok: !ch.requires || this.has(ch.requires.item) })); }
   private choose(index: number) {

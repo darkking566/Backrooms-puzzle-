@@ -61,7 +61,6 @@ export function Play({ onEnd }: { onEnd: () => void }) {
     if (out.interrupted) setSheet(null);
     showTime(cmd, out.minutes, !!out.ended, out.perceivedTime);
     for (const s of out.sfx) ctx.audio.sfx(s);
-    if (out.event === "noise_spike") ctx.audio.sfx("spike");
     save();
     const finish = () => {
       setBusy(false); v.syncEnv(); ctx.audio.ambience(g);
@@ -229,7 +228,7 @@ export function Play({ onEnd }: { onEnd: () => void }) {
       <div class="controls">{actionBar}{menuBar}</div>
       <div class="side"><div class="log">{logLines(14)}</div><button class="log-more" onClick={() => setSheet({ kind: "log" })}>{U("log")}</button>{actionBar}{menuBar}</div>
       {ev && <div class="sheet"><div class="card" role="dialog">
-        <p class="story">{L(ev.text)}</p>
+        <p class="story">{L(g.eventText(ev.id))}</p>
         {g.availableChoices(ev.id).map(({ ch, ok }, k) => <button class="opt" disabled={!ok} onClick={() => act({ type: "choose", index: k })}>{L(ch.text)}{!ok && ch.requires ? <small>{U("needs", { x: L(g.item(ch.requires.item).name) })}</small> : ch.effects?.time ? <small>{U("minutes", { m: ch.effects.time })}</small> : null}</button>)}
       </div></div>}
       {sheet && <Panel sheet={sheet} close={() => setSheet(null)} act={(cmd, keep) => { if (!keep) setSheet(null); act(cmd); }} setSheet={setSheet} />}

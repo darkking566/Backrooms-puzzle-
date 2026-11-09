@@ -762,6 +762,7 @@ choices:
     effects: { player.status: +hearing_damage }
 ```
 
+- **事件頻率與重複（已實作）**：Level 0 目前有 16 個選擇事件（`content/events/level0.yaml`），分聲音、景象、地點、休息四類。每步只擲一次 `events` 骰，所有符合條件的事件依各自 `chance` 分配機率，清單順序不會讓後面的事件被壓住。欄位：`cooldown`（遊戲小時，同一事件再次出現前要等）、`maxPerRun`（每局上限；`once: per_run` 等於上限 1）、`again`（第二次起改用的開場文字）、`sfx`（觸發音效）。任何兩個事件之間至少隔 `EVENT_GAP` 90 遊戲分鐘。`trigger.zones` 必填，只能是 Level 0 的 hall／arch／pillar／dark／pit，所以不會在曼尼拉房間、紅房間或 Level 1 觸發。建置檢查要求第一個選項不需要道具，保證事件一定能關閉。冷卻狀態存在 `run.eventLast`，舊存檔載入時補成空物件。
 - **條件與效果的小語法**：`if: player.has(crowbar) and flag(met_old_man) >= 3 and year in 1980..1999`；`meta.` 開頭的效果寫入局外狀態。建置時解析檢查，打錯旗標或引用不存在的物品會直接報錯。
 - **時間是亂的**：每局開始決定本局年份，NPC、遺體、足跡用 `year in ...` 條件選擇版本（例如老人的四個時期）。
 - **謎題範本**：參數生成（本局答案）＋線索生成（強弱可調）＋答案判定。

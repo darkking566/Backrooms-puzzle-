@@ -45,7 +45,7 @@ export function migrateMeta(m: (Partial<Meta> & { corpse?: Corpse | null }) | un
     settings: { ...base.settings, ...(m.settings ?? {}) }, v: SAVE_VERSION };
 }
 export async function loadMeta(): Promise<Meta> { return migrateMeta((await store.get("meta")) as Partial<Meta> | undefined); }
-function runDefaults(r: RunState): RunState {
+export function runDefaults(r: RunState): RunState {
   r.level ??= "level-0";
   r.mapPages ??= []; r.l1 ??= null; r.flashlightOn ??= true;
   if (r.l1) {
@@ -59,6 +59,7 @@ function runDefaults(r: RunState): RunState {
   r.npcSeenThisRun ??= r.roomPerson?.entered && (r.roomPerson.variant === "first" || r.roomPerson.variant === "revisit") ? ["manila_stranger"] : [];
   r.map ??= {}; r.mapMarks ??= {}; r.lastNotebookRead ??= null;
   r.fakePiano ??= null;
+  r.eventLast ??= {};
   r.halluc = { ...newHallucinations(), ...r.halluc };
   r.halluc.history = (r.halluc.history ?? []).slice(-50);
   r.halluc.serial = Math.max(r.halluc.serial, ...r.halluc.history.map(x => x.id));
